@@ -152,10 +152,12 @@ class MakeReport:
         }
         # update pages based on Excel
         self.page_selection = {
-            key: self.input_dict["configuration_value"][list(self.input_dict["configurations"]).index(key)].lower()
-            == "true"
-            if key in self.input_dict["configurations"]
-            else self.page_selection[key]
+            key: (
+                self.input_dict["configuration_value"][list(self.input_dict["configurations"]).index(key)].lower()
+                == "true"
+                if key in self.input_dict["configurations"]
+                else self.page_selection[key]
+            )
             for key in self.page_selection
         }
         # update pages based on hardcoded input

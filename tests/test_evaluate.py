@@ -247,12 +247,12 @@ def test_evaluate_single_dependency_evaluation_error(evaluate_beerwiser):
                 "key_outputs": {
                     "Decrease in absenteeism %": 0.0,
                     "Decrease in staff turnover %": 0.0,
-                    "Increase in customer satisfaction": 0.01,
-                    "Increase in employee satisfaction": 0.03,
-                    "Decrease in absenteeism costs": 18610.66,
-                    "Decrease in staff turnover costs": 734.7,
-                    "Decrease in wage costs": 11235861.75,
-                    "Increase in production capacity": 513.44,
+                    "Increase in customer satisfaction": 0.12,
+                    "Increase in employee satisfaction": 0.35,
+                    "Decrease in absenteeism costs": 57674.51,
+                    "Decrease in staff turnover costs": 2579.47,
+                    "Decrease in wage costs": 39965242.77,
+                    "Increase in production capacity": 8356.40,
                     "Total investment": 120000.0,
                 }
             },

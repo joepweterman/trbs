@@ -11,7 +11,7 @@ Investment per employee;Healthy eating;Leadership development;+
 Investment per employee;Physical exercise;Physical strain reduction;+
 Investment per employee;Psycho-social stress reduction;Salary increase;+
 Investment per employee;Smoking reduction;Training and development;+
-Investment per employee;Work-life balance;0;+
+Investment per employee;Work-life balance;Admin reduction;+
 Share salary increase in total investment;Salary increase;Investment per employee;/
 Share salary increase in total investment small enough;Share salary increase in total investment;Threshold salary increase effect;<=
 Effective salary increase;Salary increase;Share salary increase in total investment small enough;*
@@ -95,6 +95,11 @@ RI_ES_ld_2;RI_ES_ld_1;1;min
 RI_ES_ld_3;RI_ES_ld_2;RI_ES_ld_acc;*
 RI_ES_ld_4;RI_ES_ld_3;RI_ES_ld_pos;*
 Relative increase in employee satisfaction excluding uncertainty;RI_ES_ld_4;RI_ES_ld_me;*
+RI_ES_ar_1;Admin reduction;RI_ES_ar_sp;/
+RI_ES_ar_2;RI_ES_ar_1;1;min
+RI_ES_ar_3;RI_ES_ar_2;RI_ES_ar_acc;*
+RI_ES_ar_4;RI_ES_ar_3;RI_ES_ar_pos;*
+Relative increase in employee satisfaction excluding uncertainty;RI_ES_ar_4;RI_ES_ar_me;*
 DI_P_pssr_1;Psycho-social stress reduction;DI_P_pssr_sp;/
 DI_P_pssr_2;DI_P_pssr_1;1;min
 DI_P_pssr_3;DI_P_pssr_2;DI_P_pssr_acc;*
@@ -110,6 +115,11 @@ DI_P_sr_2;DI_P_sr_1;1;min
 DI_P_sr_3;DI_P_sr_2;DI_P_sr_acc;*
 DI_P_sr_4;DI_P_sr_3;DI_P_sr_pos;*
 Direct increase in productivity % excluding uncertainty;DI_P_sr_4;DI_P_sr_me;*
+DI_P_ar_1;Admin reduction;DI_P_ar_sp;/
+DI_P_ar_2;DI_P_ar_1;1;min
+DI_P_ar_3;DI_P_ar_2;DI_P_ar_acc;*
+DI_P_ar_4;DI_P_ar_3;DI_P_ar_pos;*
+Direct increase in productivity % excluding uncertainty;DI_P_ar_4;DI_P_ar_me;*
 Relative decrease in absenteeism %;Relative decrease in absenteeism % excluding uncertainty;Relative effect intervention on absenteeism %;*
 Relative decrease in staff turnover %;Relative decrease in staff turnover % excluding uncertainty;Relative effect intervention on staff turnover %;*
 Relative increase in employee satisfaction;Relative increase in employee satisfaction excluding uncertainty;Relative effect intervention on employee satisfaction;*

@@ -116,7 +116,7 @@
             "index":12,
             "destination":"Investment per employee",
             "argument_1":"Work-life balance",
-            "argument_2":0,
+            "argument_2":"Admin reduction",
             "operator":"+"
         },
         {
@@ -702,363 +702,433 @@
         },
         {
             "index":96,
+            "destination":"RI_ES_ar_1",
+            "argument_1":"Admin reduction",
+            "argument_2":"RI_ES_ar_sp",
+            "operator":"\/"
+        },
+        {
+            "index":97,
+            "destination":"RI_ES_ar_2",
+            "argument_1":"RI_ES_ar_1",
+            "argument_2":1,
+            "operator":"min"
+        },
+        {
+            "index":98,
+            "destination":"RI_ES_ar_3",
+            "argument_1":"RI_ES_ar_2",
+            "argument_2":"RI_ES_ar_acc",
+            "operator":"*"
+        },
+        {
+            "index":99,
+            "destination":"RI_ES_ar_4",
+            "argument_1":"RI_ES_ar_3",
+            "argument_2":"RI_ES_ar_pos",
+            "operator":"*"
+        },
+        {
+            "index":100,
+            "destination":"Relative increase in employee satisfaction excluding uncertainty",
+            "argument_1":"RI_ES_ar_4",
+            "argument_2":"RI_ES_ar_me",
+            "operator":"*"
+        },
+        {
+            "index":101,
             "destination":"DI_P_pssr_1",
             "argument_1":"Psycho-social stress reduction",
             "argument_2":"DI_P_pssr_sp",
             "operator":"\/"
         },
         {
-            "index":97,
+            "index":102,
             "destination":"DI_P_pssr_2",
             "argument_1":"DI_P_pssr_1",
             "argument_2":1,
             "operator":"min"
         },
         {
-            "index":98,
+            "index":103,
             "destination":"DI_P_pssr_3",
             "argument_1":"DI_P_pssr_2",
             "argument_2":"DI_P_pssr_acc",
             "operator":"*"
         },
         {
-            "index":99,
+            "index":104,
             "destination":"DI_P_pssr_4",
             "argument_1":"DI_P_pssr_3",
             "argument_2":"DI_P_pssr_pos",
             "operator":"*"
         },
         {
-            "index":100,
+            "index":105,
             "destination":"Direct increase in productivity % excluding uncertainty",
             "argument_1":"DI_P_pssr_4",
             "argument_2":"DI_P_pssr_me",
             "operator":"*"
         },
         {
-            "index":101,
+            "index":106,
             "destination":"DI_P_pe_1",
             "argument_1":"Physical exercise",
             "argument_2":"DI_P_pe_sp",
             "operator":"\/"
         },
         {
-            "index":102,
+            "index":107,
             "destination":"DI_P_pe_2",
             "argument_1":"DI_P_pe_1",
             "argument_2":1,
             "operator":"min"
         },
         {
-            "index":103,
+            "index":108,
             "destination":"DI_P_pe_3",
             "argument_1":"DI_P_pe_2",
             "argument_2":"DI_P_pe_acc",
             "operator":"*"
         },
         {
-            "index":104,
+            "index":109,
             "destination":"DI_P_pe_4",
             "argument_1":"DI_P_pe_3",
             "argument_2":"DI_P_pe_pos",
             "operator":"*"
         },
         {
-            "index":105,
+            "index":110,
             "destination":"Direct increase in productivity % excluding uncertainty",
             "argument_1":"DI_P_pe_4",
             "argument_2":"DI_P_pe_me",
             "operator":"*"
         },
         {
-            "index":106,
+            "index":111,
             "destination":"DI_P_sr_1",
             "argument_1":"Smoking reduction",
             "argument_2":"DI_P_sr_sp",
             "operator":"\/"
         },
         {
-            "index":107,
+            "index":112,
             "destination":"DI_P_sr_2",
             "argument_1":"DI_P_sr_1",
             "argument_2":1,
             "operator":"min"
         },
         {
-            "index":108,
+            "index":113,
             "destination":"DI_P_sr_3",
             "argument_1":"DI_P_sr_2",
             "argument_2":"DI_P_sr_acc",
             "operator":"*"
         },
         {
-            "index":109,
+            "index":114,
             "destination":"DI_P_sr_4",
             "argument_1":"DI_P_sr_3",
             "argument_2":"DI_P_sr_pos",
             "operator":"*"
         },
         {
-            "index":110,
+            "index":115,
             "destination":"Direct increase in productivity % excluding uncertainty",
             "argument_1":"DI_P_sr_4",
             "argument_2":"DI_P_sr_me",
             "operator":"*"
         },
         {
-            "index":111,
+            "index":116,
+            "destination":"DI_P_ar_1",
+            "argument_1":"Admin reduction",
+            "argument_2":"DI_P_ar_sp",
+            "operator":"\/"
+        },
+        {
+            "index":117,
+            "destination":"DI_P_ar_2",
+            "argument_1":"DI_P_ar_1",
+            "argument_2":1,
+            "operator":"min"
+        },
+        {
+            "index":118,
+            "destination":"DI_P_ar_3",
+            "argument_1":"DI_P_ar_2",
+            "argument_2":"DI_P_ar_acc",
+            "operator":"*"
+        },
+        {
+            "index":119,
+            "destination":"DI_P_ar_4",
+            "argument_1":"DI_P_ar_3",
+            "argument_2":"DI_P_ar_pos",
+            "operator":"*"
+        },
+        {
+            "index":120,
+            "destination":"Direct increase in productivity % excluding uncertainty",
+            "argument_1":"DI_P_ar_4",
+            "argument_2":"DI_P_ar_me",
+            "operator":"*"
+        },
+        {
+            "index":121,
             "destination":"Relative decrease in absenteeism %",
             "argument_1":"Relative decrease in absenteeism % excluding uncertainty",
             "argument_2":"Relative effect intervention on absenteeism %",
             "operator":"*"
         },
         {
-            "index":112,
+            "index":122,
             "destination":"Relative decrease in staff turnover %",
             "argument_1":"Relative decrease in staff turnover % excluding uncertainty",
             "argument_2":"Relative effect intervention on staff turnover %",
             "operator":"*"
         },
         {
-            "index":113,
+            "index":123,
             "destination":"Relative increase in employee satisfaction",
             "argument_1":"Relative increase in employee satisfaction excluding uncertainty",
             "argument_2":"Relative effect intervention on employee satisfaction",
             "operator":"*"
         },
         {
-            "index":114,
+            "index":124,
             "destination":"Direct increase in productivity %",
             "argument_1":"Direct increase in productivity % excluding uncertainty",
             "argument_2":"Relative effect intervention on productivity %",
             "operator":"*"
         },
         {
-            "index":115,
+            "index":125,
             "destination":"Indirect effect employee satisfaction on customer satisfaction including uncertainty",
             "argument_1":"Indirect effect employee satisfaction on customer satisfaction",
             "argument_2":"Relative effect employee satisfaction on customer satisfaction",
             "operator":"*"
         },
         {
-            "index":116,
+            "index":126,
             "destination":"Relative indirect increase in productivity % excluding uncertainty",
             "argument_1":"Relative increase in employee satisfaction",
             "argument_2":"Indirect effect employee satisfaction on productivity %",
             "operator":"*"
         },
         {
-            "index":117,
+            "index":127,
             "destination":"Relative indirect increase in productivity %",
             "argument_1":"Relative indirect increase in productivity % excluding uncertainty",
             "argument_2":"Relative effect employee satisfaction on productivity %",
             "operator":"*"
         },
         {
-            "index":118,
+            "index":128,
             "destination":"New absenteeism %",
             "argument_1":"Current absenteeism %",
             "argument_2":0,
             "operator":"+"
         },
         {
-            "index":119,
+            "index":129,
             "destination":"New absenteeism %",
             "argument_1":"Relative decrease in absenteeism %",
             "argument_2":"Current absenteeism %",
             "operator":"-*"
         },
         {
-            "index":120,
+            "index":130,
             "destination":"New staff turnover %",
             "argument_1":"Current staff turnover %",
             "argument_2":0,
             "operator":"+"
         },
         {
-            "index":121,
+            "index":131,
             "destination":"New staff turnover %",
             "argument_1":"Relative decrease in staff turnover %",
             "argument_2":"Current staff turnover %",
             "operator":"-*"
         },
         {
-            "index":122,
+            "index":132,
             "destination":"New employee satisfaction",
             "argument_1":"Current employee satisfaction",
             "argument_2":0,
             "operator":"+"
         },
         {
-            "index":123,
+            "index":133,
             "destination":"New employee satisfaction",
             "argument_1":"Relative increase in employee satisfaction",
             "argument_2":"Current employee satisfaction",
             "operator":"*"
         },
         {
-            "index":124,
+            "index":134,
             "destination":"New productivity % after direct effect",
             "argument_1":"Current productivity %",
             "argument_2":"Direct increase in productivity %",
             "operator":"+"
         },
         {
-            "index":125,
+            "index":135,
             "destination":"New productivity %",
             "argument_1":"New productivity % after direct effect",
             "argument_2":0,
             "operator":"+"
         },
         {
-            "index":126,
+            "index":136,
             "destination":"New productivity %",
             "argument_1":"Relative indirect increase in productivity %",
             "argument_2":"New productivity % after direct effect",
             "operator":"*"
         },
         {
-            "index":127,
+            "index":137,
             "destination":"New number of productive days per employee",
             "argument_1":"New productivity %",
             "argument_2":"Number of workable days per year",
             "operator":"*"
         },
         {
-            "index":128,
+            "index":138,
             "destination":"New number of employees",
             "argument_1":"Current number of productive days",
             "argument_2":"New number of productive days per employee",
             "operator":"\/"
         },
         {
-            "index":129,
+            "index":139,
             "destination":"New number of absent employees",
             "argument_1":"New number of employees",
             "argument_2":"New absenteeism %",
             "operator":"*"
         },
         {
-            "index":130,
+            "index":140,
             "destination":"New absenteeism costs",
             "argument_1":"New number of absent employees",
             "argument_2":"Costs of full-time absent employee",
             "operator":"*"
         },
         {
-            "index":131,
+            "index":141,
             "destination":"New number of staff turnover",
             "argument_1":"New number of employees",
             "argument_2":"New staff turnover %",
             "operator":"*"
         },
         {
-            "index":132,
+            "index":142,
             "destination":"New staff turnover costs",
             "argument_1":"New number of staff turnover",
             "argument_2":"Average costs of staff turnover",
             "operator":"*"
         },
         {
-            "index":133,
+            "index":143,
             "destination":"New wage costs",
             "argument_1":"New number of employees",
             "argument_2":"Average wage costs per employee",
             "operator":"*"
         },
         {
-            "index":134,
+            "index":144,
             "destination":"Decrease in number of employees",
             "argument_1":"Current number of employees",
             "argument_2":"New number of employees",
             "operator":"-"
         },
         {
-            "index":135,
+            "index":145,
             "destination":"Total investment",
             "argument_1":"Investment per employee",
             "argument_2":"Current number of employees",
             "operator":"*"
         },
         {
-            "index":136,
+            "index":146,
             "destination":"Decrease in absenteeism costs",
             "argument_1":"Current absenteeism costs",
             "argument_2":"New absenteeism costs",
             "operator":"-"
         },
         {
-            "index":137,
+            "index":147,
             "destination":"Decrease in staff turnover costs",
             "argument_1":"Current staff turnover costs",
             "argument_2":"New staff turnover costs",
             "operator":"-"
         },
         {
-            "index":138,
+            "index":148,
             "destination":"Decrease in wage costs",
             "argument_1":"Current wage costs",
             "argument_2":"New wage costs",
             "operator":"-"
         },
         {
-            "index":139,
+            "index":149,
             "destination":"Decrease in absenteeism %",
             "argument_1":"Current absenteeism %",
             "argument_2":"New absenteeism %",
             "operator":"-"
         },
         {
-            "index":140,
+            "index":150,
             "destination":"Decrease in staff turnover %",
             "argument_1":"Current staff turnover %",
             "argument_2":"New staff turnover %",
             "operator":"-"
         },
         {
-            "index":141,
+            "index":151,
             "destination":"Increase in employee satisfaction",
             "argument_1":"New employee satisfaction",
             "argument_2":"Current employee satisfaction",
             "operator":"-"
         },
         {
-            "index":142,
+            "index":152,
             "destination":"Increase in customer satisfaction",
             "argument_1":"Increase in employee satisfaction",
             "argument_2":"Indirect effect employee satisfaction on customer satisfaction including uncertainty",
             "operator":"*"
         },
         {
-            "index":143,
+            "index":153,
             "destination":"Increase in production capacity",
             "argument_1":"Decrease in number of employees",
             "argument_2":"New number of productive days per employee",
             "operator":"*"
         },
         {
-            "index":144,
+            "index":154,
             "destination":"New customer satisfaction",
             "argument_1":"Current customer satisfaction",
             "argument_2":"Increase in customer satisfaction",
             "operator":"+"
         },
         {
-            "index":145,
+            "index":155,
             "destination":"Return on investment \u20ac",
             "argument_1":"Decrease in absenteeism costs",
             "argument_2":"Decrease in staff turnover costs",
             "operator":"+"
         },
         {
-            "index":146,
+            "index":156,
             "destination":"Return on investment \u20ac",
             "argument_1":"Decrease in wage costs",
             "argument_2":"Total investment",
             "operator":"-"
         },
         {
-            "index":147,
+            "index":157,
             "destination":"Return on investment %",
             "argument_1":"Return on investment \u20ac",
             "argument_2":"Total investment",

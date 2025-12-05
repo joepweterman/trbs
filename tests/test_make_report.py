@@ -70,7 +70,7 @@ def test_make_introduction(test_outcomes_report, target_key, expected_result):
     assert result == expected_result
 
 
-@pytest.mark.parametrize("scenario", [(INPUT_DICT_BEERWISER["scenarios"][0])])
+@pytest.mark.parametrize("scenario", [INPUT_DICT_BEERWISER["scenarios"][0]])
 def test_make_slides_pdf(test_outcomes_report, scenario):
     """
     This function tests make_introduction to return the correct title of the imported Excel template.
@@ -82,7 +82,7 @@ def test_make_slides_pdf(test_outcomes_report, scenario):
     assert str(type(result)) == "<class 'fpdf.fpdf.FPDF'>"
 
 
-@pytest.mark.parametrize("scenario", [(INPUT_DICT_BEERWISER["scenarios"][1])])
+@pytest.mark.parametrize("scenario", [INPUT_DICT_BEERWISER["scenarios"][1]])
 def test_create_report(test_outcomes_report, scenario, output_path=Path(str(Path.cwd()) + "/test_reports/")):
     """
     This function tests make_introduction to return the correct title of the imported Excel template.

@@ -23,7 +23,7 @@
         {
             "index":0,
             "fixed_input":"Average costs of a day lost through absenteeism",
-            "value":500.0
+            "value":450.0
         },
         {
             "index":1,
@@ -407,63 +407,103 @@
         },
         {
             "index":77,
+            "fixed_input":"RI_ES_ar_me",
+            "value":0.57
+        },
+        {
+            "index":78,
+            "fixed_input":"RI_ES_ar_acc",
+            "value":0.95
+        },
+        {
+            "index":79,
+            "fixed_input":"RI_ES_ar_pos",
+            "value":0.9
+        },
+        {
+            "index":80,
+            "fixed_input":"RI_ES_ar_sp",
+            "value":200.0
+        },
+        {
+            "index":81,
             "fixed_input":"DI_P_pssr_me",
             "value":0.07
         },
         {
-            "index":78,
+            "index":82,
             "fixed_input":"DI_P_pssr_acc",
             "value":0.71
         },
         {
-            "index":79,
+            "index":83,
             "fixed_input":"DI_P_pssr_pos",
             "value":0.2
         },
         {
-            "index":80,
+            "index":84,
             "fixed_input":"DI_P_pssr_sp",
             "value":180.0
         },
         {
-            "index":81,
+            "index":85,
             "fixed_input":"DI_P_pe_me",
             "value":0.1
         },
         {
-            "index":82,
+            "index":86,
             "fixed_input":"DI_P_pe_acc",
             "value":0.5
         },
         {
-            "index":83,
+            "index":87,
             "fixed_input":"DI_P_pe_pos",
             "value":0.25
         },
         {
-            "index":84,
+            "index":88,
             "fixed_input":"DI_P_pe_sp",
             "value":125.0
         },
         {
-            "index":85,
+            "index":89,
             "fixed_input":"DI_P_sr_me",
             "value":0.25
         },
         {
-            "index":86,
+            "index":90,
             "fixed_input":"DI_P_sr_acc",
             "value":0.232
         },
         {
-            "index":87,
+            "index":91,
             "fixed_input":"DI_P_sr_pos",
             "value":0.137
         },
         {
-            "index":88,
+            "index":92,
             "fixed_input":"DI_P_sr_sp",
             "value":390.0
+        },
+        {
+            "index":93,
+            "fixed_input":"DI_P_ar_me",
+            "value":0.34
+        },
+        {
+            "index":94,
+            "fixed_input":"DI_P_ar_acc",
+            "value":0.95
+        },
+        {
+            "index":95,
+            "fixed_input":"DI_P_ar_pos",
+            "value":0.9
+        },
+        {
+            "index":96,
+            "fixed_input":"DI_P_ar_sp",
+            "value":200.0
         }
     ]
 }

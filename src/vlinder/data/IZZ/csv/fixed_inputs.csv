@@ -1,5 +1,5 @@
 fixed_input;value
-Average costs of a day lost through absenteeism;500.0
+Average costs of a day lost through absenteeism;450.0
 Average costs of staff turnover;3000.0
 Average wage costs per employee;40000.0
 Current absenteeism %;0.00064
@@ -76,6 +76,10 @@ RI_ES_ld_me;0.22
 RI_ES_ld_acc;0.73
 RI_ES_ld_pos;0.7
 RI_ES_ld_sp;1500.0
+RI_ES_ar_me;0.57
+RI_ES_ar_acc;0.95
+RI_ES_ar_pos;0.9
+RI_ES_ar_sp;200.0
 DI_P_pssr_me;0.07
 DI_P_pssr_acc;0.71
 DI_P_pssr_pos;0.2
@@ -88,3 +92,7 @@ DI_P_sr_me;0.25
 DI_P_sr_acc;0.232
 DI_P_sr_pos;0.137
 DI_P_sr_sp;390.0
+DI_P_ar_me;0.34
+DI_P_ar_acc;0.95
+DI_P_ar_pos;0.9
+DI_P_ar_sp;200.0
