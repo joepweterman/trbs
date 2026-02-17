@@ -164,16 +164,14 @@ class Optimize:
             self.input_dict["decision_makers_option_value"][
                 np.where(self.input_dict["decision_makers_options"] == opt_dmo_name)[0][0]
             ] = tmp_opt_decision_maker_options
-            best_dmo = opt_dmo_name
             best_appreciated_value = tmp_opt_max_appreciated_value
         else:
             self.input_dict["decision_makers_option_value"][
                 np.where(self.input_dict["decision_makers_options"] == opt_dmo_name)[0][0]
             ] = best_dmo_data["decision_maker_options"]
-            best_dmo = best_dmo_data["dmo_name"]
             best_appreciated_value = best_dmo_data["max_appreciated_value"]
 
-        return best_dmo, best_appreciated_value
+        return best_appreciated_value
 
     def optimize_single_scenario(self, scenario, tmp_opt_dmo_name, max_combinations):
         """
@@ -182,7 +180,7 @@ class Optimize:
         and finds the best distribution of internal inputs to maximize appreciation.
         """
         if tmp_opt_dmo_name in self.input_dict["decision_makers_options"]:
-            print("This DMO name already exits, please choose another")
+            print("This case is already optimized for the scenario '", scenario, "'")
             return self.input_dict
 
         # Step 1: Retrieve values and setup boundaries
@@ -203,42 +201,18 @@ class Optimize:
         )
 
         # Step 5: Perform grid search over the generated combinations and fill in input_dict
-        best_dmo, best_appreciated_value = self.grid_search(scenario, combinations, tmp_opt_dmo_name, best_dmo_data)
+        best_appreciated_value = self.grid_search(scenario, combinations, tmp_opt_dmo_name, best_dmo_data)
 
         # Print the results
-        print("For scenario: ", scenario)
-        print("------------------------------------")
+        print("For scenario:", scenario)
         print(
-            "Initial best appreciation:",
+            "Initial highest appreciation:",
             round(best_dmo_data["max_appreciated_value"], 2),
-            "for DMO:",
+            "for DMO '",
             best_dmo_data["dmo_name"],
+            "'",
         )
-        print(
-            "With the following internal variable distribution: ",
-            "["
-            + ", ".join(
-                str(int(num)) if num.is_integer() else str(num) for num in best_dmo_data["decision_maker_options"]
-            )
-            + "]",
-        )
-        print("------------------------------------")
-        print("Optimized appreciation:", round(best_appreciated_value, 2), "for DMO:", best_dmo)
-        print(
-            "With the following internal variable distribution: ",
-            "["
-            + ", ".join(
-                str(int(num)) if num.is_integer() else str(num)
-                for num in self.input_dict["decision_makers_option_value"][
-                    np.where(self.input_dict["decision_makers_options"] == best_dmo)[0][0]
-                ]
-            )
-            + "]",
-        )
-        print("------------------------------------")
-        print(
-            "Total increase appreciated value:",
-            round(best_appreciated_value - best_dmo_data["max_appreciated_value"], 2),
-        )
+        print("Optimized appreciation:", round(best_appreciated_value, 2))
+        print("Increase appreciated value:", round(best_appreciated_value - best_dmo_data["max_appreciated_value"], 2))
 
         return self.input_dict

@@ -132,7 +132,7 @@ def test_grid_search(optimize_beerwiser):
             "max_appreciated_value": 65.51984611881377,
         },
     )
-    expected_result = ("Optimized DMO", 65.7115899862911)
+    expected_result = 65.7115899862911
     assert result == expected_result
 
 

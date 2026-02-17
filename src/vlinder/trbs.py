@@ -196,7 +196,7 @@ class TheResponsibleBusinessSimulator:
 
         try:
             index = list(self.input_dict["configurations"]).index("Optimize_DMO_name")
-            optimized_dmo_name = self.input_dict["configuration_value"][index]
+            optimized_dmo_name = self.input_dict["configuration_value"][index] + "_" + scenario
 
             if pd.isna(optimized_dmo_name):
                 raise CaseError("Optimized DMO name is NaN")
