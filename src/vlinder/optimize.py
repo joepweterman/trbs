@@ -3,8 +3,14 @@
 """
 This module contains the Optimize class, which performs grid search optimization
 to maximize the appreciation of decision-maker options.
+
+It also exposes a module-level pure function ``evaluate_allocation`` used by both
+the legacy grid search and the new ``ContinuousOptimize`` (W2 thesis work). The
+function takes a deep copy of the caller's ``input_dict`` so that hundreds of
+objective evaluations from a continuous optimizer do not corrupt shared state.
 """
 
+import copy
 import math
 from math import comb
 from itertools import combinations_with_replacement, permutations
@@ -12,6 +18,34 @@ import numpy as np
 from vlinder.appreciate import Appreciate
 from vlinder.evaluate import Evaluate
 from vlinder.utils import suppress_print
+
+
+def evaluate_allocation(input_dict, x, scenario, dmo_name):
+    """
+    Pure-function evaluator: weighted appreciation of allocation ``x`` for a
+    given DMO under a given scenario, without mutating ``input_dict``.
+
+    Preconditions (caller's responsibility — typically done once per optimizer run):
+      - ``dmo_name`` must already exist in ``input_dict["decision_makers_options"]``
+      - ``input_dict["decision_makers_option_value"]`` must already have a row for
+        ``dmo_name`` (any feasible allocation is fine; it will be overwritten by ``x``)
+      - ``input_dict["key_output_automatic"]``, ``key_output_start``, ``key_output_end``
+        must be initialised (Appreciate uses these to fix the boundary points)
+
+    :param input_dict: tRBS case input dictionary (NOT mutated)
+    :param x: 1-D array-like of length ``len(input_dict["internal_variable_inputs"])``,
+              the allocation to evaluate
+    :param scenario: scenario name (str) — must be in ``input_dict["scenarios"]``
+    :param dmo_name: decision-maker option name (str) the allocation belongs to
+    :return: float — the value of ``output["decision_makers_option_appreciation"]``
+    """
+    local = copy.deepcopy(input_dict)
+    idx = np.where(local["decision_makers_options"] == dmo_name)[0][0]
+    local["decision_makers_option_value"][idx] = np.asarray(x)
+
+    output = Evaluate(local).evaluate_selected_scenario(scenario)[dmo_name]
+    Appreciate(local, output).appreciate_single_decision_maker_option(output)
+    return float(output["decision_makers_option_appreciation"])
 
 
 class Optimize:
@@ -143,16 +177,10 @@ class Optimize:
 
             # Ensure the combination length matches the number of internal inputs
             if len(comb_array) == len(self.input_dict["internal_variable_inputs"]):
-                self.input_dict["decision_makers_option_value"][
-                    np.where(self.input_dict["decision_makers_options"] == opt_dmo_name)[0][0]
-                ] = comb_array
-
-                # Evaluate and appreciate
-                output_dict = Evaluate(self.input_dict).evaluate_selected_scenario(scenario)[opt_dmo_name]
-                Appreciate(self.input_dict, output_dict).appreciate_single_decision_maker_option(output_dict)
-
-                # Compute the appreciated value
-                appreciated_value = output_dict["decision_makers_option_appreciation"]
+                # Pure-function eval (W2 refactor): no per-iter mutation of self.input_dict.
+                # The final winning allocation is written back to self.input_dict in the
+                # post-loop block below, so external observers see the same end-state.
+                appreciated_value = evaluate_allocation(self.input_dict, comb_array, scenario, opt_dmo_name)
                 appreciated_values.append((index, comb_array, appreciated_value))
 
                 # Update the best combination if this is the highest appreciation value
