@@ -1,10 +1,15 @@
+# pylint: disable=W0212
+
 """
 This module contains all tests for the Optimize() class
 """
 
+import copy
+
 import pytest
 import numpy as np
-from vlinder.optimize import Optimize
+from vlinder.appreciate import Appreciate
+from vlinder.optimize import Optimize, evaluate_allocation
 from vlinder.utils import get_values_from_target, suppress_print
 from .params import INPUT_DICT_BEERWISER, OUTPUT_DICT_BEERWISER
 
@@ -134,6 +139,51 @@ def test_grid_search(optimize_beerwiser):
     )
     expected_result = ("Optimized DMO", 65.7115899862911)
     assert result == expected_result
+
+
+def test_evaluate_allocation_purity_and_correctness(optimize_beerwiser):
+    """
+    Regression test for the W2 pure-function refactor (evaluate_allocation):
+      1. Returns the correct appreciation for a known allocation
+         (matches Equal spread's pre-computed max_appreciated_value).
+      2. Does NOT mutate the caller's input_dict.
+
+    Tests the function in isolation, without going through grid_search,
+    to lock down the contract for ContinuousOptimize's use.
+    """
+    # Phase-A setup (mirrors grid_search lines 122-133) — boundaries + reset key_output_automatic.
+    # The "Equal spread" DMO already exists in INPUT_DICT_BEERWISER, so no need to register it.
+    boundaries = Appreciate(optimize_beerwiser.input_dict, optimize_beerwiser.output_dict)._get_start_and_end_points()
+    optimize_beerwiser.input_dict["key_output_automatic"] = np.zeros(
+        len(optimize_beerwiser.input_dict["key_output_automatic"]), dtype=int
+    )
+    optimize_beerwiser.input_dict["key_output_start"] = np.array([v[0] for v in boundaries.values()])
+    optimize_beerwiser.input_dict["key_output_end"] = np.array([v[1] for v in boundaries.values()])
+
+    # Snapshot input_dict for the purity check
+    snapshot = copy.deepcopy(optimize_beerwiser.input_dict)
+
+    # 1. Correctness: Equal spread allocation [150000, 150000] should give exactly 65.51984611881377
+    #    (this is the max_appreciated_value asserted in test_find_dict_values for the same DMO/scenario)
+    appreciation = evaluate_allocation(
+        optimize_beerwiser.input_dict, np.array([150000, 150000]), "Base case", "Equal spread"
+    )
+    assert appreciation == pytest.approx(65.51984611881377, abs=1e-9)
+
+    # 2. Call again with a different allocation; result should be different
+    appreciation_alt = evaluate_allocation(
+        optimize_beerwiser.input_dict, np.array([100000, 200000]), "Base case", "Equal spread"
+    )
+    assert appreciation_alt != pytest.approx(appreciation, abs=1e-9)
+
+    # 3. Purity: input_dict must be byte-identical to the snapshot after both calls
+    for key in snapshot:
+        if isinstance(snapshot[key], np.ndarray):
+            np.testing.assert_array_equal(
+                optimize_beerwiser.input_dict[key], snapshot[key], err_msg=f"input_dict['{key}'] was mutated"
+            )
+        else:
+            assert optimize_beerwiser.input_dict[key] == snapshot[key], f"input_dict['{key}'] was mutated"
 
 
 @suppress_print
