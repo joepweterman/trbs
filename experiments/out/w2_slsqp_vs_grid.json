@@ -1,0 +1,175 @@
+{
+  "scenario": "Base case",
+  "python": "3.11.9",
+  "numpy": "2.3.2",
+  "scipy": "1.17.1",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "grid_baseline": {
+    "method": "grid",
+    "max_combinations": 60000,
+    "wall_time_s": 4.274646400008351,
+    "allocation": [
+      25000,
+      275000
+    ],
+    "appreciation": 65.7115899862911
+  },
+  "slsqp_runs": [
+    {
+      "method": "slsqp",
+      "n_starts": 10,
+      "seed": 42,
+      "best_x": [
+        152152.31751892556,
+        147847.68248107444
+      ],
+      "best_appreciation": 65.48955814140041,
+      "n_converged": 10,
+      "n_function_evals": 30,
+      "wall_time_s": 0.03997659997548908
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 10,
+      "seed": 123,
+      "best_x": [
+        112775.82473614652,
+        187224.17526385345
+      ],
+      "best_appreciation": 65.67435944292116,
+      "n_converged": 10,
+      "n_function_evals": 30,
+      "wall_time_s": 0.03657820005901158
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 10,
+      "seed": 456,
+      "best_x": [
+        97220.12081338678,
+        202779.87918661325
+      ],
+      "best_appreciation": 65.52989073938113,
+      "n_converged": 10,
+      "n_function_evals": 30,
+      "wall_time_s": 0.037596300011500716
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 50,
+      "seed": 42,
+      "best_x": [
+        124981.54292621143,
+        175018.45707378857
+      ],
+      "best_appreciation": 65.69992392153782,
+      "n_converged": 50,
+      "n_function_evals": 150,
+      "wall_time_s": 0.3060391000472009
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 50,
+      "seed": 123,
+      "best_x": [
+        118464.31491496283,
+        181535.68508503717
+      ],
+      "best_appreciation": 65.69575443262528,
+      "n_converged": 50,
+      "n_function_evals": 150,
+      "wall_time_s": 0.2799218000145629
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 50,
+      "seed": 456,
+      "best_x": [
+        25440.36360817793,
+        274559.63639182213
+      ],
+      "best_appreciation": 65.6966985619307,
+      "n_converged": 50,
+      "n_function_evals": 150,
+      "wall_time_s": 0.23174620000645518
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 100,
+      "seed": 42,
+      "best_x": [
+        124981.54292621143,
+        175018.45707378857
+      ],
+      "best_appreciation": 65.69992392153782,
+      "n_converged": 100,
+      "n_function_evals": 300,
+      "wall_time_s": 0.46934999991208315
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 100,
+      "seed": 123,
+      "best_x": [
+        122971.15238089368,
+        177028.84761910632
+      ],
+      "best_appreciation": 65.70093881724395,
+      "n_converged": 100,
+      "n_function_evals": 300,
+      "wall_time_s": 0.29710970004089177
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 100,
+      "seed": 456,
+      "best_x": [
+        120838.98896935064,
+        179161.01103064936
+      ],
+      "best_appreciation": 65.69977490457038,
+      "n_converged": 100,
+      "n_function_evals": 300,
+      "wall_time_s": 0.3164548999629915
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 500,
+      "seed": 42,
+      "best_x": [
+        122411.08633437513,
+        177588.91366562483
+      ],
+      "best_appreciation": 65.70085700409237,
+      "n_converged": 500,
+      "n_function_evals": 1500,
+      "wall_time_s": 1.470743800047785
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 500,
+      "seed": 123,
+      "best_x": [
+        122971.15238089368,
+        177028.84761910632
+      ],
+      "best_appreciation": 65.70093881724395,
+      "n_converged": 500,
+      "n_function_evals": 1500,
+      "wall_time_s": 1.5094862000551075
+    },
+    {
+      "method": "slsqp",
+      "n_starts": 500,
+      "seed": 456,
+      "best_x": [
+        24993.014117279312,
+        275006.9858827207
+      ],
+      "best_appreciation": 65.71074652263148,
+      "n_converged": 500,
+      "n_function_evals": 1500,
+      "wall_time_s": 1.6721114000538364
+    }
+  ]
+}
