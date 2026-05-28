@@ -1,5 +1,6 @@
 # pylint: disable=no-member
 # pylint: disable=W0511
+# pylint: disable=R0902
 
 """
 This module contains the tRBS class. This is the parent class that deals with anything related to a Responsible
@@ -21,6 +22,7 @@ from vlinder.appreciate import Appreciate
 from vlinder.visualize import Visualize, DependencyGraph
 from vlinder.make_report import MakeReport
 from vlinder.optimize import Optimize
+from vlinder.optimize_continuous import ContinuousOptimize, ContinuousOptimizationResult
 
 
 def list_demo_cases(file_path=None):
@@ -208,3 +210,29 @@ class TheResponsibleBusinessSimulator:
 
         except (ValueError, IndexError, KeyError) as error:
             raise CaseError("cannot find optimized DMO name") from error
+
+    def optimize_continuous(self, scenario, method="slsqp", **kwargs) -> ContinuousOptimizationResult:
+        """Continuous-space optimization (W2 thesis work — SLSQP scaffold).
+
+        Sibling of :meth:`optimize`: where ``optimize`` runs a combinatorial
+        grid search over the simplex {Σx_i = B, x_i ≥ 0}, this treats the
+        allocation problem as a continuous NLP and solves it with derivative-
+        free local methods. The new DMO is added to ``self.input_dict`` so
+        downstream visualization/reporting work on it like any other DMO.
+
+        :param scenario: scenario name to optimize for (must be in input_dict)
+        :param method: ``"slsqp"`` (default). ``"basin_hopping"`` and
+            ``"genetic_algorithm"`` raise NotImplementedError pending W3+ work.
+        :param kwargs: forwarded to :meth:`ContinuousOptimize.optimize_slsqp` —
+            commonly ``n_starts`` (default 100), ``seed``, ``dmo_name``,
+            ``budget`` (auto-inferred from first DMO if omitted).
+        :return: :class:`ContinuousOptimizationResult` with the winner +
+            per-start diagnostics for the W2 empirical report.
+        """
+        self._status_check([0, 1, 2])
+        optimizer = ContinuousOptimize(self.input_dict, self.output_dict)
+        result = optimizer.optimize(scenario, method=method, **kwargs)
+        # optimizer.input_dict has the new DMO row appended/updated; sync back.
+        self.input_dict = optimizer.input_dict
+        self._set_and_reset_status(3)
+        return result
