@@ -1,20 +1,29 @@
-# pylint: disable=W0212
+# pylint: disable=W0212,R0913,R0917,R0914
 
 """
-This module contains the Optimize class, which performs grid search optimization
-to maximize the appreciation of decision-maker options.
+This module is the single home for tRBS optimization. The :class:`Optimize`
+class exposes one entry point, :meth:`Optimize.run`, which dispatches to a named
+optimization method (``"grid"`` combinatorial search or ``"slsqp"`` continuous
+multi-start) — or to several at once, printing each method's result and returning
+the best.
 
-It also exposes a module-level pure function ``evaluate_allocation`` used by both
-the legacy grid search and the new ``ContinuousOptimize`` (W2 thesis work). The
-function takes a deep copy of the caller's ``input_dict`` so that hundreds of
-objective evaluations from a continuous optimizer do not corrupt shared state.
+It also exposes a module-level pure function ``evaluate_allocation`` shared by all
+methods. The function takes a deep copy of the caller's ``input_dict`` so that the
+hundreds of objective evaluations a continuous optimizer makes do not corrupt
+shared state.
 """
 
 import copy
 import math
+import time
+from dataclasses import dataclass, field
 from math import comb
 from itertools import combinations_with_replacement, permutations
+from typing import List, Optional
+
 import numpy as np
+from scipy.optimize import minimize
+
 from vlinder.appreciate import Appreciate
 from vlinder.evaluate import Evaluate
 from vlinder.utils import suppress_print
@@ -48,16 +57,53 @@ def evaluate_allocation(input_dict, x, scenario, dmo_name):
     return float(output["decision_makers_option_appreciation"])
 
 
+@dataclass
+class OptimizationResult:
+    """Unified result of an optimization run, for any method.
+
+    ``grid`` fills ``method``/``dmo_name``/``allocation``/``appreciation`` and
+    leaves the solver diagnostics ``None``; ``slsqp`` (and future continuous
+    methods) fill everything. ``best_x`` / ``best_appreciation`` are read-only
+    aliases kept for backward compatibility with the W2 experiment harness and
+    the existing tests.
+    """
+
+    method: str
+    dmo_name: str
+    allocation: np.ndarray
+    appreciation: float
+    n_starts: Optional[int] = None
+    n_converged: Optional[int] = None
+    n_function_evals: Optional[int] = None
+    wall_time_s: Optional[float] = None
+    per_start_results: List[dict] = field(default_factory=list)
+
+    @property
+    def best_x(self):
+        """Alias for :attr:`allocation` (kept for back-compat)."""
+        return self.allocation
+
+    @property
+    def best_appreciation(self):
+        """Alias for :attr:`appreciation` (kept for back-compat)."""
+        return self.appreciation
+
+
 class Optimize:
     """
     The Optimize class performs grid search optimization to find the optimal distribution of internal input values
     that maximizes the appreciation value of decision-maker options.
     """
 
+    # String name → adapter method name. Add basin_hopping / genetic_algorithm here (W3+).
+    METHOD_REGISTRY = {"grid": "_run_grid", "slsqp": "_run_slsqp"}
+    DEFAULT_DMO_NAME = {"grid": "Optimized (grid)", "slsqp": "Optimized (SLSQP)"}
+
     def __init__(self, input_dict, output_dict):
         self.input_dict = input_dict
         self.output_dict = output_dict
         self.boundaries = None
+        self._k = len(input_dict["internal_variable_inputs"])
 
     def find_dict_values(self, scenario):
         """
@@ -270,3 +316,191 @@ class Optimize:
         )
 
         return self.input_dict
+
+    # ==================================================================
+    # Continuous optimization (SLSQP) — merged from the former
+    # optimize_continuous.ContinuousOptimize (W2 thesis work). Treats the
+    # allocation problem {x : Σx_i = B, x_i ≥ 0} as a continuous NLP and
+    # solves it with multi-start SLSQP. basin_hopping / GA land here in W3+.
+    # ==================================================================
+    def _prepare_input_dict(self, dmo_name, reference_allocation):
+        """Register the optimizer's DMO + freeze the appreciation boundaries.
+
+        ``evaluate_allocation`` requires ``dmo_name`` to exist with a feasible
+        row, and ``key_output_automatic``/``key_output_start``/``key_output_end``
+        to be fixed so the appreciation curve is identical across every objective
+        evaluation. Idempotent — safe to call repeatedly with the same name.
+        """
+        if dmo_name not in self.input_dict["decision_makers_options"]:
+            self.input_dict["decision_makers_options"] = np.array(
+                np.append(self.input_dict["decision_makers_options"], dmo_name), dtype=object
+            )
+            self.input_dict["decision_makers_option_value"] = np.vstack(
+                [self.input_dict["decision_makers_option_value"], np.asarray(reference_allocation)]
+            )
+
+        boundaries = Appreciate(self.input_dict, self.output_dict)._get_start_and_end_points()
+        self.input_dict["key_output_automatic"] = np.zeros(len(self.input_dict["key_output_automatic"]), dtype=int)
+        self.input_dict["key_output_start"] = np.array([v[0] for v in boundaries.values()])
+        self.input_dict["key_output_end"] = np.array([v[1] for v in boundaries.values()])
+
+    def _objective(self, x, scenario, dmo_name, eval_counter):
+        """Negated appreciation (scipy minimizes); ``eval_counter`` counts calls."""
+        eval_counter[0] += 1
+        return -evaluate_allocation(self.input_dict, x, scenario, dmo_name)
+
+    def _dirichlet_starts(self, n_starts, budget, seed=None):
+        """Uniform simplex starts via ``Dirichlet(1,...,1) * budget`` (all feasible)."""
+        rng = np.random.default_rng(seed)
+        return rng.dirichlet(np.ones(self._k), size=n_starts) * budget
+
+    def _slsqp_from_start(self, x0, scenario, dmo_name, budget, eval_counter):
+        """Single SLSQP solve from ``x0``. Constraint Σx_i = B, bounds [0, B]^k."""
+        constraints = ({"type": "eq", "fun": lambda x: float(np.sum(x) - budget)},)
+        bounds = [(0.0, float(budget))] * self._k
+        return minimize(
+            self._objective,
+            x0,
+            args=(scenario, dmo_name, eval_counter),
+            method="SLSQP",
+            bounds=bounds,
+            constraints=constraints,
+            options={"ftol": 1e-6, "maxiter": 100, "disp": False},
+        )
+
+    def optimize_slsqp(
+        self,
+        scenario,
+        budget,
+        dmo_name="Optimized (SLSQP)",
+        reference_allocation=None,
+        n_starts=100,
+        seed=None,
+    ):
+        """Multi-start SLSQP on the simplex-constrained appreciation objective.
+
+        :param scenario: scenario name (must be in input_dict["scenarios"]).
+        :param budget: total allocation budget (Σx_i = budget).
+        :param dmo_name: name under which the winning allocation is written back to
+            ``input_dict`` (registered if absent).
+        :param reference_allocation: feasible allocation used to seed the new DMO
+            row (only when registering); defaults to the first existing DMO's row.
+        :param n_starts: number of Dirichlet multi-starts (default 100).
+        :param seed: RNG seed for reproducible starts.
+        :return: an :class:`OptimizationResult` with per-start diagnostics.
+        """
+        if reference_allocation is None:
+            reference_allocation = self.input_dict["decision_makers_option_value"][0].copy()
+        self._prepare_input_dict(dmo_name, reference_allocation)
+
+        starts = self._dirichlet_starts(n_starts, budget, seed=seed)
+        eval_counter = [0]
+        t0 = time.perf_counter()
+
+        per_start = []
+        best_x = None
+        best_neg_f = np.inf
+
+        for i, x0 in enumerate(starts):
+            res = self._slsqp_from_start(x0, scenario, dmo_name, budget, eval_counter)
+            per_start.append(
+                {
+                    "i": i,
+                    "x0": np.asarray(x0),
+                    "x": np.asarray(res.x),
+                    "appreciation": float(-res.fun),
+                    "success": bool(res.success),
+                    "nit": int(res.nit),
+                    "message": str(res.message),
+                }
+            )
+            if res.success and res.fun < best_neg_f:
+                best_neg_f = res.fun
+                best_x = np.asarray(res.x)
+
+        # Write the winning allocation back so downstream consumers (visuals,
+        # reports) see it as a regular DMO.
+        if best_x is not None:
+            idx = np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
+            self.input_dict["decision_makers_option_value"][idx] = best_x
+
+        return OptimizationResult(
+            method="slsqp",
+            dmo_name=dmo_name,
+            allocation=best_x if best_x is not None else np.full(self._k, np.nan),
+            appreciation=-best_neg_f if best_x is not None else float("nan"),
+            n_starts=n_starts,
+            n_converged=sum(1 for r in per_start if r["success"]),
+            n_function_evals=eval_counter[0],
+            wall_time_s=time.perf_counter() - t0,
+            per_start_results=per_start,
+        )
+
+    # ==================================================================
+    # Unified dispatch — one entry point for every method.
+    # ==================================================================
+    def _infer_budget(self):
+        """Total budget = sum of the first DMO's allocation (every DMO spends the same)."""
+        return float(np.sum(self.input_dict["decision_makers_option_value"][0]))
+
+    def _run_grid(  # pylint: disable=unused-argument
+        self, scenario, *, dmo_name, budget=None, max_combinations=60000, **_ignored
+    ):
+        """Grid-search adapter → :class:`OptimizationResult`.
+
+        ``budget`` is accepted for a uniform solver signature but unused — grid
+        derives its own ``max_investment`` from the highest-weighted DMO.
+        """
+        self.optimize_single_scenario(scenario, dmo_name, max_combinations)
+        idx = np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
+        allocation = np.asarray(self.input_dict["decision_makers_option_value"][idx])
+        appreciation = evaluate_allocation(self.input_dict, allocation, scenario, dmo_name)
+        return OptimizationResult(method="grid", dmo_name=dmo_name, allocation=allocation, appreciation=appreciation)
+
+    def _run_slsqp(self, scenario, *, dmo_name, budget, **method_kwargs):
+        """SLSQP adapter → :class:`OptimizationResult`."""
+        return self.optimize_slsqp(scenario, budget, dmo_name=dmo_name, **method_kwargs)
+
+    def run(self, scenario, method="grid", *, dmo_name=None, budget=None, **method_kwargs):
+        """Run one or several optimization methods and return the best result.
+
+        :param scenario: scenario name (must be in input_dict["scenarios"]).
+        :param method: a single method name (str) or a list of names. Supported:
+            ``"grid"``, ``"slsqp"``. Unknown names raise ``NotImplementedError``.
+        :param dmo_name: name for the optimizer DMO. Defaults per method
+            (:attr:`DEFAULT_DMO_NAME`); for a list, each method uses its own
+            default unless an explicit name is given.
+        :param budget: total allocation budget; inferred from the first DMO if None.
+        :param method_kwargs: forwarded to the chosen solver (grid:
+            ``max_combinations``; slsqp: ``n_starts``, ``seed``, ``reference_allocation``).
+        :return: a single :class:`OptimizationResult`. For a list of methods,
+            every method's appreciation + allocation is printed and the best is
+            returned; only the winning allocation is written back as a new DMO.
+        """
+        if budget is None:
+            budget = self._infer_budget()
+        methods = [method] if isinstance(method, str) else list(method)
+        for name in methods:
+            if name not in self.METHOD_REGISTRY:
+                raise NotImplementedError(f"method={name!r} not implemented. Supported: {list(self.METHOD_REGISTRY)}")
+
+        # Single method → run on self so the winning DMO + frozen boundaries land here.
+        if len(methods) == 1:
+            chosen = methods[0]
+            name = dmo_name or self.DEFAULT_DMO_NAME[chosen]
+            return getattr(self, self.METHOD_REGISTRY[chosen])(scenario, dmo_name=name, budget=budget, **method_kwargs)
+
+        # Multiple methods → isolate each on its own deepcopy so they don't see
+        # each other's appended DMOs; print all, then adopt the best run's
+        # input_dict (only the winning DMO is written back).
+        runs = []
+        for chosen in methods:
+            sub = Optimize(copy.deepcopy(self.input_dict), self.output_dict)
+            name = dmo_name or self.DEFAULT_DMO_NAME[chosen]
+            res = getattr(sub, self.METHOD_REGISTRY[chosen])(scenario, dmo_name=name, budget=budget, **method_kwargs)
+            print(f"[{chosen}] appreciation={res.appreciation:.6f} allocation={np.asarray(res.allocation).tolist()}")
+            runs.append((res, sub))
+
+        best_res, best_sub = max(runs, key=lambda pair: pair[0].appreciation)
+        self.input_dict = best_sub.input_dict
+        return best_res

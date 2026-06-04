@@ -21,8 +21,7 @@ from vlinder.evaluate import Evaluate
 from vlinder.appreciate import Appreciate
 from vlinder.visualize import Visualize, DependencyGraph
 from vlinder.make_report import MakeReport
-from vlinder.optimize import Optimize
-from vlinder.optimize_continuous import ContinuousOptimize, ContinuousOptimizationResult
+from vlinder.optimize import Optimize, OptimizationResult
 
 
 def list_demo_cases(file_path=None):
@@ -188,51 +187,53 @@ class TheResponsibleBusinessSimulator:
         location_report = self.report.create_report(scenario, output_path)
         print(location_report)
 
-    def optimize(self, scenario, **kwargs):
-        """
-        This function deals with finding the optimal distribution of decision maker options.
-        :param scenario: the selected scenario of the case
+    def optimize(self, scenario, method="grid", **kwargs) -> OptimizationResult:
+        """Find the optimal distribution of internal inputs for a scenario.
+
+        One entry point for every optimization method. ``method`` is a single
+        method name or a list of names:
+
+          * single name   → run it, return its :class:`OptimizationResult`
+          * list of names → run each, print every method's appreciation +
+            allocation, and return the best (only the winner is written back)
+
+        Supported methods: ``"grid"`` (combinatorial grid search, default) and
+        ``"slsqp"`` (continuous multi-start SLSQP). ``"basin_hopping"`` /
+        ``"genetic_algorithm"`` raise ``NotImplementedError`` (W3+).
+
+        :param scenario: scenario name (must be in input_dict["scenarios"]).
+        :param method: method name or list of names.
+        :param kwargs: ``new_dmo_name`` / ``dmo_name`` for the optimizer DMO,
+            ``new_case_name`` for the optimized case name; grid takes
+            ``max_combinations`` (default 60000), slsqp takes ``n_starts``
+            (default 100), ``seed``, ``reference_allocation``.
+        :return: the (best) :class:`OptimizationResult`.
         """
         self._status_check([0, 1, 2])
         case_optimizer = Optimize(self.input_dict, self.output_dict)
 
+        dmo_name = kwargs.pop("new_dmo_name", None) or kwargs.pop("dmo_name", None)
+        # Single grid run with no explicit name → fall back to the configured DMO
+        # name (legacy behaviour). For a list, each method keeps its own default
+        # name so the case shows which method produced the winning allocation.
+        if dmo_name is None and method == "grid":
+            dmo_name = self._resolve_grid_dmo_name()
+
+        new_case_name = kwargs.pop("new_case_name", None)
+        result = case_optimizer.run(scenario, method=method, dmo_name=dmo_name, **kwargs)
+        # case_optimizer.input_dict holds the winning DMO (appended/updated); sync back.
+        self.input_dict = case_optimizer.input_dict
+        self.name = new_case_name or f"{self.name} - Optimized"
+        self._set_and_reset_status(3)
+        return result
+
+    def _resolve_grid_dmo_name(self):
+        """Look up the configured grid optimizer DMO name (preserves legacy behaviour)."""
         try:
             index = list(self.input_dict["configurations"]).index("Optimize_DMO_name")
             optimized_dmo_name = self.input_dict["configuration_value"][index]
-
             if pd.isna(optimized_dmo_name):
                 raise CaseError("Optimized DMO name is NaN")
-
-            self.input_dict = case_optimizer.optimize_single_scenario(
-                scenario, kwargs.get("new_dmo_name", optimized_dmo_name), kwargs.get("max_combinations", 60000)
-            )
-            self.name = kwargs.get("new_case_name", f"{self.name} - Optimized")
-
+            return optimized_dmo_name
         except (ValueError, IndexError, KeyError) as error:
             raise CaseError("cannot find optimized DMO name") from error
-
-    def optimize_continuous(self, scenario, method="slsqp", **kwargs) -> ContinuousOptimizationResult:
-        """Continuous-space optimization (W2 thesis work — SLSQP scaffold).
-
-        Sibling of :meth:`optimize`: where ``optimize`` runs a combinatorial
-        grid search over the simplex {Σx_i = B, x_i ≥ 0}, this treats the
-        allocation problem as a continuous NLP and solves it with derivative-
-        free local methods. The new DMO is added to ``self.input_dict`` so
-        downstream visualization/reporting work on it like any other DMO.
-
-        :param scenario: scenario name to optimize for (must be in input_dict)
-        :param method: ``"slsqp"`` (default). ``"basin_hopping"`` and
-            ``"genetic_algorithm"`` raise NotImplementedError pending W3+ work.
-        :param kwargs: forwarded to :meth:`ContinuousOptimize.optimize_slsqp` —
-            commonly ``n_starts`` (default 100), ``seed``, ``dmo_name``,
-            ``budget`` (auto-inferred from first DMO if omitted).
-        :return: :class:`ContinuousOptimizationResult` with the winner +
-            per-start diagnostics for the W2 empirical report.
-        """
-        self._status_check([0, 1, 2])
-        optimizer = ContinuousOptimize(self.input_dict, self.output_dict)
-        result = optimizer.optimize(scenario, method=method, **kwargs)
-        # optimizer.input_dict has the new DMO row appended/updated; sync back.
-        self.input_dict = optimizer.input_dict
-        self._set_and_reset_status(3)
-        return result
