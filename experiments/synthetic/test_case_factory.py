@@ -21,7 +21,7 @@ from case_factory import (
     read_manifest,
     validate_case,
 )
-from oracle import certify_case, _build, ORACLE_DMO
+from oracle import certify_case, solve_multistart_proxy, _build, ORACLE_DMO
 
 
 def _params(**overrides):
@@ -128,9 +128,112 @@ def test_k15_smoke(tmp_path):
     assert report["no_clip"] and report["slsqp_consensus"]
 
 
-def test_unbuilt_regimes_refuse():
-    """Unbuilt regimes and unknown appreciation values are rejected loudly."""
-    with pytest.raises(NotImplementedError):
-        SyntheticCaseParams(regime="smooth_nonconvex")
+def test_knob_validation_matrix():
+    """Unknown values and regime/mechanism inconsistencies are rejected loudly."""
     with pytest.raises(ValueError):
         SyntheticCaseParams(appreciation="cubic")
+    with pytest.raises(ValueError):
+        SyntheticCaseParams(regime="chaotic")
+    with pytest.raises(ValueError):  # convex must keep all mechanisms neutral
+        SyntheticCaseParams(regime="convex", n_stb1=1)
+    with pytest.raises(ValueError):  # smooth needs at least one curvature carrier
+        SyntheticCaseParams(regime="smooth_nonconvex")
+    with pytest.raises(ValueError):  # smooth must stay smooth
+        SyntheticCaseParams(regime="smooth_nonconvex", n_stb1=1, n_saturation=1)
+    with pytest.raises(ValueError):  # nonsmooth needs a nonsmooth mechanism
+        SyntheticCaseParams(regime="nonsmooth")
+    with pytest.raises(ValueError):  # bilinear is a smooth mechanism (exclusivity)
+        SyntheticCaseParams(regime="nonsmooth", bracketing_factor=0.7, n_bilinear=1)
+    with pytest.raises(ValueError):  # a bilinear term is a lever pair
+        SyntheticCaseParams(regime="smooth_nonconvex", n_bilinear=1, k=1, n_key_outputs=2)
+
+
+def test_smooth_stb_only_keeps_exact_bracketing(tmp_path):
+    """STB=1 flips change appreciation, not KO envelopes: NO-CLIP must hold and
+    the plain-affine independent cross-check still applies."""
+    params = _params(name="T_smooth_stb", regime="smooth_nonconvex", n_stb1=2, seed=3)
+    SyntheticCaseFactory(params).write(tmp_path)
+    report = validate_case(params.name, tmp_path, budget=params.budget, n_samples=40)
+    assert report["regime"] == "smooth_nonconvex" and report["no_clip"]
+    assert "n_distinct_terminal_values" in report  # multimodality is reported, not asserted
+
+
+def test_smooth_bilinear_blend_dmo_brackets(tmp_path):
+    """The 'Blend' DMO realises the bilinear KO's edge max: envelope stays exact."""
+    params = _params(name="T_smooth_bil", regime="smooth_nonconvex", n_bilinear=1, seed=6)
+    factory = SyntheticCaseFactory(params)
+    factory.write(tmp_path)
+    dmos = set(factory.tables()["decision_makers_options"]["decision_makers_option"])
+    assert "Blend 01" in dmos
+    report = validate_case(params.name, tmp_path, budget=params.budget, n_samples=40)
+    assert report["no_clip"]
+
+
+def test_nonsmooth_clip_is_intentional_and_measured(tmp_path):
+    """bracketing_factor < 1 must under-bracket (the exp03 mechanism as a dial)."""
+    params = _params(name="T_clip", regime="nonsmooth", bracketing_factor=0.7, seed=5)
+    SyntheticCaseFactory(params).write(tmp_path)
+    report = validate_case(params.name, tmp_path, budget=params.budget, n_samples=60)
+    assert not report["no_clip"]
+    assert report["underbracketing_margin"] > 0
+    assert report["clipping_incidence"] > 0
+
+
+def test_nonsmooth_saturation_kinks_without_clipping(tmp_path):
+    """min-cap chains put kinks in the dependencies; the greedy 'Envelope' DMOs
+    keep the auto-boundaries exactly on the feasible envelope (no clipping)."""
+    params = _params(name="T_sat", regime="nonsmooth", n_saturation=2, saturation_point=0.4, seed=6)
+    factory = SyntheticCaseFactory(params)
+    factory.write(tmp_path)
+    dmos = set(factory.tables()["decision_makers_options"]["decision_makers_option"])
+    assert any(dmo_name.startswith("Envelope") for dmo_name in dmos)
+    report = validate_case(params.name, tmp_path, budget=params.budget, n_samples=40)
+    assert report["no_clip"]
+
+
+def test_dispersion_moves_scenario_optima(tmp_path):
+    """scenario_dispersion > 0 must make per-scenario optima diverge while the
+    per-scenario convex geometry (and NO-CLIP) is preserved."""
+    params = _params(name="T_disp", scenario_dispersion=0.6, seed=7)
+    SyntheticCaseFactory(params).write(tmp_path)
+    report = validate_case(params.name, tmp_path, budget=params.budget, n_samples=40)
+    assert report["no_clip"] and report["slsqp_consensus"]
+    oracle = certify_case(params.name, tmp_path)
+    assert oracle["method"] == "vertex_enumeration" and oracle["verified"]
+    assert oracle["scenario_optimum_dispersion"] > 0.5
+
+
+def test_grid_oracle_verifies_nonconvex_low_k(tmp_path):
+    """Dense-grid + polish ground truth for a nonconvex case at low k."""
+    params = _params(
+        name="T_grid",
+        regime="smooth_nonconvex",
+        appreciation="sinusoidal",
+        n_stb1=1,
+        n_bilinear=1,
+        n_scenarios=1,
+        seed=4,
+    )
+    SyntheticCaseFactory(params).write(tmp_path)
+    oracle = certify_case(params.name, tmp_path)
+    assert oracle["method"] == "dense_grid_polish" and oracle["verified"]
+    scen = next(iter(oracle["per_scenario"].values()))
+    cert = scen["certificate"]
+    assert cert["n_grid_nodes"] > 500 and cert["polish_gain"] >= 0
+    # the certified optimum must not be beaten by production SLSQP
+    sim, opt = _build(params.name, tmp_path)
+    scenario = str(sim.input_dict["scenarios"][0])
+    with contextlib.redirect_stdout(io.StringIO()):
+        slsqp = opt.optimize_slsqp(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=10, seed=1)
+    assert scen["f_star"] >= float(slsqp.appreciation) - 1e-6
+
+
+def test_multistart_proxy_high_k_is_labelled(tmp_path):
+    """Above the grid limit the ground truth is an explicitly-unverified proxy."""
+    params = _params(name="T_proxy", k=7, n_key_outputs=2, regime="smooth_nonconvex", n_stb1=1, n_scenarios=1, seed=2)
+    SyntheticCaseFactory(params).write(tmp_path)
+    oracle = solve_multistart_proxy(params.name, tmp_path, n_starts=4)
+    assert oracle["method"] == "best_of_multistart_proxy"
+    assert oracle["verified"] is False
+    scen = next(iter(oracle["per_scenario"].values()))
+    assert "PROXY ONLY" in scen["certificate"]["basis"]
