@@ -295,7 +295,10 @@ def test_slsqp_single_start_beats_uniform(continuous_beerwiser):
 
     assert res.success, f"SLSQP did not converge: {res.message}"
     assert slsqp_app >= uniform_app - 1e-3
-    assert abs(float(np.sum(res.x)) - budget) < 1e-3
+    # Capped-simplex formulation: allocation must be feasible (Σx ≤ B). Beerwiser
+    # is monotone in spend (exp02), so the budget binds → the solution still spends B.
+    assert float(np.sum(res.x)) <= budget + 1e-3  # feasible under Σx ≤ B
+    assert abs(float(np.sum(res.x)) - budget) < 1e-3  # binds (Beerwiser monotone)
     assert (res.x >= -1e-6).all()
 
 
@@ -316,8 +319,9 @@ def test_multistart_slsqp_returns_structured_result(continuous_beerwiser):
     assert len(result.per_start_results) == 20
     assert result.n_function_evals > 20  # at least 1 per start, usually many more
     assert result.wall_time_s > 0
-    # Best allocation is feasible (alias best_x → allocation)
-    assert abs(float(np.sum(result.best_x)) - budget) < 1e-3
+    # Best allocation is feasible under Σx ≤ B; Beerwiser binds (monotone, exp02)
+    assert float(np.sum(result.best_x)) <= budget + 1e-3  # feasible
+    assert abs(float(np.sum(result.best_x)) - budget) < 1e-3  # binds
     assert (result.best_x >= -1e-6).all()
     # Best appreciation beats the uniform start (alias best_appreciation → appreciation)
     uniform_app = evaluate_allocation(

@@ -320,8 +320,9 @@ class Optimize:
     # ==================================================================
     # Continuous optimization (SLSQP) — merged from the former
     # optimize_continuous.ContinuousOptimize (W2 thesis work). Treats the
-    # allocation problem {x : Σx_i = B, x_i ≥ 0} as a continuous NLP and
-    # solves it with multi-start SLSQP. basin_hopping / GA land here in W3+.
+    # allocation problem {x : Σx_i ≤ B, x_i ≥ 0} (capped simplex; under-spending
+    # feasible) as a continuous NLP and solves it with multi-start SLSQP.
+    # basin_hopping / GA land here in W3+.
     # ==================================================================
     def _prepare_input_dict(self, dmo_name, reference_allocation):
         """Register the optimizer's DMO + freeze the appreciation boundaries.
@@ -350,13 +351,29 @@ class Optimize:
         return -evaluate_allocation(self.input_dict, x, scenario, dmo_name)
 
     def _dirichlet_starts(self, n_starts, budget, seed=None):
-        """Uniform simplex starts via ``Dirichlet(1,...,1) * budget`` (all feasible)."""
+        """Multi-start points on the budget face via ``Dirichlet(1,...,1) * budget``.
+
+        These lie on Σx_i = B, which is feasible under the capped-simplex
+        constraint Σx_i ≤ B (the face is a subset of the capped simplex). SLSQP
+        can still move into the interior when the gradient favours under-spending.
+        Interior starts can be added later for cases whose optimum is strictly
+        interior (the curvature-heavy synthetic regimes)."""
         rng = np.random.default_rng(seed)
         return rng.dirichlet(np.ones(self._k), size=n_starts) * budget
 
     def _slsqp_from_start(self, x0, scenario, dmo_name, budget, eval_counter):
-        """Single SLSQP solve from ``x0``. Constraint Σx_i = B, bounds [0, B]^k."""
-        constraints = ({"type": "eq", "fun": lambda x: float(np.sum(x) - budget)},)
+        """Single SLSQP solve from ``x0``. Constraint Σx_i ≤ B (capped simplex),
+        bounds [0, B]^k.
+
+        The budget is an upper bound, not an equality: under-spending is feasible
+        (Vlinder, 2026-06-26). This matters on appreciation surfaces that are
+        non-monotone in total spend — e.g. IZZ, where spending the whole budget
+        can lower appreciation (exp02). On monotone cases (Beerwiser, Refugee)
+        the constraint binds and the solution still spends the full budget, so
+        the formulation reduces to the former equality there. scipy reads
+        ``ineq`` constraints as ``fun(x) >= 0``, hence ``B - Σx_i >= 0``.
+        """
+        constraints = ({"type": "ineq", "fun": lambda x: float(budget - np.sum(x))},)
         bounds = [(0.0, float(budget))] * self._k
         return minimize(
             self._objective,
@@ -380,7 +397,7 @@ class Optimize:
         """Multi-start SLSQP on the simplex-constrained appreciation objective.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
-        :param budget: total allocation budget (Σx_i = budget).
+        :param budget: total allocation budget (upper bound: Σx_i ≤ budget; under-spending feasible).
         :param dmo_name: name under which the winning allocation is written back to
             ``input_dict`` (registered if absent).
         :param reference_allocation: feasible allocation used to seed the new DMO
