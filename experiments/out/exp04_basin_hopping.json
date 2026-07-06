@@ -1,0 +1,401 @@
+{
+  "stall_regression": {
+    "start_x": [
+      60000.0,
+      240000.0
+    ],
+    "start_appreciation": 64.65694592190266,
+    "final_x": [
+      122979.34982828713,
+      177020.65017171288
+    ],
+    "final_appreciation": 65.70141982708175,
+    "n_evals": 13,
+    "moved_units": 62979.34982828713,
+    "stalled": false
+  },
+  "kink": {
+    "face_scan": [
+      {
+        "x1": 20000,
+        "appreciation": 65.01560796281103
+      },
+      {
+        "x1": 21000,
+        "appreciation": 65.16973052541752
+      },
+      {
+        "x1": 22000,
+        "appreciation": 65.31641193950244
+      },
+      {
+        "x1": 23000,
+        "appreciation": 65.45562970178246
+      },
+      {
+        "x1": 24000,
+        "appreciation": 65.58736245401822
+      },
+      {
+        "x1": 25000,
+        "appreciation": 65.7115899862911
+      },
+      {
+        "x1": 26000,
+        "appreciation": 65.67793658169461
+      },
+      {
+        "x1": 27000,
+        "appreciation": 65.64370640484952
+      },
+      {
+        "x1": 28000,
+        "appreciation": 65.60889985858195
+      },
+      {
+        "x1": 29000,
+        "appreciation": 65.57351735250069
+      },
+      {
+        "x1": 30000,
+        "appreciation": 65.53755930299255
+      },
+      {
+        "x1": 31000,
+        "appreciation": 65.50102613321751
+      },
+      {
+        "x1": 32000,
+        "appreciation": 65.46391827310356
+      }
+    ],
+    "clip_status_at_optimum": [
+      {
+        "key_output": "Accidents reduction",
+        "rel_position": -0.12499999999999997
+      },
+      {
+        "key_output": "Water use reduction",
+        "rel_position": 1.095121951219512
+      },
+      {
+        "key_output": "Production cost reduction",
+        "rel_position": 0.8753698893619818
+      }
+    ]
+  },
+  "comparison": [
+    {
+      "seed": 0,
+      "method": "slsqp",
+      "appreciation": 65.71158585873061,
+      "allocation": [
+        25000.123709201438,
+        274999.876290716
+      ],
+      "basin": "kink",
+      "gap_to_grid": 4.1275604871771066e-06,
+      "n_function_evals": 1786,
+      "wall_time_s": 1.5765037999954075
+    },
+    {
+      "seed": 0,
+      "method": "basin_hopping",
+      "appreciation": 65.71158843769307,
+      "allocation": [
+        25000.046658335556,
+        274999.95334166446
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.5485980355833817e-06,
+      "n_function_evals": 645,
+      "wall_time_s": 0.5909413999761455
+    },
+    {
+      "seed": 1,
+      "method": "slsqp",
+      "appreciation": 65.7115897942524,
+      "allocation": [
+        25000.005697217137,
+        274999.9942900957
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.92038697832686e-07,
+      "n_function_evals": 2059,
+      "wall_time_s": 1.8349130999995396
+    },
+    {
+      "seed": 1,
+      "method": "basin_hopping",
+      "appreciation": 65.71158961508966,
+      "allocation": [
+        25000.004630254163,
+        274999.99396099086
+      ],
+      "basin": "kink",
+      "gap_to_grid": 3.712014375878425e-07,
+      "n_function_evals": 664,
+      "wall_time_s": 0.5800292000058107
+    },
+    {
+      "seed": 2,
+      "method": "slsqp",
+      "appreciation": 65.71158950474751,
+      "allocation": [
+        25000.014438521306,
+        274999.9855614787
+      ],
+      "basin": "kink",
+      "gap_to_grid": 4.815435943328339e-07,
+      "n_function_evals": 1938,
+      "wall_time_s": 1.7729526999755763
+    },
+    {
+      "seed": 2,
+      "method": "basin_hopping",
+      "appreciation": 65.7115887157064,
+      "allocation": [
+        25000.038067679252,
+        274999.96192932717
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.2705847041161178e-06,
+      "n_function_evals": 723,
+      "wall_time_s": 0.6212054000352509
+    },
+    {
+      "seed": 3,
+      "method": "slsqp",
+      "appreciation": 65.71158998168258,
+      "allocation": [
+        25000.00013584727,
+        274999.9998636587
+      ],
+      "basin": "kink",
+      "gap_to_grid": 4.608523340721149e-09,
+      "n_function_evals": 1848,
+      "wall_time_s": 1.6571660000481643
+    },
+    {
+      "seed": 3,
+      "method": "basin_hopping",
+      "appreciation": 65.71158885824802,
+      "allocation": [
+        25000.03877625961,
+        274999.9612237404
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.128043081166652e-06,
+      "n_function_evals": 811,
+      "wall_time_s": 0.7120014000101946
+    },
+    {
+      "seed": 4,
+      "method": "slsqp",
+      "appreciation": 65.7115880723313,
+      "allocation": [
+        25000.057362861953,
+        274999.94263679016
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.9139598066431063e-06,
+      "n_function_evals": 2055,
+      "wall_time_s": 1.697526799980551
+    },
+    {
+      "seed": 4,
+      "method": "basin_hopping",
+      "appreciation": 65.71158756862918,
+      "allocation": [
+        25000.072461888034,
+        274999.927538112
+      ],
+      "basin": "kink",
+      "gap_to_grid": 2.417661917775149e-06,
+      "n_function_evals": 820,
+      "wall_time_s": 0.7310262999963015
+    },
+    {
+      "seed": 5,
+      "method": "slsqp",
+      "appreciation": 65.71158961180407,
+      "allocation": [
+        25000.0112344577,
+        274999.98876554234
+      ],
+      "basin": "kink",
+      "gap_to_grid": 3.7448702983056137e-07,
+      "n_function_evals": 2104,
+      "wall_time_s": 1.8545830000075512
+    },
+    {
+      "seed": 5,
+      "method": "basin_hopping",
+      "appreciation": 65.71158983311778,
+      "allocation": [
+        25000.00469853465,
+        274999.9953014654
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.5317331758524233e-07,
+      "n_function_evals": 1158,
+      "wall_time_s": 1.0563318000058644
+    },
+    {
+      "seed": 6,
+      "method": "slsqp",
+      "appreciation": 65.71158978928172,
+      "allocation": [
+        25000.00588060841,
+        274999.99411416805
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.9700938480582408e-07,
+      "n_function_evals": 1995,
+      "wall_time_s": 2.2100481999805197
+    },
+    {
+      "seed": 6,
+      "method": "basin_hopping",
+      "appreciation": 65.71158991113687,
+      "allocation": [
+        25000.002262522397,
+        274999.9977374776
+      ],
+      "basin": "kink",
+      "gap_to_grid": 7.515423305903823e-08,
+      "n_function_evals": 558,
+      "wall_time_s": 0.6313032999751158
+    },
+    {
+      "seed": 7,
+      "method": "slsqp",
+      "appreciation": 65.71158881432393,
+      "allocation": [
+        25000.03507143099,
+        274999.96491678664
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.1719671704213397e-06,
+      "n_function_evals": 1898,
+      "wall_time_s": 2.211492799979169
+    },
+    {
+      "seed": 7,
+      "method": "basin_hopping",
+      "appreciation": 65.7115888433036,
+      "allocation": [
+        25000.03429170116,
+        274999.96570829884
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.1429875002022527e-06,
+      "n_function_evals": 906,
+      "wall_time_s": 0.90679189999355
+    },
+    {
+      "seed": 8,
+      "method": "slsqp",
+      "appreciation": 65.71158954022772,
+      "allocation": [
+        25000.01331621267,
+        274999.9866722852
+      ],
+      "basin": "kink",
+      "gap_to_grid": 4.460633817870985e-07,
+      "n_function_evals": 2016,
+      "wall_time_s": 1.9421718000085093
+    },
+    {
+      "seed": 8,
+      "method": "basin_hopping",
+      "appreciation": 65.71158937075214,
+      "allocation": [
+        25000.018657246994,
+        274999.981342753
+      ],
+      "basin": "kink",
+      "gap_to_grid": 6.155389655759791e-07,
+      "n_function_evals": 824,
+      "wall_time_s": 0.7005473000463098
+    },
+    {
+      "seed": 9,
+      "method": "slsqp",
+      "appreciation": 65.71158970956452,
+      "allocation": [
+        25000.00829695532,
+        274999.9917030447
+      ],
+      "basin": "kink",
+      "gap_to_grid": 2.7672658120536653e-07,
+      "n_function_evals": 2112,
+      "wall_time_s": 1.8835700000054203
+    },
+    {
+      "seed": 9,
+      "method": "basin_hopping",
+      "appreciation": 65.71158736361119,
+      "allocation": [
+        25000.06181755947,
+        274999.93454121257
+      ],
+      "basin": "kink",
+      "gap_to_grid": 2.6226799150208535e-06,
+      "n_function_evals": 627,
+      "wall_time_s": 0.5403360000345856
+    },
+    {
+      "seed": 10,
+      "method": "slsqp",
+      "appreciation": 65.71158985479775,
+      "allocation": [
+        25000.00392366307,
+        274999.9960725616
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.3149335131856787e-07,
+      "n_function_evals": 2063,
+      "wall_time_s": 2.0552752999938093
+    },
+    {
+      "seed": 10,
+      "method": "basin_hopping",
+      "appreciation": 65.71158666953758,
+      "allocation": [
+        25000.099345482515,
+        274999.9006408664
+      ],
+      "basin": "kink",
+      "gap_to_grid": 3.3167535207212495e-06,
+      "n_function_evals": 635,
+      "wall_time_s": 0.5813109999871813
+    },
+    {
+      "seed": 11,
+      "method": "slsqp",
+      "appreciation": 65.71158971093354,
+      "allocation": [
+        25000.008162390517,
+        274999.9918179757
+      ],
+      "basin": "kink",
+      "gap_to_grid": 2.7535756430552283e-07,
+      "n_function_evals": 1950,
+      "wall_time_s": 1.7222386000212282
+    },
+    {
+      "seed": 11,
+      "method": "basin_hopping",
+      "appreciation": 65.71158988161002,
+      "allocation": [
+        25000.003447645016,
+        274999.996552355
+      ],
+      "basin": "kink",
+      "gap_to_grid": 1.0468107802807936e-07,
+      "n_function_evals": 742,
+      "wall_time_s": 0.6410970999859273
+    }
+  ]
+}

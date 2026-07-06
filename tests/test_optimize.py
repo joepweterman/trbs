@@ -331,11 +331,79 @@ def test_multistart_slsqp_returns_structured_result(continuous_beerwiser):
 
 
 def test_unsupported_method_raises(continuous_beerwiser):
-    """basin_hopping / genetic_algorithm are W3+ work — must raise NotImplementedError."""
-    with pytest.raises(NotImplementedError, match="basin_hopping"):
-        continuous_beerwiser.run("Base case", method="basin_hopping")
+    """genetic_algorithm is still W3+ work — must raise NotImplementedError."""
     with pytest.raises(NotImplementedError, match="genetic_algorithm"):
         continuous_beerwiser.run("Base case", method="genetic_algorithm")
+
+
+def test_slsqp_moves_from_face_start(continuous_beerwiser):
+    """Regression test for the two silent stall bugs found 2026-07-06 (exp04).
+
+    Beerwiser's DMO values import as int64, so assigning a float allocation
+    truncated it (finite-difference perturbations flattened to zero); and on the
+    raw budget scale (B=3e5) SLSQP's identity initial Hessian made its first
+    trial step microscopic, aborting at the start point. Under either bug SLSQP
+    returns its start unchanged while reporting success. From [60000, 240000]
+    (appreciation 64.657) a working solver must MOVE and reach the interior
+    local optimum (~[123000, 177000], appreciation 65.7014).
+    """
+    budget = 300000.0
+    x0 = np.array([60000.0, 240000.0])
+    start_app = evaluate_allocation(continuous_beerwiser.input_dict, x0, "Base case", "Test DMO")
+
+    eval_counter = [0]
+    res = continuous_beerwiser._slsqp_from_start(x0, "Base case", "Test DMO", budget, eval_counter)
+
+    assert res.success, f"SLSQP did not converge: {res.message}"
+    assert abs(res.x[0] - x0[0]) > 10000, f"solver stalled at its start point: x={res.x}"
+    assert -res.fun > start_app + 0.5, f"no real improvement: {-res.fun:.4f} vs start {start_app:.4f}"
+
+
+def test_basin_hopping_returns_structured_result(continuous_beerwiser):
+    """optimize_basin_hopping returns an OptimizationResult with sane fields."""
+    budget = 300000.0
+    result = continuous_beerwiser.optimize_basin_hopping(
+        scenario="Base case",
+        budget=budget,
+        dmo_name="Test DMO",  # already prepared by the fixture
+        n_hops=5,
+        n_starts=2,
+        seed=42,
+    )
+    assert isinstance(result, OptimizationResult)
+    assert result.method == "basin_hopping"
+    assert result.n_starts == 2
+    assert len(result.per_start_results) == 2
+    assert result.n_function_evals > 10
+    assert result.wall_time_s > 0
+    # Feasible under the capped simplex; Beerwiser is monotone in spend → binds
+    assert float(np.sum(result.best_x)) <= budget + 1e-3
+    assert (result.best_x >= -1e-6).all()
+
+
+def test_basin_hopping_finds_global_kink(continuous_beerwiser):
+    """Basin-hopping recovers Beerwiser's global optimum — the clip-kink at
+    [25000, 275000] with appreciation 65.711590 (exp04; equals the grid value).
+    Seeded, so deterministic."""
+    result = continuous_beerwiser.optimize_basin_hopping(
+        scenario="Base case",
+        budget=300000.0,
+        dmo_name="Test DMO",
+        n_hops=25,
+        n_starts=1,
+        seed=1,
+    )
+    assert result.appreciation == pytest.approx(65.7115899862911, abs=1e-3)
+    assert result.allocation[0] == pytest.approx(25000.0, abs=500.0)
+
+
+def test_basin_hopping_via_unified_run(beerwiser_appreciated):
+    """basin_hopping dispatches through the unified .optimize() entry point."""
+    result = beerwiser_appreciated.optimize("Base case", method="basin_hopping", n_hops=5, seed=42, dmo_name="BH DMO")
+    assert isinstance(result, OptimizationResult)
+    assert result.method == "basin_hopping"
+    assert "BH DMO" in beerwiser_appreciated.input_dict["decision_makers_options"]
+    assert 3 in beerwiser_appreciated.status
 
 
 def test_optimize_end_to_end_slsqp_beats_grid(beerwiser_appreciated):

@@ -22,7 +22,7 @@ from itertools import combinations_with_replacement, permutations
 from typing import List, Optional
 
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import basinhopping, minimize
 
 from vlinder.appreciate import Appreciate
 from vlinder.evaluate import Evaluate
@@ -50,7 +50,13 @@ def evaluate_allocation(input_dict, x, scenario, dmo_name):
     """
     local = copy.deepcopy(input_dict)
     idx = np.where(local["decision_makers_options"] == dmo_name)[0][0]
-    local["decision_makers_option_value"][idx] = np.asarray(x)
+    # Cases whose DMO values are all whole numbers (Beerwiser, Refugee) import as
+    # int64; assigning a float allocation into an int row silently truncates it,
+    # which flattens finite-difference perturbations to zero and stalls gradient-
+    # based solvers at their start point. Cast the (local, deep-copied) matrix to
+    # float so the allocation is evaluated exactly as given.
+    local["decision_makers_option_value"] = np.asarray(local["decision_makers_option_value"], dtype=float)
+    local["decision_makers_option_value"][idx] = np.asarray(x, dtype=float)
 
     output = Evaluate(local).evaluate_selected_scenario(scenario)[dmo_name]
     Appreciate(local, output).appreciate_single_decision_maker_option(output)
@@ -89,15 +95,45 @@ class OptimizationResult:
         return self.appreciation
 
 
+class _CappedSimplexStep:  # pylint: disable=too-few-public-methods
+    """Feasible random-displacement step for basin-hopping.
+
+    ``scipy.optimize.basinhopping`` calls ``take_step(x)`` between local solves.
+    The default displacement ignores the feasible set; this one adds a Gaussian
+    kick and then projects back onto the capped simplex ``{x >= 0, Σx <= B}`` so
+    every proposed basin start is feasible. Stateful (its own RNG → reproducible
+    restarts) and picklable; the ``stepsize`` attribute lets basin-hopping's
+    adaptive step-size control tune the kick toward its target acceptance rate.
+    """
+
+    def __init__(self, budget, k, rng, step_frac=0.3):
+        self.budget = float(budget)
+        self.k = int(k)
+        self.rng = rng
+        self.stepsize = step_frac * float(budget)
+
+    def __call__(self, x):
+        x_new = np.asarray(x, dtype=float) + self.rng.normal(scale=self.stepsize, size=self.k)
+        x_new = np.clip(x_new, 0.0, self.budget)
+        total = x_new.sum()
+        if total > self.budget:
+            x_new = x_new * (self.budget / total)
+        return x_new
+
+
 class Optimize:
     """
     The Optimize class performs grid search optimization to find the optimal distribution of internal input values
     that maximizes the appreciation value of decision-maker options.
     """
 
-    # String name → adapter method name. Add basin_hopping / genetic_algorithm here (W3+).
-    METHOD_REGISTRY = {"grid": "_run_grid", "slsqp": "_run_slsqp"}
-    DEFAULT_DMO_NAME = {"grid": "Optimized (grid)", "slsqp": "Optimized (SLSQP)"}
+    # String name → adapter method name. Add genetic_algorithm here (W3+).
+    METHOD_REGISTRY = {"grid": "_run_grid", "slsqp": "_run_slsqp", "basin_hopping": "_run_basin_hopping"}
+    DEFAULT_DMO_NAME = {
+        "grid": "Optimized (grid)",
+        "slsqp": "Optimized (SLSQP)",
+        "basin_hopping": "Optimized (basin-hopping)",
+    }
 
     def __init__(self, input_dict, output_dict):
         self.input_dict = input_dict
@@ -339,6 +375,11 @@ class Optimize:
             self.input_dict["decision_makers_option_value"] = np.vstack(
                 [self.input_dict["decision_makers_option_value"], np.asarray(reference_allocation)]
             )
+        # Float dtype so the winning (generally non-integer) allocation is written
+        # back exactly — an int64 matrix would truncate it (see evaluate_allocation).
+        self.input_dict["decision_makers_option_value"] = np.asarray(
+            self.input_dict["decision_makers_option_value"], dtype=float
+        )
 
         boundaries = Appreciate(self.input_dict, self.output_dict)._get_start_and_end_points()
         self.input_dict["key_output_automatic"] = np.zeros(len(self.input_dict["key_output_automatic"]), dtype=int)
@@ -349,6 +390,10 @@ class Optimize:
         """Negated appreciation (scipy minimizes); ``eval_counter`` counts calls."""
         eval_counter[0] += 1
         return -evaluate_allocation(self.input_dict, x, scenario, dmo_name)
+
+    def _objective_z(self, z, scenario, dmo_name, eval_counter, budget):
+        """:meth:`_objective` in budget-normalised coordinates, ``x = budget·z``."""
+        return self._objective(np.asarray(z, dtype=float) * budget, scenario, dmo_name, eval_counter)
 
     def _dirichlet_starts(self, n_starts, budget, seed=None):
         """Multi-start points on the budget face via ``Dirichlet(1,...,1) * budget``.
@@ -362,8 +407,17 @@ class Optimize:
         return rng.dirichlet(np.ones(self._k), size=n_starts) * budget
 
     def _slsqp_from_start(self, x0, scenario, dmo_name, budget, eval_counter):
-        """Single SLSQP solve from ``x0``. Constraint Σx_i ≤ B (capped simplex),
-        bounds [0, B]^k.
+        """Single SLSQP solve from ``x0``, in budget-normalised coordinates.
+
+        The solve runs in z-space, ``x = B·z``, on the unit capped simplex
+        ``{z : Σz_i ≤ 1, z_i ∈ [0, 1]}``. SLSQP starts from an identity Hessian
+        approximation and uses absolute tolerances, so on raw budgets of 1e5–1e7
+        (Beerwiser, Refugee) its first trial step is microscopic relative to the
+        variable scale and the improvement test aborts at the start point — the
+        solver "converges" without moving. Normalising makes solver behaviour
+        independent of the case's budget scale (Beerwiser 3e5, Refugee ≈6.5e6,
+        IZZ and the synthetic suite 100). ``res.x`` is mapped back to x-space;
+        ``res.fun`` (negated appreciation) is unscaled either way.
 
         The budget is an upper bound, not an equality: under-spending is feasible
         (Vlinder, 2026-06-26). This matters on appreciation surfaces that are
@@ -371,19 +425,34 @@ class Optimize:
         can lower appreciation (exp02). On monotone cases (Beerwiser, Refugee)
         the constraint binds and the solution still spends the full budget, so
         the formulation reduces to the former equality there. scipy reads
-        ``ineq`` constraints as ``fun(x) >= 0``, hence ``B - Σx_i >= 0``.
+        ``ineq`` constraints as ``fun(z) >= 0``, hence ``1 - Σz_i >= 0``.
         """
-        constraints = ({"type": "ineq", "fun": lambda x: float(budget - np.sum(x))},)
-        bounds = [(0.0, float(budget))] * self._k
-        return minimize(
-            self._objective,
-            x0,
-            args=(scenario, dmo_name, eval_counter),
+        constraints = ({"type": "ineq", "fun": lambda z: float(1.0 - np.sum(z))},)
+        bounds = [(0.0, 1.0)] * self._k
+        res = minimize(
+            self._objective_z,
+            np.asarray(x0, dtype=float) / float(budget),
+            args=(scenario, dmo_name, eval_counter, float(budget)),
             method="SLSQP",
             bounds=bounds,
             constraints=constraints,
-            options={"ftol": 1e-6, "maxiter": 100, "disp": False},
+            options={"ftol": 1e-6, "maxiter": 100, "disp": False, "eps": 1e-6},
         )
+        res.x = self._project_capped_simplex(res.x * float(budget), float(budget))
+        return res
+
+    @staticmethod
+    def _project_capped_simplex(x, budget):
+        """Clean solver-tolerance dust off a solution: SLSQP satisfies constraints
+        only to its accuracy tolerance (in z-units, so ×B in x-units), while
+        downstream consumers assert strict feasibility. Clip negatives and rescale
+        an over-budget sum — a relative correction of order 1e-8, negligible in f.
+        """
+        x = np.clip(np.asarray(x, dtype=float), 0.0, None)
+        total = float(np.sum(x))
+        if total > budget:
+            x = x * (budget / total)
+        return x
 
     def optimize_slsqp(
         self,
@@ -453,6 +522,113 @@ class Optimize:
             per_start_results=per_start,
         )
 
+    def optimize_basin_hopping(
+        self,
+        scenario,
+        budget,
+        dmo_name="Optimized (basin-hopping)",
+        reference_allocation=None,
+        n_hops=100,
+        n_starts=1,
+        temperature=1.0,
+        step_frac=0.3,
+        seed=None,
+    ):
+        """Basin-hopping (Wales & Doye, 1997) on the capped-simplex objective.
+
+        An outer loop of random perturbations between SLSQP local solves, with
+        Metropolis acceptance, over the same feasible set as SLSQP
+        ``{x : Σx_i ≤ B, x_i ≥ 0}``. This is the global-escape method for the
+        multimodal appreciation surfaces where plain multi-start SLSQP gets stuck
+        in the wrong basin: exp01 showed SLSQP recovers Beerwiser's near-corner
+        global basin in only ~2/12 runs, hopping over the interior local optimum.
+
+        :param scenario: scenario name (must be in input_dict["scenarios"]).
+        :param budget: allocation budget (upper bound: Σx_i ≤ budget).
+        :param dmo_name: name under which the winning allocation is written back.
+        :param reference_allocation: feasible allocation seeding the new DMO row
+            (only when registering); defaults to the first existing DMO's row.
+        :param n_hops: basin-hopping iterations per start (scipy ``niter``).
+        :param n_starts: number of Dirichlet restarts, each a full hopping chain.
+        :param temperature: Metropolis acceptance temperature ``T``.
+        :param step_frac: perturbation size as a fraction of the budget.
+        :param seed: RNG seed for reproducible starts, kicks and acceptance.
+        :return: an :class:`OptimizationResult` with per-start diagnostics.
+        """
+        if reference_allocation is None:
+            reference_allocation = self.input_dict["decision_makers_option_value"][0].copy()
+        self._prepare_input_dict(dmo_name, reference_allocation)
+
+        starts = self._dirichlet_starts(n_starts, budget, seed=seed)
+        eval_counter = [0]
+        t0 = time.perf_counter()
+
+        # Hopping runs in budget-normalised z-space (x = B·z), like
+        # _slsqp_from_start and for the same reason: on raw budget scales the
+        # inner SLSQP stalls at its start point, reducing the hop chain to a
+        # random walk. The unit budget also makes ``step_frac`` case-independent.
+        constraints = ({"type": "ineq", "fun": lambda z: float(1.0 - np.sum(z))},)
+        bounds = [(0.0, 1.0)] * self._k
+        minimizer_kwargs = {
+            "method": "SLSQP",
+            "bounds": bounds,
+            "constraints": constraints,
+            "args": (scenario, dmo_name, eval_counter, float(budget)),
+            "options": {"ftol": 1e-6, "maxiter": 100, "disp": False, "eps": 1e-6},
+        }
+
+        per_start = []
+        best_x = None
+        best_neg_f = np.inf
+
+        for i, x0 in enumerate(starts):
+            if seed is None:
+                step_rng, hop_rng = np.random.default_rng(), np.random.default_rng()
+            else:
+                step_rng, hop_rng = np.random.default_rng([seed, i, 0]), np.random.default_rng([seed, i, 1])
+            take_step = _CappedSimplexStep(1.0, self._k, step_rng, step_frac=step_frac)
+
+            res = basinhopping(
+                self._objective_z,
+                np.asarray(x0, dtype=float) / float(budget),
+                niter=n_hops,
+                T=temperature,
+                minimizer_kwargs=minimizer_kwargs,
+                take_step=take_step,
+                rng=hop_rng,
+            )
+            x_best_start = self._project_capped_simplex(np.asarray(res.x) * float(budget), float(budget))
+            per_start.append(
+                {
+                    "i": i,
+                    "x0": np.asarray(x0),
+                    "x": x_best_start,
+                    "appreciation": float(-res.fun),
+                    "success": bool(res.lowest_optimization_result.success),
+                    "nit": int(res.nit),
+                    "message": str(res.message[0]) if isinstance(res.message, (list, tuple)) else str(res.message),
+                }
+            )
+            if res.fun < best_neg_f:
+                best_neg_f = res.fun
+                best_x = x_best_start
+
+        if best_x is not None:
+            idx = np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
+            self.input_dict["decision_makers_option_value"][idx] = best_x
+
+        return OptimizationResult(
+            method="basin_hopping",
+            dmo_name=dmo_name,
+            allocation=best_x if best_x is not None else np.full(self._k, np.nan),
+            appreciation=-best_neg_f if best_x is not None else float("nan"),
+            n_starts=n_starts,
+            n_converged=sum(1 for r in per_start if r["success"]),
+            n_function_evals=eval_counter[0],
+            wall_time_s=time.perf_counter() - t0,
+            per_start_results=per_start,
+        )
+
     # ==================================================================
     # Unified dispatch — one entry point for every method.
     # ==================================================================
@@ -478,12 +654,17 @@ class Optimize:
         """SLSQP adapter → :class:`OptimizationResult`."""
         return self.optimize_slsqp(scenario, budget, dmo_name=dmo_name, **method_kwargs)
 
+    def _run_basin_hopping(self, scenario, *, dmo_name, budget, **method_kwargs):
+        """Basin-hopping adapter → :class:`OptimizationResult`."""
+        return self.optimize_basin_hopping(scenario, budget, dmo_name=dmo_name, **method_kwargs)
+
     def run(self, scenario, method="grid", *, dmo_name=None, budget=None, **method_kwargs):
         """Run one or several optimization methods and return the best result.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
         :param method: a single method name (str) or a list of names. Supported:
-            ``"grid"``, ``"slsqp"``. Unknown names raise ``NotImplementedError``.
+            ``"grid"``, ``"slsqp"``, ``"basin_hopping"``. Unknown names raise
+            ``NotImplementedError``.
         :param dmo_name: name for the optimizer DMO. Defaults per method
             (:attr:`DEFAULT_DMO_NAME`); for a list, each method uses its own
             default unless an explicit name is given.
