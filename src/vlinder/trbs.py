@@ -197,16 +197,21 @@ class TheResponsibleBusinessSimulator:
           * list of names → run each, print every method's appreciation +
             allocation, and return the best (only the winner is written back)
 
-        Supported methods: ``"grid"`` (combinatorial grid search, default) and
-        ``"slsqp"`` (continuous multi-start SLSQP). ``"basin_hopping"`` /
-        ``"genetic_algorithm"`` raise ``NotImplementedError`` (W3+).
+        Supported methods: ``"grid"`` (combinatorial grid search, default),
+        ``"slsqp"`` (continuous multi-start SLSQP), ``"basin_hopping"``
+        (global escape: random perturbations between SLSQP local solves) and
+        ``"genetic_algorithm"`` (derivative-free real-coded GA).
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
         :param method: method name or list of names.
         :param kwargs: ``new_dmo_name`` / ``dmo_name`` for the optimizer DMO,
             ``new_case_name`` for the optimized case name; grid takes
             ``max_combinations`` (default 60000), slsqp takes ``n_starts``
-            (default 100), ``seed``, ``reference_allocation``.
+            (default 100), ``seed``, ``reference_allocation``; basin_hopping
+            takes ``n_hops``, ``n_starts``, ``temperature``, ``step_frac``,
+            ``seed``; genetic_algorithm takes ``population_size``,
+            ``n_generations``, ``crossover_prob``, ``eta_crossover``,
+            ``eta_mutation``, ``seed``.
         :return: the (best) :class:`OptimizationResult`.
         """
         self._status_check([0, 1, 2])

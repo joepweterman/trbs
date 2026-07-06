@@ -331,9 +331,43 @@ def test_multistart_slsqp_returns_structured_result(continuous_beerwiser):
 
 
 def test_unsupported_method_raises(continuous_beerwiser):
-    """genetic_algorithm is still W3+ work — must raise NotImplementedError."""
-    with pytest.raises(NotImplementedError, match="genetic_algorithm"):
-        continuous_beerwiser.run("Base case", method="genetic_algorithm")
+    """An unknown method name must raise NotImplementedError listing the registry."""
+    with pytest.raises(NotImplementedError, match="tabu_search"):
+        continuous_beerwiser.run("Base case", method="tabu_search")
+
+
+def test_ga_returns_structured_result(continuous_beerwiser):
+    """optimize_genetic_algorithm returns an OptimizationResult with sane fields
+    and a per-generation trace; the winner is feasible on the capped simplex."""
+    budget = 300000.0
+    result = continuous_beerwiser.optimize_genetic_algorithm(
+        scenario="Base case",
+        budget=budget,
+        dmo_name="Test DMO",  # already prepared by the fixture
+        population_size=16,
+        n_generations=6,
+        seed=42,
+    )
+    assert isinstance(result, OptimizationResult)
+    assert result.method == "genetic_algorithm"
+    assert result.n_starts == 16  # population size
+    assert len(result.per_start_results) == 6  # one trace entry per generation
+    assert result.n_function_evals == 16 * 7  # initial population + 6 child generations
+    # Monotone best trace thanks to one-elite replacement
+    best_trace = [row["best"] for row in result.per_start_results]
+    assert best_trace == sorted(best_trace)
+    # Feasibility on the capped simplex
+    assert float(np.sum(result.best_x)) <= budget + 1e-6
+    assert (result.best_x >= -1e-12).all()
+
+
+def test_ga_reaches_known_basin_beerwiser(continuous_beerwiser):
+    """At default budget the seeded GA lands in one of Beerwiser's two basins
+    (interior 65.7014 / clip kink 65.7116) — appreciation >= 65.70 (exp04/1b).
+    Seeded, so deterministic."""
+    result = continuous_beerwiser.run("Base case", method="genetic_algorithm", seed=2, dmo_name="Test DMO")
+    assert result.appreciation >= 65.70
+    assert result.appreciation <= 65.7115899862911 + 1e-6  # cannot beat the certified global
 
 
 def test_slsqp_moves_from_face_start(continuous_beerwiser):

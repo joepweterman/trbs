@@ -127,12 +127,18 @@ class Optimize:
     that maximizes the appreciation value of decision-maker options.
     """
 
-    # String name → adapter method name. Add genetic_algorithm here (W3+).
-    METHOD_REGISTRY = {"grid": "_run_grid", "slsqp": "_run_slsqp", "basin_hopping": "_run_basin_hopping"}
+    # String name → adapter method name.
+    METHOD_REGISTRY = {
+        "grid": "_run_grid",
+        "slsqp": "_run_slsqp",
+        "basin_hopping": "_run_basin_hopping",
+        "genetic_algorithm": "_run_genetic_algorithm",
+    }
     DEFAULT_DMO_NAME = {
         "grid": "Optimized (grid)",
         "slsqp": "Optimized (SLSQP)",
         "basin_hopping": "Optimized (basin-hopping)",
+        "genetic_algorithm": "Optimized (GA)",
     }
 
     def __init__(self, input_dict, output_dict):
@@ -629,6 +635,132 @@ class Optimize:
             per_start_results=per_start,
         )
 
+    @staticmethod
+    def _sbx_pair(parent_a, parent_b, eta, crossover_prob, rng):
+        """Simulated binary crossover (Deb & Agrawal, 1995) on one parent pair.
+
+        Applied per pair with probability ``crossover_prob``; children stay in
+        [0, 1] by clipping (the capped-simplex projection follows separately).
+        """
+        if rng.random() > crossover_prob:
+            return parent_a.copy(), parent_b.copy()
+        u = rng.random(parent_a.shape)
+        beta = np.where(u <= 0.5, (2.0 * u) ** (1.0 / (eta + 1.0)), (1.0 / (2.0 * (1.0 - u))) ** (1.0 / (eta + 1.0)))
+        child_a = 0.5 * ((1.0 + beta) * parent_a + (1.0 - beta) * parent_b)
+        child_b = 0.5 * ((1.0 - beta) * parent_a + (1.0 + beta) * parent_b)
+        return np.clip(child_a, 0.0, 1.0), np.clip(child_b, 0.0, 1.0)
+
+    @staticmethod
+    def _polynomial_mutation(child, eta, rng):
+        """Polynomial mutation (Deb & Agrawal, 1995), per-gene probability 1/k."""
+        k = child.size
+        mutate = rng.random(k) < (1.0 / k)
+        u = rng.random(k)
+        delta = np.where(
+            u < 0.5, (2.0 * u) ** (1.0 / (eta + 1.0)) - 1.0, 1.0 - (2.0 * (1.0 - u)) ** (1.0 / (eta + 1.0))
+        )
+        return np.clip(np.where(mutate, child + delta, child), 0.0, 1.0)
+
+    def optimize_genetic_algorithm(
+        self,
+        scenario,
+        budget,
+        dmo_name="Optimized (GA)",
+        reference_allocation=None,
+        population_size=50,
+        n_generations=60,
+        crossover_prob=0.9,
+        eta_crossover=15.0,
+        eta_mutation=20.0,
+        seed=None,
+    ):
+        """Real-coded genetic algorithm on the capped-simplex objective.
+
+        Standard real-coded GA with the operators named in the methodology
+        (Deb & Agrawal, 1995): binary-tournament selection, simulated binary
+        crossover (SBX), polynomial mutation, one-elite replacement. The
+        population lives in budget-normalised z-space (x = B·z) and every
+        individual is projected onto the unit capped simplex after variation,
+        so the whole population is always feasible. The initial population is
+        uniform over the capped simplex: Dirichlet(1, ..., 1) on k+1
+        coordinates with the slack coordinate dropped.
+
+        Derivative-free — the reference population-based method for the
+        nonsmooth/clipped regimes where finite-difference gradient information
+        is unreliable (exp03/exp04 clipping mechanism). Weighted-sum
+        scalarisation: the fitness IS the (already theme-weighted) appreciation.
+
+        :param scenario: scenario name (must be in input_dict["scenarios"]).
+        :param budget: allocation budget (upper bound: Σx_i ≤ budget).
+        :param dmo_name: name under which the winning allocation is written back.
+        :param reference_allocation: feasible allocation seeding the new DMO row
+            (only when registering); defaults to the first existing DMO's row.
+        :param population_size: individuals per generation.
+        :param n_generations: number of generations.
+        :param crossover_prob: per-pair SBX probability.
+        :param eta_crossover: SBX distribution index (larger = children closer to parents).
+        :param eta_mutation: polynomial-mutation distribution index.
+        :param seed: RNG seed — the full run is deterministic given the seed.
+        :return: an :class:`OptimizationResult`; ``per_start_results`` holds the
+            per-generation best/mean fitness trace.
+        """
+        if reference_allocation is None:
+            reference_allocation = self.input_dict["decision_makers_option_value"][0].copy()
+        self._prepare_input_dict(dmo_name, reference_allocation)
+
+        rng = np.random.default_rng(seed)
+        eval_counter = [0]
+        t0 = time.perf_counter()
+
+        def fitness(z):
+            eval_counter[0] += 1
+            return evaluate_allocation(self.input_dict, z * float(budget), scenario, dmo_name)
+
+        # Uniform initial population over the capped simplex {z >= 0, sum z <= 1}.
+        population = rng.dirichlet(np.ones(self._k + 1), size=population_size)[:, : self._k]
+        scores = np.array([fitness(z) for z in population])
+        trace = []
+
+        for generation in range(n_generations):
+            children = []
+            while len(children) < population_size:
+                # Binary tournaments pick the two parents.
+                idx = rng.integers(0, population_size, size=4)
+                parent_a = population[idx[0]] if scores[idx[0]] >= scores[idx[1]] else population[idx[1]]
+                parent_b = population[idx[2]] if scores[idx[2]] >= scores[idx[3]] else population[idx[3]]
+                child_a, child_b = self._sbx_pair(parent_a, parent_b, eta_crossover, crossover_prob, rng)
+                for child in (child_a, child_b):
+                    child = self._polynomial_mutation(child, eta_mutation, rng)
+                    children.append(self._project_capped_simplex(child, 1.0))
+            children = np.array(children[:population_size])
+            child_scores = np.array([fitness(z) for z in children])
+
+            # One-elite replacement: the incumbent best survives unless beaten.
+            elite_idx = int(np.argmax(scores))
+            worst_child = int(np.argmin(child_scores))
+            if scores[elite_idx] > child_scores.max():
+                children[worst_child] = population[elite_idx]
+                child_scores[worst_child] = scores[elite_idx]
+            population, scores = children, child_scores
+            trace.append({"generation": generation, "best": float(scores.max()), "mean": float(scores.mean())})
+
+        best_idx = int(np.argmax(scores))
+        best_x = population[best_idx] * float(budget)
+        idx = np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
+        self.input_dict["decision_makers_option_value"][idx] = best_x
+
+        return OptimizationResult(
+            method="genetic_algorithm",
+            dmo_name=dmo_name,
+            allocation=best_x,
+            appreciation=float(scores[best_idx]),
+            n_starts=population_size,
+            n_converged=None,
+            n_function_evals=eval_counter[0],
+            wall_time_s=time.perf_counter() - t0,
+            per_start_results=trace,
+        )
+
     # ==================================================================
     # Unified dispatch — one entry point for every method.
     # ==================================================================
@@ -658,13 +790,17 @@ class Optimize:
         """Basin-hopping adapter → :class:`OptimizationResult`."""
         return self.optimize_basin_hopping(scenario, budget, dmo_name=dmo_name, **method_kwargs)
 
+    def _run_genetic_algorithm(self, scenario, *, dmo_name, budget, **method_kwargs):
+        """Genetic-algorithm adapter → :class:`OptimizationResult`."""
+        return self.optimize_genetic_algorithm(scenario, budget, dmo_name=dmo_name, **method_kwargs)
+
     def run(self, scenario, method="grid", *, dmo_name=None, budget=None, **method_kwargs):
         """Run one or several optimization methods and return the best result.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
         :param method: a single method name (str) or a list of names. Supported:
-            ``"grid"``, ``"slsqp"``, ``"basin_hopping"``. Unknown names raise
-            ``NotImplementedError``.
+            ``"grid"``, ``"slsqp"``, ``"basin_hopping"``, ``"genetic_algorithm"``.
+            Unknown names raise ``NotImplementedError``.
         :param dmo_name: name for the optimizer DMO. Defaults per method
             (:attr:`DEFAULT_DMO_NAME`); for a list, each method uses its own
             default unless an explicit name is given.
