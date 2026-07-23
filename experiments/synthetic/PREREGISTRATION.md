@@ -72,4 +72,7 @@ Phases 2-4 (smooth_nonconvex, nonsmooth, scenario dispersion): their generator k
 
 ## Amendments
 
-(none)
+**A1 — 2026-07-23: grid at k = 15 is recorded as a censored observation without execution.**
+- **Finding:** no grid task at k = 15 has ever completed. Mechanism (source-verified, `vlinder/optimize.py::generate_combinations`): every budget split that passes the sum filter is expanded through `set(permutations(combination))`, which iterates all k! index-permutations — 15! ≈ 1.31 × 10¹² per split. Extrapolating from the measured k = 12 grid task (~623 s, 12! ≈ 4.79 × 10⁸): ≈ 19 days of CPU per k = 15 grid task, × 180 tasks in the design. Empirical corroboration: zero k = 15 grid completions across both confirmatory runs; six workers observed at 100% CPU for 40+ minutes each on k = 15 grid tasks with no completion, while k = 15 continuous-method tasks complete in 3–13 s.
+- **Treatment:** every (case, scenario, grid) cell at k = 15 is written to the results store as `censored = true`, `recovered = false`, with null result fields and an explanatory `censor_reason` — i.e. the §3 runtime-cap rule applied categorically: the cap (600 s) is exceeded with certainty, by five orders of magnitude. Recovery = 0 for these cells counts against grid adequacy exactly as §3 prescribes. All other cells, including grid at k ≤ 12 and all continuous methods at k = 15, run unchanged.
+- **Interpretation:** this strengthens H2 rather than weakening it — the baseline cannot even enumerate its own grid at k = 15. The analytic combinatorial cost curve of §4 still covers grid at k = 15. No result-dependent discretion is involved: the failure is categorical (weeks vs. a 600 s cap), not marginal.
