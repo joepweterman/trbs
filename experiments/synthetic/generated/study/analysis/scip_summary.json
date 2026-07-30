@@ -1,0 +1,12 @@
+{
+  "n_rows": 1260,
+  "n_proved_optimal": 1260,
+  "n_model_faithful": 1260,
+  "worst_fidelity_residual": 9.928942006354191e-07,
+  "max_abs_gap_vs_oracle": 7.029401558611426e-07,
+  "largest_exceedance_over_oracle": 3.497291345411213e-11,
+  "n_breaching_eps": 0,
+  "breaching_cases": [],
+  "verdict": "ORACLE CORROBORATED",
+  "rule": "a proven optimum more than 0.1 points above the certified f_star would mean the ground truth is wrong"
+}
