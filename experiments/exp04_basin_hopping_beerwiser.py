@@ -1,8 +1,8 @@
-"""exp04 — solver-stall diagnosis and the SLSQP vs basin-hopping benchmark on Beerwiser.
+"""exp04: solver-stall diagnosis and the SLSQP vs basin-hopping benchmark on Beerwiser.
 
 Reproduces the 2026-07-06 findings (knowledge base: exp04-solver-stall-and-basin-hopping.md):
 
-1. STALL REGRESSION — two silent failure modes made every earlier continuous
+1. STALL REGRESSION: two silent failure modes made every earlier continuous
    result on Beerwiser a best-of-random-starts, not an optimization:
    (a) int64 truncation: Beerwiser's DMO values import as int64, so assigning a
        float allocation truncated it and finite-difference perturbations
@@ -13,7 +13,7 @@ Reproduces the 2026-07-06 findings (knowledge base: exp04-solver-stall-and-basin
    Fixed by a float cast in evaluate_allocation and by solving in
    budget-normalised z-space (x = B*z on the unit capped simplex).
 
-2. KINK CHARACTERISATION — Beerwiser's global optimum [25000, 275000]
+2. KINK CHARACTERISATION: Beerwiser's global optimum [25000, 275000]
    (appreciation 65.711590) sits at a nonsmooth clip point: 'Accidents
    reduction' is floor-clipped (rel -0.125) and 'Water use reduction' is
    cap-clipped (rel 1.095) at the optimum. A real-case instance of the exp03
@@ -21,7 +21,7 @@ Reproduces the 2026-07-06 findings (knowledge base: exp04-solver-stall-and-basin
    kink at x1=25000 (global) and a smooth interior optimum at x1~123000
    (65.7014), only 0.0104 appreciation points apart.
 
-3. METHOD COMPARISON — post-fix, both multi-start SLSQP (100 starts) and
+3. METHOD COMPARISON: post-fix, both multi-start SLSQP (100 starts) and
    basin-hopping (25 hops) recover the global kink 12/12 seeds, matching the
    grid value at ~3.3% and ~1.2% of grid's 60,000 evaluations respectively.
 """

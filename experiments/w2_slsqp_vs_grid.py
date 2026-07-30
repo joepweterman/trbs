@@ -27,7 +27,7 @@ from vlinder.optimize import evaluate_allocation
 from vlinder.trbs import TheResponsibleBusinessSimulator
 
 # ---------------------------------------------------------------------------
-# Experiment configuration — single source of truth for the report.
+# Experiment configuration: single source of truth for the report.
 # ---------------------------------------------------------------------------
 SCENARIO = "Base case"
 GRID_MAX_COMBINATIONS = 60000  # matches the legacy default
@@ -80,8 +80,8 @@ def run_slsqp(n_starts: int, seed: int):
         "method": "slsqp",
         "n_starts": n_starts,
         "seed": seed,
-        "best_x": result.best_x.tolist(),
-        "best_appreciation": result.best_appreciation,
+        "allocation": result.allocation.tolist(),
+        "appreciation": result.appreciation,
         "n_converged": result.n_converged,
         "n_function_evals": result.n_function_evals,
         "wall_time_s": result.wall_time_s,
@@ -90,7 +90,7 @@ def run_slsqp(n_starts: int, seed: int):
 
 def main():
     """Run the full SLSQP vs grid comparison, save JSON, print summary table."""
-    print(f"# W2 experiment: SLSQP vs grid — Beerwiser, scenario '{SCENARIO}'")
+    print(f"# W2 experiment: SLSQP vs grid on Beerwiser, scenario '{SCENARIO}'")
     print(f"Python {sys.version.split()[0]} | numpy {np.__version__} | scipy {scipy.__version__}")
     print(f"Platform: {platform.platform()}")
     print()
@@ -111,7 +111,7 @@ def main():
             res = run_slsqp(n_starts, seed)
             runs.append(res)
             print(
-                f"  appreciation={res['best_appreciation']:.6f}, "
+                f"  appreciation={res['appreciation']:.6f}, "
                 f"converged={res['n_converged']}/{res['n_starts']}, "
                 f"n_evals={res['n_function_evals']}, "
                 f"wall={res['wall_time_s']:.3f}s"
@@ -136,7 +136,7 @@ def main():
     print("## Aggregated table (mean ± std over seeds)")
     print()
     print(
-        "| n_starts | best_appreciation (mean ± std) | n_converged (mean) | "
+        "| n_starts | appreciation (mean ± std) | n_converged (mean) | "
         "n_function_evals (mean) | wall_time_s (mean ± std) |"
     )
     print(
@@ -145,7 +145,7 @@ def main():
     )
     for n_starts in N_STARTS_GRID:
         slsqp_for_n = [r for r in runs if r["method"] == "slsqp" and r["n_starts"] == n_starts]
-        apps = np.array([r["best_appreciation"] for r in slsqp_for_n])
+        apps = np.array([r["appreciation"] for r in slsqp_for_n])
         convs = np.array([r["n_converged"] for r in slsqp_for_n])
         evals = np.array([r["n_function_evals"] for r in slsqp_for_n])
         walls = np.array([r["wall_time_s"] for r in slsqp_for_n])

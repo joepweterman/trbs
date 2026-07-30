@@ -1,72 +1,23 @@
 """
-Synthetic tRBS case factory — generator COMPLETE (Phases 0-4: all regimes + knobs).
+This file contains the synthetic tRBS case factory: a data-generating process
+that emits cases whose optimum is known in advance.
 
-Part of the thesis synthetic-case generator (a known data-generating process for
-the convexity-characterisation Monte-Carlo study). Lives THESIS-SIDE in
-``experiments/`` — deliberately NOT inside the ``vlinder`` package (Vlinder Q3).
+A case is written as the 11 native tRBS tables, so it flows through the real
+import -> evaluate -> appreciate -> optimize pipeline unchanged and the
+optimizer cannot tell it from a real case. Each case also gets a
+``manifest.json`` recording its parameters, seed, convexity claim, analytic
+envelope and table hashes; ``oracle.py`` patches the certified optimum into it.
 
-Deliverables:
-  * ``SyntheticCaseParams`` — the tunable knob schema (a dataclass).
-  * ``SyntheticCaseFactory`` — emits the 11 native tRBS CSV tables for a case so
-    it flows through the real ``case_importer -> evaluate -> appreciate -> optimize``
-    pipeline unchanged (the optimizer cannot tell synthetic from real), plus a
-    ``manifest.json`` (params, seed, convexity claim, analytic envelope, table
-    hashes; the oracle block is patched in by ``oracle.py``).
-  * ``validate_case`` — regime-aware round-trip validation (invariants below).
+Three regimes set the geometry of the appreciation landscape: ``convex`` (one
+optimum), ``smooth_nonconvex`` (several optima, no kinks) and ``nonsmooth``
+(kinks and plateaus). The mechanism-by-mechanism map from parameters to
+geometry, and the NO-CLIP invariant the validator enforces, are documented in
+``thesis-knowledge/03-methodology/synthetic_case_generator_plan.md``.
 
-Regimes (defined by objective geometry, realised through real tRBS mechanisms):
-  * ``convex`` — affine dependencies + concave-increasing appreciation + exact
-    bracketing => concave program. Variants via ``appreciation``:
-    ``linear`` (affine objective, vertex optimum) or ``sinusoidal`` (STB=0
-    quarter-sine, concave increasing on the bracket, interior optimum; IZZ-like).
-  * ``smooth_nonconvex`` — convex curvature injected smoothly, exact bracketing
-    kept so the nonconvexity is purely smooth:
-      - ``n_stb1``: first n KOs flipped to smaller_the_better=1 + sinusoidal
-        (convex DECREASING appreciation terms — the IZZ cost-KPI mechanism);
-      - ``n_bilinear``: first n KOs each get one bilinear intermediate
-        ``Bil m = Lever a * Lever b`` (indefinite curvature; the multiplicative-
-        coupling mechanism of the real dependency graphs). A per-KO 'Blend' DMO
-        at the analytic edge-argmax keeps the feasible envelope exactly bracketed.
-  * ``nonsmooth`` — kinks through real mechanisms:
-      - ``bracketing_factor`` in (0,1]: all bracketing DMOs are shrunk toward the
-        equal spread, so the auto-boundaries under-bracket the feasible envelope
-        and the 0-floor/100-cap clips switch on INSIDE the feasible set — the
-        exp03 mechanism as a controllable dial (1.0 = exact bracket = no clipping);
-      - ``n_saturation``: first n levers get a min-cap chain
-        ``Sat i = min(Lever i / sp, 1)`` with ``sp = saturation_point * B``
-        (the Beerwiser chain; kinks + corner/plateau optima without clipping).
-        A per-KO greedy 'Envelope' DMO keeps bracketing exact at factor 1.
-  * ``scenario_dispersion`` in [0,1] (orthogonal knob, any regime): per-KO
-    multiplicative scenario factors ``KO j = Base j * Fac j`` with
-    ``Fac j(s) = 1 + delta*u_js``, u ~ U(-1,1) — per-scenario optima genuinely
-    diverge (RQ3), while per-scenario affinity/curvature class is unchanged.
-
-Mechanism exclusivity (keeps the factorial clean and the envelope math exact):
-bilinear only in smooth_nonconvex; saturation and bracketing_factor<1 only in
-nonsmooth. The ``ruggedness`` concept from the methodology plan maps to the
-count knobs (n_stb1 + n_bilinear = number of convex-curvature carriers).
-
-NO-CLIP invariant (Phase-0 audit, exp03, 2026-07-02): vlinder's auto-boundaries
-are the min/max of KO values over the DMO set, and appreciation hard-clips to
-0/100 outside them. Under-bracketing DMOs put clipping kinks INSIDE the feasible
-set; the 0-floor clip is convex and makes even the linear regime multimodal.
-The factory therefore emits bracketing DMOs realising every KO's feasible
-extremes (corners, zero spend, Blend/Envelope DMOs) and stores the analytic
-per-KO envelope in the manifest; ``validate_case`` asserts the frozen
-boundaries equal it (or, for bracketing_factor<1, that the under-bracketing is
-present and *intentional*).
-
-Budget is the capped simplex sum x <= B (exp02 decision, 2026-06-26).
-
-Reproducibility: all randomness is drawn in ``__init__`` from independent
-``SeedSequence`` child streams (coefficients / KO weights / theme weights /
-scenario weights / dispersion factors / bilinear structure), so varying one
-factorial knob never re-randomises unrelated components, and ``tables()`` is
-idempotent.
+Budget is the capped simplex sum x <= B (exp02 decision).
 
 Run:
-  & "C:\\Users\\joepw\\.virtualenvs\\tRBS-DclBJWVi-python.exe\\Scripts\\python.exe" `
-    C:\\Users\\joepw\\tRBS\\experiments\\synthetic\\case_factory.py
+  python experiments/synthetic/case_factory.py
 """
 
 # pylint: disable=invalid-name,protected-access,too-many-locals,too-many-instance-attributes
@@ -78,8 +29,6 @@ Run:
 from __future__ import annotations
 
 import copy
-import io
-import contextlib
 import hashlib
 import json
 from dataclasses import asdict, dataclass
@@ -92,6 +41,7 @@ import pandas as pd
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.evaluate import Evaluate
 from vlinder.optimize import Optimize, evaluate_allocation
+from vlinder.utils import suppress_print
 
 DEFAULT_ROOT = Path(__file__).parent / "generated"
 GENERATOR_VERSION = "1.0"
@@ -298,7 +248,7 @@ class SyntheticCaseFactory:
         (matching vlinder's pooled auto-boundaries).
 
         KO j = Fac_j(s) * base_j(x) + [j == 0] * ce * ext_s, with base_j >= 0,
-        base_j(0) = 0 and Fac >= 0 — so lo comes from x = 0 and hi from the
+        base_j(0) = 0 and Fac >= 0, so lo comes from x = 0 and hi from the
         per-scenario max of factor * base-max.
         """
         n = self.p.n_key_outputs
@@ -318,7 +268,7 @@ class SyntheticCaseFactory:
         stb = [1 if j in self.stb1_kos else 0 for j in range(self.p.n_key_outputs)]
         base_linear = 1 if self.p.appreciation == "linear" else 0
         # STB=1 flips must be sinusoidal: linear STB=1 is affine decreasing and
-        # would leave the objective concave — no curvature carrier at all.
+        # would leave the objective concave, with no curvature carrier at all.
         linear = [0 if j in self.stb1_kos else base_linear for j in range(self.p.n_key_outputs)]
         return pd.DataFrame(
             {
@@ -421,8 +371,8 @@ class SyntheticCaseFactory:
         """Regime-aware dependency graph (accumulation handles all sums).
 
         Base structure per KO j: affine lever terms, saturated levers routed
-        through a min-cap chain, an optional bilinear intermediate, and — when
-        scenario_dispersion > 0 — an intermediate 'Base j' multiplied by the
+        through a min-cap chain, an optional bilinear intermediate, and (when
+        scenario_dispersion > 0) an intermediate 'Base j' multiplied by the
         scenario factor 'Fac j'. The additive external shift stays on KO 01.
         """
         p = self.p
@@ -589,15 +539,78 @@ class SyntheticCaseFactory:
         return Path(root)
 
 
-def _capped_simplex(rng, n, k, budget):
-    """Uniform samples on {x >= 0, sum x <= budget} (Dirichlet over k+1, drop slack)."""
+def sample_capped_simplex(rng, n, k, budget, face=False):
+    """
+    This function draws uniform samples from the feasible set.
+    :param rng: the numpy random generator to draw from
+    :param n: number of samples
+    :param k: number of internal variables
+    :param budget: the budget B
+    :param face: draw on the budget face {sum x = B} instead of the capped simplex
+    :return: an (n x k) array of allocations
+    """
+    if face:
+        return rng.dirichlet(np.ones(k), size=n) * budget
     return rng.dirichlet(np.ones(k + 1), size=n)[:, :k] * budget
 
 
-def read_manifest(name: str, root: Path = DEFAULT_ROOT) -> dict | None:
-    """Read ``<root>/<name>/manifest.json`` if present."""
-    path = Path(root) / name / "manifest.json"
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+def manifest_path(name: str, root: Path = DEFAULT_ROOT) -> Path:
+    """
+    This function returns the manifest location of a case, which also serves as
+    the marker for whether that case has been generated yet.
+    :param name: the case name
+    :param root: the directory the case was written to
+    :return: the path of the case manifest
+    """
+    return Path(root) / name / "manifest.json"
+
+
+def read_manifest(name: str, root: Path = DEFAULT_ROOT) -> dict:
+    """
+    This function reads the manifest of a generated case.
+    :param name: the case name
+    :param root: the directory the case was written to
+    :return: the manifest dictionary
+    """
+    return json.loads(manifest_path(name, root).read_text(encoding="utf-8"))
+
+
+@suppress_print
+def build_case(name: str, root: Path, probe_dmo: str):
+    """
+    This function imports a generated case through the real tRBS pipeline and
+    registers a probe decision makers option to write trial allocations into.
+    Registering the probe also freezes the appreciation boundaries, which is
+    what makes a trial allocation comparable to the certified optimum.
+    :param name: the case name
+    :param root: the directory the case was written to
+    :param probe_dmo: name of the decision makers option to register
+    :return: a tuple of the built simulator and its prepared Optimize instance
+    """
+    sim = TheResponsibleBusinessSimulator(name, file_path=Path(root), file_extension="csv")
+    sim.build()
+    sim.evaluate()
+    sim.appreciate()
+    opt = Optimize(sim.input_dict, sim.output_dict)
+    opt._prepare_input_dict(probe_dmo, sim.input_dict["decision_makers_option_value"][0].copy())
+    return sim, opt
+
+
+def parse_coefficients(input_dict) -> np.ndarray:
+    """
+    This function recovers the internal-variable-to-key-output coefficient
+    matrix c[j, i] from the imported fixed inputs. Reading the coefficients back
+    out of the case (instead of off the factory object) is what makes the
+    envelope check and the oracle gradient independent cross-checks.
+    :param input_dict: the imported case dictionary
+    :return: an (n_key_outputs x k) coefficient matrix
+    """
+    coef = np.zeros((len(input_dict["key_outputs"]), len(input_dict["internal_variable_inputs"])))
+    for fi_name, fi_value in zip(input_dict["fixed_inputs"], input_dict["fixed_input_value"]):
+        if str(fi_name).startswith("c_"):
+            _, j, i = str(fi_name).split("_")
+            coef[int(j) - 1, int(i) - 1] = float(fi_value)
+    return coef
 
 
 def _analytic_envelope(input_dict, budget) -> tuple:
@@ -605,21 +618,15 @@ def _analytic_envelope(input_dict, budget) -> tuple:
     (no bilinear, no saturation, no dispersion).
 
     By construction KO_j = sum_i x_i * c_ji (+ ext * ce_01 on KO 01) with all
-    c_ji > 0, x on the capped simplex, and boundaries pooled over scenarios —
+    c_ji > 0, x on the capped simplex, and boundaries pooled over scenarios,
     so lo_j = 0 (+ ce*min ext) and hi_j = B * max_i c_ji (+ ce*max ext).
-    Coefficients are parsed back from the imported ``fixed_inputs``, not taken
-    from the factory object, which makes this a real cross-check.
     """
     kos = list(input_dict["key_outputs"])
-    k = len(input_dict["internal_variable_inputs"])
-    coef = np.zeros((len(kos), k))
-    ce = 0.0
-    for fi_name, fi_value in zip(input_dict["fixed_inputs"], input_dict["fixed_input_value"]):
-        if str(fi_name).startswith("c_"):
-            _, j, i = str(fi_name).split("_")
-            coef[int(j) - 1, int(i) - 1] = float(fi_value)
-        elif str(fi_name) == "ce_01":
-            ce = float(fi_value)
+    coef = parse_coefficients(input_dict)
+    ce = next(
+        (float(v) for n, v in zip(input_dict["fixed_inputs"], input_dict["fixed_input_value"]) if str(n) == "ce_01"),
+        0.0,
+    )
     evis = [str(e) for e in input_dict["external_variable_inputs"]]
     ext = np.asarray(input_dict["scenario_value"], dtype=float)[:, evis.index("Ext 01")]
     lo = np.zeros(len(kos))
@@ -654,9 +661,9 @@ def validate_case(
       * every objective evaluation over the capped simplex is finite;
       * every sampled per-KO value lies inside the manifest's analytic envelope
         (the envelope claim is a true bound on the real pipeline);
-      * bracketing_factor = 1: NO-CLIP — the frozen auto-boundaries equal the
+      * bracketing_factor = 1: NO-CLIP, the frozen auto-boundaries equal the
         analytic envelope (under-bracketing puts clipping kinks inside the
-        feasible set and makes even the linear regime multimodal — exp03).
+        feasible set and makes even the linear regime multimodal, see exp03).
         For plain-affine cases the envelope is additionally recomputed
         independently from the imported tables (``_analytic_envelope``);
       * bracketing_factor < 1: the under-bracketing is PRESENT and intentional
@@ -664,50 +671,31 @@ def validate_case(
       * the SLSQP solution is feasible;
       * convex regime only: all converged SLSQP starts agree in OBJECTIVE value
         (consensus spread <= 0.1 points, one recovery epsilon; measured in f,
-        not x — near-tied gradients at large k leave x unstable while f
+        not x, because near-tied gradients at large k leave x unstable while f
         converges; genuine clipping basins spread 3.3-47 points in exp03).
         Non-convex regimes report multimodality evidence instead of asserting.
 
-    ``budget`` should be passed explicitly (or via the manifest); the fallback
-    ``Optimize._infer_budget()`` sums the FIRST DMO row and is only correct
-    because the alphabetically-first DMO lies on the budget face.
+    ``budget`` defaults to the value recorded in the manifest.
     """
     manifest = read_manifest(name, root)
-    if budget is None and manifest is not None:
+    if budget is None:
         budget = float(manifest["params"]["budget"])
-    regime = manifest.get("regime", "convex") if manifest else "convex"
-    mech = manifest.get("mechanisms", {}) if manifest else {}
-    f_brack = float(mech.get("bracketing_factor", 1.0))
+    regime = manifest["regime"]
+    mech = manifest["mechanisms"]
+    f_brack = float(mech["bracketing_factor"])
 
-    sim = TheResponsibleBusinessSimulator(name, file_path=Path(root), file_extension="csv")
-    with contextlib.redirect_stdout(io.StringIO()):
-        sim.build()
-        sim.evaluate()
-        sim.appreciate()
+    sim, opt = build_case(name, root, "Probe")
+    B, k = float(budget), opt._k
 
-    opt = Optimize(sim.input_dict, sim.output_dict)
-    B = float(budget) if budget is not None else opt._infer_budget()
-    k = opt._k
-    with contextlib.redirect_stdout(io.StringIO()):
-        opt._prepare_input_dict("Probe", sim.input_dict["decision_makers_option_value"][0].copy())
-
-    # Envelope reference: manifest (all regimes) or independent parse (legacy).
     start = np.asarray(opt.input_dict["key_output_start"], dtype=float)
     end = np.asarray(opt.input_dict["key_output_end"], dtype=float)
-    if manifest is not None and "envelope" in manifest:
-        lo = np.asarray(manifest["envelope"]["lo"], dtype=float)
-        hi = np.asarray(manifest["envelope"]["hi"], dtype=float)
-    else:
-        lo, hi = _analytic_envelope(opt.input_dict, B)
+    lo = np.asarray(manifest["envelope"]["lo"], dtype=float)
+    hi = np.asarray(manifest["envelope"]["hi"], dtype=float)
     scale = max(1.0, float(np.abs(hi).max()))
     tol = 1e-9 * scale
 
-    plain_affine = (
-        mech.get("n_bilinear", 0) == 0
-        and mech.get("n_saturation", 0) == 0
-        and float(mech.get("scenario_dispersion", 0.0)) == 0.0
-    )
-    if manifest is not None and plain_affine:
+    plain_affine = mech["n_bilinear"] == 0 and mech["n_saturation"] == 0 and float(mech["scenario_dispersion"]) == 0.0
+    if plain_affine:
         lo2, hi2 = _analytic_envelope(opt.input_dict, B)
         assert np.allclose(lo, lo2, atol=tol) and np.allclose(hi, hi2, atol=tol), (
             "manifest envelope disagrees with the independent affine recomputation "
@@ -718,24 +706,24 @@ def validate_case(
         no_clip = bool(np.allclose(start, lo, atol=tol) and np.allclose(end, hi, atol=tol))
         assert no_clip, (
             f"auto-boundaries do not bracket the feasible envelope "
-            f"(start={start} vs {lo}; end={end} vs {hi}) — appreciation would clip inside the feasible set"
+            f"(start={start} vs {lo}; end={end} vs {hi}): appreciation would clip inside the feasible set"
         )
         underbracketing_margin = 0.0
     else:
         no_clip = False
         assert (start >= lo - tol).all() and (end <= hi + tol).all(), (
-            f"frozen boundaries exceed the analytic envelope (start={start}, lo={lo}; end={end}, hi={hi}) — "
+            f"frozen boundaries exceed the analytic envelope (start={start}, lo={lo}; end={end}, hi={hi}): "
             "the envelope claim is wrong"
         )
         margins = (start - lo) + (hi - end)
         underbracketing_margin = float(margins.max())
         assert (
             underbracketing_margin > 1e-6 * scale
-        ), f"bracketing_factor={f_brack} < 1 but no under-bracketing measured — shrink not applied?"
+        ), f"bracketing_factor={f_brack} < 1 but no under-bracketing measured, shrink not applied?"
 
     scenario = str(sim.input_dict["scenarios"][0])
     rng = np.random.default_rng(seed)
-    X = _capped_simplex(rng, n_samples, k, B)
+    X = sample_capped_simplex(rng, n_samples, k, B)
     vals = np.array([evaluate_allocation(opt.input_dict, x, scenario, "Probe") for x in X])
 
     finite = np.isfinite(vals)
@@ -746,18 +734,17 @@ def validate_case(
     KOX = _ko_sample_values(opt.input_dict, X[:n_check], scenario, "Probe")
     assert (KOX >= lo - tol).all() and (
         KOX <= hi + tol
-    ).all(), "sampled KO values escape the analytic envelope — the envelope math does not match the pipeline"
+    ).all(), "sampled KO values escape the analytic envelope: the envelope math does not match the pipeline"
     # Clipping incidence: fraction of sampled points with >= 1 KO outside the
     # FROZEN boundaries (nonzero only under intentional under-bracketing).
     outside = (KOX < start - tol) | (KOX > end + tol)
     clipping_incidence = float(outside.any(axis=1).mean())
 
-    with contextlib.redirect_stdout(io.StringIO()):
-        slsqp = opt.optimize_slsqp(scenario, B, dmo_name="Probe", n_starts=20, seed=seed)
+    slsqp = suppress_print(opt.optimize_slsqp)(scenario, B, dmo_name="Probe", n_starts=20, seed=seed)
 
-    spend = float(np.sum(slsqp.best_x))
-    slsqp_feasible = bool(spend <= B + 1e-6 and (slsqp.best_x >= -1e-6).all())
-    assert slsqp_feasible, f"SLSQP solution infeasible: spend={spend}, x={slsqp.best_x}"
+    spend = float(np.sum(slsqp.allocation))
+    slsqp_feasible = bool(spend <= B + 1e-6 and (slsqp.allocation >= -1e-6).all())
+    assert slsqp_feasible, f"SLSQP solution infeasible: spend={spend}, x={slsqp.allocation}"
 
     converged = [float(r["appreciation"]) for r in slsqp.per_start_results if r["success"]]
     consensus_spread = float(max(converged) - min(converged)) if converged else float("nan")
@@ -765,7 +752,7 @@ def validate_case(
     slsqp_consensus = bool(converged and consensus_spread <= 0.1)
     if regime == "convex":
         assert slsqp_consensus, (
-            f"SLSQP starts disagree (spread={consensus_spread:.6f}) on a case claimed concave — "
+            f"SLSQP starts disagree (spread={consensus_spread:.6f}) on a case claimed concave: "
             "distinct local optima indicate a generator bug (see exp03)"
         )
 

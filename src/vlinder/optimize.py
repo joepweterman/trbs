@@ -4,7 +4,7 @@
 This module is the single home for tRBS optimization. The :class:`Optimize`
 class exposes one entry point, :meth:`Optimize.run`, which dispatches to a named
 optimization method (``"grid"`` combinatorial search or ``"slsqp"`` continuous
-multi-start) — or to several at once, printing each method's result and returning
+multi-start), or to several at once, printing each method's result and returning
 the best.
 
 It also exposes a module-level pure function ``evaluate_allocation`` shared by all
@@ -34,7 +34,7 @@ def evaluate_allocation(input_dict, x, scenario, dmo_name):
     Pure-function evaluator: weighted appreciation of allocation ``x`` for a
     given DMO under a given scenario, without mutating ``input_dict``.
 
-    Preconditions (caller's responsibility — typically done once per optimizer run):
+    Preconditions (caller's responsibility, typically done once per optimizer run):
       - ``dmo_name`` must already exist in ``input_dict["decision_makers_options"]``
       - ``input_dict["decision_makers_option_value"]`` must already have a row for
         ``dmo_name`` (any feasible allocation is fine; it will be overwritten by ``x``)
@@ -44,9 +44,9 @@ def evaluate_allocation(input_dict, x, scenario, dmo_name):
     :param input_dict: tRBS case input dictionary (NOT mutated)
     :param x: 1-D array-like of length ``len(input_dict["internal_variable_inputs"])``,
               the allocation to evaluate
-    :param scenario: scenario name (str) — must be in ``input_dict["scenarios"]``
+    :param scenario: scenario name (str), must be in ``input_dict["scenarios"]``
     :param dmo_name: decision-maker option name (str) the allocation belongs to
-    :return: float — the value of ``output["decision_makers_option_appreciation"]``
+    :return: float, the value of ``output["decision_makers_option_appreciation"]``
     """
     local = copy.deepcopy(input_dict)
     idx = np.where(local["decision_makers_options"] == dmo_name)[0][0]
@@ -69,9 +69,7 @@ class OptimizationResult:
 
     ``grid`` fills ``method``/``dmo_name``/``allocation``/``appreciation`` and
     leaves the solver diagnostics ``None``; ``slsqp`` (and future continuous
-    methods) fill everything. ``best_x`` / ``best_appreciation`` are read-only
-    aliases kept for backward compatibility with the W2 experiment harness and
-    the existing tests.
+    methods) fill everything.
     """
 
     method: str
@@ -83,16 +81,6 @@ class OptimizationResult:
     n_function_evals: Optional[int] = None
     wall_time_s: Optional[float] = None
     per_start_results: List[dict] = field(default_factory=list)
-
-    @property
-    def best_x(self):
-        """Alias for :attr:`allocation` (kept for back-compat)."""
-        return self.allocation
-
-    @property
-    def best_appreciation(self):
-        """Alias for :attr:`appreciation` (kept for back-compat)."""
-        return self.appreciation
 
 
 class _CappedSimplexStep:  # pylint: disable=too-few-public-methods
@@ -360,7 +348,7 @@ class Optimize:
         return self.input_dict
 
     # ==================================================================
-    # Continuous optimization (SLSQP) — merged from the former
+    # Continuous optimization (SLSQP), merged from the former
     # optimize_continuous.ContinuousOptimize (W2 thesis work). Treats the
     # allocation problem {x : Σx_i ≤ B, x_i ≥ 0} (capped simplex; under-spending
     # feasible) as a continuous NLP and solves it with multi-start SLSQP.
@@ -372,7 +360,7 @@ class Optimize:
         ``evaluate_allocation`` requires ``dmo_name`` to exist with a feasible
         row, and ``key_output_automatic``/``key_output_start``/``key_output_end``
         to be fixed so the appreciation curve is identical across every objective
-        evaluation. Idempotent — safe to call repeatedly with the same name.
+        evaluation. Idempotent, so it is safe to call repeatedly with the same name.
         """
         if dmo_name not in self.input_dict["decision_makers_options"]:
             self.input_dict["decision_makers_options"] = np.array(
@@ -382,7 +370,7 @@ class Optimize:
                 [self.input_dict["decision_makers_option_value"], np.asarray(reference_allocation)]
             )
         # Float dtype so the winning (generally non-integer) allocation is written
-        # back exactly — an int64 matrix would truncate it (see evaluate_allocation).
+        # back exactly; an int64 matrix would truncate it (see evaluate_allocation).
         self.input_dict["decision_makers_option_value"] = np.asarray(
             self.input_dict["decision_makers_option_value"], dtype=float
         )
@@ -417,9 +405,9 @@ class Optimize:
 
         The solve runs in z-space, ``x = B·z``, on the unit capped simplex
         ``{z : Σz_i ≤ 1, z_i ∈ [0, 1]}``. SLSQP starts from an identity Hessian
-        approximation and uses absolute tolerances, so on raw budgets of 1e5–1e7
+        approximation and uses absolute tolerances, so on raw budgets of 1e5 to 1e7
         (Beerwiser, Refugee) its first trial step is microscopic relative to the
-        variable scale and the improvement test aborts at the start point — the
+        variable scale and the improvement test aborts at the start point. The
         solver "converges" without moving. Normalising makes solver behaviour
         independent of the case's budget scale (Beerwiser 3e5, Refugee ≈6.5e6,
         IZZ and the synthetic suite 100). ``res.x`` is mapped back to x-space;
@@ -427,7 +415,7 @@ class Optimize:
 
         The budget is an upper bound, not an equality: under-spending is feasible
         (Vlinder, 2026-06-26). This matters on appreciation surfaces that are
-        non-monotone in total spend — e.g. IZZ, where spending the whole budget
+        non-monotone in total spend, for example IZZ, where spending the whole budget
         can lower appreciation (exp02). On monotone cases (Beerwiser, Refugee)
         the constraint binds and the solution still spends the full budget, so
         the formulation reduces to the former equality there. scipy reads
@@ -452,7 +440,7 @@ class Optimize:
         """Clean solver-tolerance dust off a solution: SLSQP satisfies constraints
         only to its accuracy tolerance (in z-units, so ×B in x-units), while
         downstream consumers assert strict feasibility. Clip negatives and rescale
-        an over-budget sum — a relative correction of order 1e-8, negligible in f.
+        an over-budget sum, a relative correction of order 1e-8, negligible in f.
         """
         x = np.clip(np.asarray(x, dtype=float), 0.0, None)
         total = float(np.sum(x))
@@ -685,7 +673,7 @@ class Optimize:
         uniform over the capped simplex: Dirichlet(1, ..., 1) on k+1
         coordinates with the slack coordinate dropped.
 
-        Derivative-free — the reference population-based method for the
+        Derivative-free: the reference population-based method for the
         nonsmooth/clipped regimes where finite-difference gradient information
         is unreliable (exp03/exp04 clipping mechanism). Weighted-sum
         scalarisation: the fitness IS the (already theme-weighted) appreciation.
@@ -700,7 +688,7 @@ class Optimize:
         :param crossover_prob: per-pair SBX probability.
         :param eta_crossover: SBX distribution index (larger = children closer to parents).
         :param eta_mutation: polynomial-mutation distribution index.
-        :param seed: RNG seed — the full run is deterministic given the seed.
+        :param seed: RNG seed; the full run is deterministic given the seed.
         :return: an :class:`OptimizationResult`; ``per_start_results`` holds the
             per-generation best/mean fitness trace.
         """
@@ -762,7 +750,7 @@ class Optimize:
         )
 
     # ==================================================================
-    # Unified dispatch — one entry point for every method.
+    # Unified dispatch: one entry point for every method.
     # ==================================================================
     def _infer_budget(self):
         """Total budget = sum of the first DMO's allocation (every DMO spends the same)."""
@@ -773,7 +761,7 @@ class Optimize:
     ):
         """Grid-search adapter → :class:`OptimizationResult`.
 
-        ``budget`` is accepted for a uniform solver signature but unused — grid
+        ``budget`` is accepted for a uniform solver signature but unused; grid
         derives its own ``max_investment`` from the highest-weighted DMO.
         """
         self.optimize_single_scenario(scenario, dmo_name, max_combinations)

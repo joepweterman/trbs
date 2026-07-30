@@ -1,5 +1,5 @@
 """
-exp02 — Budget-constraint formulation research: does any real tRBS case ever
+exp02: budget-constraint formulation research. Does any real tRBS case ever
 prefer to UNDER-spend? Decides between Sum x = B (equality) and Sum x <= B
 (capped simplex) for the thesis.
 
@@ -12,19 +12,17 @@ Method, per case x scenario:
     =>  equality is WLOG. Violations => under-spending can strictly help.
 
 Run:
-  & "C:\\Users\\joepw\\.virtualenvs\\tRBS-DclBJWVi-python.exe\\Scripts\\python.exe" `
-    C:\\Users\\joepw\\tRBS\\experiments\\exp02_budget_constraint_monotonicity.py
+  python experiments/exp02_budget_constraint_monotonicity.py
 """
 
 # pylint: disable=invalid-name,protected-access,too-many-locals
 # (math notation B/X/f; Optimize internals are the documented experiment surface)
 
-import io
 import json
-import contextlib
 import numpy as np
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.optimize import Optimize, evaluate_allocation
+from vlinder.utils import suppress_print
 
 RNG = np.random.default_rng(12345)
 CASES = ["Beerwiser", "Refugee", "IZZ"]
@@ -33,23 +31,22 @@ N_CAP = 4000
 TOL = 1e-6  # appreciation points
 
 
+@suppress_print
 def load(name):
     """Build/evaluate/appreciate a bundled case, silencing pipeline prints."""
     c = TheResponsibleBusinessSimulator(name)
-    with contextlib.redirect_stdout(io.StringIO()):
-        c.build()
-        c.evaluate()
-        c.appreciate()
+    c.build()
+    c.evaluate()
+    c.appreciate()
     return c
 
 
+@suppress_print
 def setup_probe(c):
     """Register the Probe DMO and freeze boundaries; return (opt, budget, k)."""
     opt = Optimize(c.input_dict, c.output_dict)
     budget = opt._infer_budget()
-    ref = c.input_dict["decision_makers_option_value"][0].copy()
-    with contextlib.redirect_stdout(io.StringIO()):
-        opt._prepare_input_dict("Probe", ref)
+    opt._prepare_input_dict("Probe", c.input_dict["decision_makers_option_value"][0].copy())
     return opt, budget, opt._k
 
 

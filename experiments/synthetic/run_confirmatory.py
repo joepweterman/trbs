@@ -1,4 +1,4 @@
-"""Confirmatory H1/H2/H5 study driver — runs the pre-registered grid.
+"""Confirmatory H1/H2/H5 study driver: runs the pre-registered grid.
 
 The design is frozen in ``PREREGISTRATION.md`` (committed alongside this file;
 that commit hash timestamps the lock). ``StudySpec`` defaults ARE the locked
@@ -6,7 +6,7 @@ confirmatory grid: {linear, sinusoidal} x k in {2,3,4,6,9,12,15} x 30 seeds x
 {grid, slsqp, basin_hopping, genetic_algorithm}, 3 scenarios per case.
 
 Amendment A1 (2026-07-23, see PREREGISTRATION.md): grid at k = 15 never
-terminates — ``vlinder``'s ``generate_combinations`` expands each valid budget
+terminates, because ``vlinder``'s ``generate_combinations`` expands each valid budget
 split through ``set(permutations(...))``, 15! per split, ~19 days of CPU per
 task extrapolated from k = 12. Those cells are written as censored observations
 without execution before the run starts, so the resume logic skips them.
@@ -14,9 +14,8 @@ without execution before the run starts, so the resume logic skips them.
 Must be a real .py file: Windows spawn cannot serve a stdin ``__main__`` to
 worker processes (validated in the Phase-2b dry run).
 
-Run (background, resumable — interrupted runs continue where they stopped):
-  & "C:\\Users\\joepw\\.virtualenvs\\tRBS-DclBJWVi-python.exe\\Scripts\\python.exe" `
-    experiments/synthetic/run_confirmatory.py --workers 6
+Run (background, resumable, interrupted runs continue where they stopped):
+  python experiments/synthetic/run_confirmatory.py --workers 6
 """
 
 import argparse
@@ -79,8 +78,8 @@ def main():
     args = parser.parse_args()
     harness = StudyHarness(StudySpec())
     write_grid_k15_censored_rows(harness)
-    csv_path = harness.run(n_workers=args.workers)
-    print(f"[confirmatory] complete - results at {csv_path}")
+    results_path = harness.run(n_workers=args.workers)
+    print(f"[confirmatory] complete - results at {results_path}")
 
 
 if __name__ == "__main__":

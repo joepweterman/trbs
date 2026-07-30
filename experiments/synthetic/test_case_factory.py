@@ -1,15 +1,8 @@
 """Tests for the synthetic case factory + oracle (thesis-side, Phase 0.75/1).
 
 Run:
-  & "C:\\Users\\joepw\\.virtualenvs\\tRBS-DclBJWVi-python.exe\\Scripts\\python.exe" `
-    -m pytest C:\\Users\\joepw\\tRBS\\experiments\\synthetic -q
+  python -m pytest experiments/synthetic -q
 """
-
-# pylint: disable=protected-access
-# (oracle._build is the shared import-and-prepare helper under test)
-
-import contextlib
-import io
 
 import numpy as np
 import pandas as pd
@@ -18,10 +11,13 @@ import pytest
 from case_factory import (
     SyntheticCaseFactory,
     SyntheticCaseParams,
+    build_case,
     read_manifest,
     validate_case,
 )
-from oracle import certify_case, solve_multistart_proxy, _build, ORACLE_DMO
+from oracle import Oracle, certify_case, ORACLE_DMO
+
+from vlinder.utils import suppress_print
 
 
 def _params(**overrides):
@@ -88,10 +84,9 @@ def test_oracle_linear_agreement(tmp_path):
     assert len(vertex_indices) == 1
 
     # Production SLSQP recovers the certified optimum.
-    sim, opt = _build(params.name, tmp_path)
+    sim, opt = build_case(params.name, tmp_path, ORACLE_DMO)
     scenario = str(sim.input_dict["scenarios"][0])
-    with contextlib.redirect_stdout(io.StringIO()):
-        slsqp = opt.optimize_slsqp(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=20, seed=1)
+    slsqp = suppress_print(opt.optimize_slsqp)(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=20, seed=1)
     assert abs(oracle["per_scenario"][scenario]["f_star"] - float(slsqp.appreciation)) <= 1e-6
 
 
@@ -104,10 +99,9 @@ def test_oracle_curved_kkt(tmp_path):
     for scen in oracle["per_scenario"].values():
         assert scen["certificate"]["kkt_residual"] <= 1e-2
 
-    sim, opt = _build(params.name, tmp_path)
+    sim, opt = build_case(params.name, tmp_path, ORACLE_DMO)
     scenario = str(sim.input_dict["scenarios"][0])
-    with contextlib.redirect_stdout(io.StringIO()):
-        slsqp = opt.optimize_slsqp(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=20, seed=1)
+    slsqp = suppress_print(opt.optimize_slsqp)(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=20, seed=1)
     assert abs(oracle["per_scenario"][scenario]["f_star"] - float(slsqp.appreciation)) <= 1e-3
 
 
@@ -221,10 +215,9 @@ def test_grid_oracle_verifies_nonconvex_low_k(tmp_path):
     cert = scen["certificate"]
     assert cert["n_grid_nodes"] > 500 and cert["polish_gain"] >= 0
     # the certified optimum must not be beaten by production SLSQP
-    sim, opt = _build(params.name, tmp_path)
+    sim, opt = build_case(params.name, tmp_path, ORACLE_DMO)
     scenario = str(sim.input_dict["scenarios"][0])
-    with contextlib.redirect_stdout(io.StringIO()):
-        slsqp = opt.optimize_slsqp(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=10, seed=1)
+    slsqp = suppress_print(opt.optimize_slsqp)(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=10, seed=1)
     assert scen["f_star"] >= float(slsqp.appreciation) - 1e-6
 
 
@@ -232,7 +225,7 @@ def test_multistart_proxy_high_k_is_labelled(tmp_path):
     """Above the grid limit the ground truth is an explicitly-unverified proxy."""
     params = _params(name="T_proxy", k=7, n_key_outputs=2, regime="smooth_nonconvex", n_stb1=1, n_scenarios=1, seed=2)
     SyntheticCaseFactory(params).write(tmp_path)
-    oracle = solve_multistart_proxy(params.name, tmp_path, n_starts=4)
+    oracle = Oracle(params.name, tmp_path).solve_multistart_proxy(n_starts=4)
     assert oracle["method"] == "best_of_multistart_proxy"
     assert oracle["verified"] is False
     scen = next(iter(oracle["per_scenario"].values()))

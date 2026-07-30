@@ -10,29 +10,16 @@ Honest non-convexity audit per case. For each case determine:
 
 # pylint: disable=too-many-locals
 
-import os
-from pathlib import Path
 import pandas as pd
-import vlinder as vl
 
-DATA = Path(os.path.dirname(vl.__file__)) / "data"
-
-
-def is_number(s):
-    """True if s parses as a number (comma thousands separators allowed)."""
-    try:
-        float(str(s).replace(",", ""))
-        return True
-    except (ValueError, TypeError):
-        return False
+from bundled_cases import DATA, is_number, read_case_tables
 
 
 def audit(case):
     """Audit one bundled case for genuine nonconvexity sources."""
-    csv = DATA / case / "csv"
-    deps = pd.read_csv(csv / "dependencies.csv", sep=";")
-    ko = pd.read_csv(csv / "key_outputs.csv", sep=";")
-    internals = set(pd.read_csv(csv / "decision_makers_options.csv", sep=";")["internal_variable_input"])
+    deps, _, internal_list = read_case_tables(case)
+    ko = pd.read_csv(DATA / case / "csv" / "key_outputs.csv", sep=";")
+    internals = set(internal_list)
 
     # forward-propagate decision dependence to a fixpoint
     xdep = set(internals)

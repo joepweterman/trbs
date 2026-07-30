@@ -320,14 +320,14 @@ def test_multistart_slsqp_returns_structured_result(continuous_beerwiser):
     assert result.n_function_evals > 20  # at least 1 per start, usually many more
     assert result.wall_time_s > 0
     # Best allocation is feasible under Σx ≤ B; Beerwiser binds (monotone, exp02)
-    assert float(np.sum(result.best_x)) <= budget + 1e-3  # feasible
-    assert abs(float(np.sum(result.best_x)) - budget) < 1e-3  # binds
-    assert (result.best_x >= -1e-6).all()
-    # Best appreciation beats the uniform start (alias best_appreciation → appreciation)
+    assert float(np.sum(result.allocation)) <= budget + 1e-3  # feasible
+    assert abs(float(np.sum(result.allocation)) - budget) < 1e-3  # binds
+    assert (result.allocation >= -1e-6).all()
+    # Best appreciation beats the uniform start (appreciation of the best start)
     uniform_app = evaluate_allocation(
         continuous_beerwiser.input_dict, np.array([budget / 2, budget / 2]), "Base case", "Test DMO"
     )
-    assert result.best_appreciation >= uniform_app - 1e-3
+    assert result.appreciation >= uniform_app - 1e-3
 
 
 def test_unsupported_method_raises(continuous_beerwiser):
@@ -357,8 +357,8 @@ def test_ga_returns_structured_result(continuous_beerwiser):
     best_trace = [row["best"] for row in result.per_start_results]
     assert best_trace == sorted(best_trace)
     # Feasibility on the capped simplex
-    assert float(np.sum(result.best_x)) <= budget + 1e-6
-    assert (result.best_x >= -1e-12).all()
+    assert float(np.sum(result.allocation)) <= budget + 1e-6
+    assert (result.allocation >= -1e-12).all()
 
 
 def test_ga_reaches_known_basin_beerwiser(continuous_beerwiser):
@@ -411,8 +411,8 @@ def test_basin_hopping_returns_structured_result(continuous_beerwiser):
     assert result.n_function_evals > 10
     assert result.wall_time_s > 0
     # Feasible under the capped simplex; Beerwiser is monotone in spend → binds
-    assert float(np.sum(result.best_x)) <= budget + 1e-3
-    assert (result.best_x >= -1e-6).all()
+    assert float(np.sum(result.allocation)) <= budget + 1e-3
+    assert (result.allocation >= -1e-6).all()
 
 
 def test_basin_hopping_finds_global_kink(continuous_beerwiser):
@@ -457,8 +457,8 @@ def test_optimize_end_to_end_slsqp_beats_grid(beerwiser_appreciated):
     assert 3 in case_slsqp.status
     # Continuous should in principle do >= grid; allow 0.5 appreciation-point slack for noise
     assert (
-        result.best_appreciation >= grid_app - 0.5
-    ), f"SLSQP appreciation {result.best_appreciation:.4f} is worse than grid {grid_app:.4f} by more than 0.5"
+        result.appreciation >= grid_app - 0.5
+    ), f"SLSQP appreciation {result.appreciation:.4f} is worse than grid {grid_app:.4f} by more than 0.5"
     assert "SLSQP DMO" in case_slsqp.input_dict["decision_makers_options"]
 
 

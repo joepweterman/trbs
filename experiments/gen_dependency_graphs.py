@@ -20,7 +20,6 @@ networkx.multipartite_layout.
 # (matplotlib.use('Agg') must run before pyplot is imported)
 
 import argparse
-import os
 from pathlib import Path
 
 import pandas as pd
@@ -32,7 +31,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.lines import Line2D  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
 
-import vlinder as vl  # noqa: E402
+from bundled_cases import is_number, read_case_tables  # noqa: E402
 
 # vlinder brand palette
 C_INTERNAL = "#299D8F"  # decision (internal) variables
@@ -41,27 +40,6 @@ C_INTER = "#6A91B6"  # intermediate computations
 C_OUTPUT = "#D04A02"  # key outputs
 C_MULT = "#E72B33"  # multiplicative edge highlight
 C_OTHER = "#9aa0a6"  # other edges
-
-DATA = Path(os.path.dirname(vl.__file__)) / "data"
-
-
-def is_number(s):
-    """True if s parses as a number (comma thousands separators allowed)."""
-    try:
-        float(str(s).replace(",", ""))
-        return True
-    except (ValueError, TypeError):
-        return False
-
-
-def load_case(case):
-    """Read dependencies, key outputs and internal variables for a bundled case."""
-    csv = DATA / case / "csv"
-    deps = pd.read_csv(csv / "dependencies.csv", sep=";")
-    kos = pd.read_csv(csv / "key_outputs.csv", sep=";")["key_output"].tolist()
-    dmo = pd.read_csv(csv / "decision_makers_options.csv", sep=";")
-    internals = dmo["internal_variable_input"].unique().tolist()
-    return deps, kos, internals
 
 
 def build_graph(deps):
@@ -117,7 +95,7 @@ def categorise(node, kos, internals, g):
 
 def draw(case, out_dir):
     """Render the layered dependency DAG for one case to PDF + PNG."""
-    deps, kos, internals = load_case(case)
+    deps, kos, internals = read_case_tables(case)
     g = build_graph(deps)
     layer = assign_layers(g)
     cats = {n: categorise(n, kos, internals, g) for n in g.nodes}
