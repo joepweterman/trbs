@@ -1,0 +1,57 @@
+[
+  {
+    "case": "Beerwiser",
+    "k": 2,
+    "levers": [
+      "Invest in training of employees",
+      "Invest in water recycling"
+    ],
+    "scenarios": [
+      "Base case",
+      "Optimistic",
+      "Pessimistic"
+    ],
+    "budget": 300000.0,
+    "n_key_outputs": 3
+  },
+  {
+    "case": "Refugee",
+    "k": 5,
+    "levers": [
+      "Access to transport",
+      "Education after 18",
+      "Employment",
+      "Language and integration course",
+      "Sports and association"
+    ],
+    "scenarios": [
+      "Base case",
+      "Labour optimistic",
+      "Labour pessimistic"
+    ],
+    "budget": 6469004.0,
+    "n_key_outputs": 7
+  },
+  {
+    "case": "IZZ",
+    "k": 9,
+    "levers": [
+      "Healthy eating",
+      "Leadership development",
+      "Physical exercise",
+      "Physical strain reduction",
+      "Psycho-social stress reduction",
+      "Salary increase",
+      "Smoking reduction",
+      "Training and development",
+      "Work-life balance"
+    ],
+    "scenarios": [
+      "Base case",
+      "Optimistic",
+      "Pessimistic"
+    ],
+    "budget": 100.0,
+    "n_key_outputs": 9
+  }
+]
