@@ -1,2 +1,18 @@
-# Generated synthetic cases are reproducible from the seed — do not track them.
+# Generated synthetic cases are reproducible from the seed, so the case tables
+# themselves are not tracked: the confirmatory grid alone is 420 case folders of
+# 11 CSVs each.
 generated/
+
+# The study-level artefacts are a different matter and ARE tracked. The frozen
+# results store is the primary evidence of the results chapter and represents
+# days of compute; regenerating it from seeds is possible but expensive, and
+# losing it would make every reported number unreproducible. It is a few MB.
+!generated/study/results.jsonl
+!generated/study/results.csv
+!generated/study/meta.json
+!generated/study/analysis/**
+
+# Negations only take effect if the parent directories are not excluded first.
+!generated/
+!generated/study/
+generated/study/Study_*/

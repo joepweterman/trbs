@@ -1,0 +1,14 @@
+\begin{tabular}{llrrrr}
+\toprule
+Response & Method & Slope per lever & HC3 SE & 95\% CI & $R^2$ \\
+\midrule
+$\log$ runtime & Grid (baseline) & 0.555 & 0.013 & [0.529, 0.581] & 0.645 \\
+ & SLSQP multi-start & 0.295 & 0.004 & [0.287, 0.303] & 0.790 \\
+ & Basin-hopping & 0.297 & 0.004 & [0.289, 0.305] & 0.777 \\
+ & Genetic algorithm & 0.149 & 0.003 & [0.144, 0.154] & 0.647 \\
+\addlinespace
+$\log$ evaluations & SLSQP multi-start & 0.159 & 0.003 & [0.153, 0.165] & 0.715 \\
+ & Basin-hopping & 0.166 & 0.003 & [0.160, 0.171] & 0.721 \\
+ & Genetic algorithm & 0.000 & -- & -- & -- \\
+\bottomrule
+\end{tabular}

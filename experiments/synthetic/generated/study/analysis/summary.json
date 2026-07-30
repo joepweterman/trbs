@@ -1,0 +1,196 @@
+{
+  "source": "C:\\Users\\joepw\\tRBS\\experiments\\synthetic\\generated\\study\\results.jsonl",
+  "n_rows": 5040,
+  "n_censored": 317,
+  "environment_at_generation": {
+    "python": "3.11.9",
+    "numpy": "2.3.2",
+    "scipy": "1.17.1",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "vlinder_commit": "fcdaa643769186d7b4a0e4d9cd062174ac65fb0a",
+    "method_defaults": {
+      "grid": {
+        "max_combinations": 60000
+      },
+      "slsqp": {
+        "n_starts": 100
+      },
+      "basin_hopping": {
+        "n_hops": 25,
+        "n_starts": 1
+      },
+      "genetic_algorithm": {
+        "population_size": 50,
+        "n_generations": 60
+      }
+    },
+    "spec": {
+      "variants": [
+        "linear",
+        "sinusoidal"
+      ],
+      "ks": [
+        2,
+        3,
+        4,
+        6,
+        9,
+        12,
+        15
+      ],
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "methods": [
+        "grid",
+        "slsqp",
+        "basin_hopping",
+        "genetic_algorithm"
+      ],
+      "method_kwargs": {},
+      "runtime_cap_s": 600.0,
+      "recovery_eps": 0.1,
+      "root": "C:\\Users\\joepw\\tRBS\\experiments\\synthetic\\generated\\study"
+    },
+    "written": "2026-07-23T20:39:14+00:00"
+  },
+  "recovery_eps": 0.1,
+  "primary_scenario": "Scenario 01",
+  "hypotheses": {
+    "H1a": {
+      "hypothesis": "SLSQP recovers the certified optimum in >=99% of convex-linear cases at every k",
+      "rule": "supported if the Wilson lower bound is >= 0.95 at every k",
+      "verdict": "SUPPORTED",
+      "min_recovery": 1.0,
+      "min_ci_low": 0.9590643744356734,
+      "worst_k": 2
+    },
+    "H1b": {
+      "hypothesis": "SLSQP recovers the certified optimum in >=99% of convex-curved cases at every k",
+      "rule": "supported if the Wilson lower bound is >= 0.95 at every k",
+      "verdict": "SUPPORTED",
+      "min_recovery": 1.0,
+      "min_ci_low": 0.9590643744356734,
+      "worst_k": 2
+    },
+    "H2": {
+      "hypothesis": "Grid recovery degrades with k while SLSQP runtime grows at most polynomially",
+      "rule": "supported if grid recovery CI upper bound < 0.5 at some k, or grid is censored, while H1 holds",
+      "verdict": "SUPPORTED",
+      "grid_censored_at_k": [
+        9,
+        12,
+        15
+      ],
+      "k_with_ci_high_below_50pct": [
+        15
+      ],
+      "grid_recovery_at_max_k": 0.0,
+      "h1_holds": true
+    },
+    "H5": {
+      "hypothesis": "Grid runtime grows super-linearly in k; SLSQP evaluations grow ~linearly at fixed recovery",
+      "rule": "clause 1 on the pre-registered semi-log slopes; clause 2 needs an exponent, so it is read off the supplementary log-log fit (CI must contain 1)",
+      "verdict": "PARTIALLY SUPPORTED",
+      "clause_1_grid_grows_faster": true,
+      "clause_2_slsqp_evals_linear_in_k": false,
+      "grid_log_runtime_slope": 0.5550362108737397,
+      "grid_runtime_factor_per_lever": 1.742004063121191,
+      "slsqp_log_runtime_slope": 0.29505257674840313,
+      "slsqp_runtime_factor_per_lever": 1.3431969777593553,
+      "slsqp_evals_loglog_exponent": 1.0766311702002498,
+      "slsqp_evals_loglog_ci": [
+        1.045129645964604,
+        1.1081326944358956
+      ],
+      "caveat": "The grid slope is a lower bound: its most expensive cells are censored out of the regression."
+    }
+  },
+  "oracle_tightness": {
+    "n_negative_gaps": 2340,
+    "n_beyond_noise_1e-6": 173,
+    "largest_exceedance": 2.1443928446274185e-05,
+    "share_beyond_noise": 0.03662926106288376,
+    "note": "Largest exceedance is far below the recovery threshold eps=0.1, so no recovery decision is affected; it bounds oracle tightness."
+  },
+  "grid_analytic_cost": [
+    {
+      "k": 2,
+      "units": 1000,
+      "grid_points": 1001,
+      "permutation_bound": 2002.0
+    },
+    {
+      "k": 3,
+      "units": 250,
+      "grid_points": 31626,
+      "permutation_bound": 189756.0
+    },
+    {
+      "k": 4,
+      "units": 50,
+      "grid_points": 23426,
+      "permutation_bound": 562224.0
+    },
+    {
+      "k": 6,
+      "units": 20,
+      "grid_points": 53130,
+      "permutation_bound": 38253600.0
+    },
+    {
+      "k": 9,
+      "units": 10,
+      "grid_points": 43758,
+      "permutation_bound": 15878903040.0
+    },
+    {
+      "k": 12,
+      "units": 5,
+      "grid_points": 4368,
+      "permutation_bound": 2092278988800.0
+    },
+    {
+      "k": 15,
+      "units": 5,
+      "grid_points": 11628,
+      "permutation_bound": 1.5205637551104e+16
+    }
+  ],
+  "decision_basis": "Decision rules are evaluated on recovery pooled over each case's three scenarios (n=90 per variant x k). At the per-cell n=30 a >=0.95 Wilson lower bound is unreachable even under flawless recovery (max 0.886), so the pooled reading is the only one under which the pre-registered rule discriminates.",
+  "pooled_recovery_by_method": {
+    "grid": 0.8539682539682539,
+    "slsqp": 1.0,
+    "basin_hopping": 1.0,
+    "genetic_algorithm": 0.4515873015873016
+  }
+}
