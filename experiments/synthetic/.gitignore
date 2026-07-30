@@ -15,4 +15,5 @@ generated/study/*
 !generated/study/results.jsonl
 !generated/study/results.csv
 !generated/study/meta.json
+!generated/study/scip_results.jsonl
 !generated/study/analysis/
