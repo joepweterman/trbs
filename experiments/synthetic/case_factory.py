@@ -65,7 +65,7 @@ class SyntheticCaseParams:
     """Tunable knobs for one synthetic tRBS case (see module docstring for the
     regime/mechanism map). Knob validity is enforced in ``__post_init__``."""
 
-    name: str = "Synthetic_convex_k3"
+    name: str = ""  # left empty, a descriptive name is derived from the knobs
     k: int = 3  # number of internal variables (levers)
     budget: float = 100.0  # B (capped simplex: sum x <= B)
     n_key_outputs: int = 3
@@ -124,6 +124,41 @@ class SyntheticCaseParams:
                 raise ValueError("nonsmooth needs bracketing_factor < 1 and/or n_saturation >= 1")
             if self.n_bilinear:
                 raise ValueError("bilinear terms are a smooth_nonconvex mechanism (exclusivity rule)")
+        if not self.name:
+            self.name = self.derived_name()
+
+    def derived_name(self) -> str:
+        """
+        Build a case name from the knobs that distinguish one case from another.
+
+        Naming a case by hand is busywork that also invites collisions: the old
+        default was a single fixed string, so two differently-configured cases
+        written to the same directory would silently overwrite each other. The
+        derived name encodes the regime, every active mechanism, k and the seed,
+        so two cases collide only when they are genuinely the same case. Pass
+        ``name`` explicitly to override this.
+        :return: the derived case name
+        """
+        parts = ["Synthetic"]
+        if self.regime == "convex":
+            parts.append("convex" if self.appreciation == "linear" else "curved")
+        elif self.regime == "smooth_nonconvex":
+            parts.append("smooth")
+            if self.n_stb1:
+                parts.append(f"stb{self.n_stb1}")
+            if self.n_bilinear:
+                parts.append(f"bil{self.n_bilinear}")
+        else:
+            parts.append("nonsmooth")
+            if self.bracketing_factor < 1.0:
+                parts.append(f"clip{self.bracketing_factor:g}".replace(".", ""))
+            if self.n_saturation:
+                parts.append(f"sat{self.n_saturation}")
+        if self.scenario_dispersion > 0:
+            parts.append(f"disp{self.scenario_dispersion:g}".replace(".", ""))
+        parts.append(f"k{self.k:02d}")
+        parts.append(f"s{self.seed}")
+        return "_".join(parts)
 
 
 class SyntheticCaseFactory:

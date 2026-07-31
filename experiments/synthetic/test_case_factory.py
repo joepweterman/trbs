@@ -142,6 +142,33 @@ def test_knob_validation_matrix():
         SyntheticCaseParams(regime="smooth_nonconvex", n_bilinear=1, k=1, n_key_outputs=2)
 
 
+def test_derived_name_separates_cases_that_differ():
+    """A case name left empty is derived from the knobs that make the case what
+    it is, so two differently-configured cases cannot land in one folder."""
+    configs = [
+        SyntheticCaseParams(k=3, seed=1),
+        SyntheticCaseParams(k=3, seed=2),
+        SyntheticCaseParams(k=6, seed=1),
+        SyntheticCaseParams(k=3, seed=1, appreciation="sinusoidal"),
+        SyntheticCaseParams(k=3, seed=1, scenario_dispersion=0.6),
+        SyntheticCaseParams(k=3, seed=1, regime="nonsmooth", bracketing_factor=0.7),
+        SyntheticCaseParams(k=3, seed=1, regime="nonsmooth", n_saturation=2),
+        SyntheticCaseParams(k=3, seed=1, regime="smooth_nonconvex", appreciation="sinusoidal", n_stb1=1),
+        SyntheticCaseParams(k=3, seed=1, regime="smooth_nonconvex", appreciation="sinusoidal", n_bilinear=1),
+    ]
+    names = [p.name for p in configs]
+    assert len(set(names)) == len(names), f"derived names collide: {names}"
+    assert all(n.startswith("Synthetic_") for n in names)
+    # The same configuration must always derive the same name, or a case could
+    # not be found again after it was written.
+    assert SyntheticCaseParams(k=3, seed=1).name == SyntheticCaseParams(k=3, seed=1).name
+
+
+def test_explicit_name_overrides_the_derived_one():
+    """Passing a name wins, which is what the curated suite and the fixtures rely on."""
+    assert SyntheticCaseParams(k=3, seed=1, name="My_case").name == "My_case"
+
+
 def test_smooth_stb_only_keeps_exact_bracketing(tmp_path):
     """STB=1 flips change appreciation, not KO envelopes: NO-CLIP must hold and
     the plain-affine independent cross-check still applies."""
