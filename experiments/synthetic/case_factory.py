@@ -40,7 +40,7 @@ import pandas as pd
 
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.evaluate import Evaluate
-from vlinder.optimize import Optimize, evaluate_allocation
+from vlinder.optimize import SLSQPSolver, evaluate_allocation
 from vlinder.utils import suppress_print
 
 DEFAULT_ROOT = Path(__file__).parent / "generated"
@@ -626,7 +626,7 @@ def build_case(name: str, root: Path, probe_dmo: str):
     sim.build()
     sim.evaluate()
     sim.appreciate()
-    opt = Optimize(sim.input_dict, sim.output_dict)
+    opt = SLSQPSolver(sim.input_dict, sim.output_dict)
     opt._prepare_input_dict(probe_dmo, sim.input_dict["decision_makers_option_value"][0].copy())
     return sim, opt
 
@@ -775,7 +775,7 @@ def validate_case(
     outside = (KOX < start - tol) | (KOX > end + tol)
     clipping_incidence = float(outside.any(axis=1).mean())
 
-    slsqp = suppress_print(opt.optimize_slsqp)(scenario, B, dmo_name="Probe", n_starts=20, seed=seed)
+    slsqp = suppress_print(opt.solve)(scenario, dmo_name="Probe", budget=B, n_starts=20, seed=seed)
 
     spend = float(np.sum(slsqp.allocation))
     slsqp_feasible = bool(spend <= B + 1e-6 and (slsqp.allocation >= -1e-6).all())

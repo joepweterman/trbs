@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from study_report import StudyReport
-from vlinder.optimize import Optimize
+from vlinder.optimize import GridSearch
 
 # Headless rendering; switching after import keeps every import at the top.
 plt.switch_backend("Agg")
@@ -207,8 +207,8 @@ class StudyAnalysis:
         :param budget: case budget
         :return: resolution, grid points, and the permutation-expansion bound
         """
-        scaled = Optimize.scale_max_investment(budget)
-        step = Optimize.calculate_step_size(budget, scaled, k, GRID_MAX_COMBINATIONS)
+        scaled = GridSearch.scale_max_investment(budget)
+        step = GridSearch.calculate_step_size(budget, scaled, k, GRID_MAX_COMBINATIONS)
         units = int(round(budget / step))
         points = comb(units + k - 1, k - 1)
         return {

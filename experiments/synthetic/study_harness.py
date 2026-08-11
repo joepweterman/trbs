@@ -178,13 +178,15 @@ class StudyHarness:
 
         sim = _build()
         t0 = time.perf_counter()
-        result = sim.optimize(
+        sim.optimize(
             task["scenario"],
             method=task["method"],
             dmo_name=f"Study ({task['method']})",
             seed=task["method_seed"],
             **task["method_kwargs"],
         )
+        # optimize() returns the updated input_dict; the run's diagnostics live here.
+        result = sim.optimization_result
         wall = time.perf_counter() - t0
         gap = task["f_oracle"] - float(result.appreciation)
         return {

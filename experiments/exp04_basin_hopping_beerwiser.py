@@ -35,7 +35,7 @@ from pathlib import Path
 import numpy as np
 
 from vlinder.evaluate import Evaluate
-from vlinder.optimize import Optimize, evaluate_allocation
+from vlinder.optimize import Optimize, SLSQPSolver, evaluate_allocation
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.utils import suppress_print
 
@@ -65,10 +65,15 @@ class Exp04BasinHoppingBeerwiser:
     def _fresh_optimizer(self):
         return Optimize(copy.deepcopy(self.case.input_dict), copy.deepcopy(self.case.output_dict))
 
+    def _fresh_solver(self):
+        """A prepared SLSQP solver, for the parts that drive a single solve directly."""
+        solver = SLSQPSolver(copy.deepcopy(self.case.input_dict), copy.deepcopy(self.case.output_dict))
+        solver._prepare_input_dict("EXP04", solver.input_dict["decision_makers_option_value"][0].copy())
+        return solver
+
     def run_stall_regression(self):
         """From [60000, 240000] a working solver must move and improve (>0.5 pts)."""
-        opt = self._fresh_optimizer()
-        opt._prepare_input_dict("EXP04", opt.input_dict["decision_makers_option_value"][0].copy())
+        opt = self._fresh_solver()
         x0 = np.array([60000.0, 240000.0])
         start_app = evaluate_allocation(opt.input_dict, x0, "Base case", "EXP04")
         eval_counter = [0]
@@ -106,8 +111,7 @@ class Exp04BasinHoppingBeerwiser:
 
     def run_kink_characterisation(self):
         """Face scan around the kink + KO clip status at the optimum."""
-        opt = self._fresh_optimizer()
-        opt._prepare_input_dict("EXP04", opt.input_dict["decision_makers_option_value"][0].copy())
+        opt = self._fresh_solver()
 
         scan = []
         for x1 in range(20000, 32001, 1000):
@@ -144,7 +148,7 @@ class Exp04BasinHoppingBeerwiser:
                         "basin": "kink" if res.allocation[0] < self.KINK_BASIN_MAX_X1 else "interior",
                         "gap_to_grid": self.GRID_OPTIMUM - res.appreciation,
                         "n_function_evals": res.n_function_evals,
-                        "wall_time_s": res.wall_time_s,
+                        "wall_time_s": res.calculation_time,
                     }
                 )
         self.results["comparison"] = rows

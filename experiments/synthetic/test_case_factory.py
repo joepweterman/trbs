@@ -86,7 +86,7 @@ def test_oracle_linear_agreement(tmp_path):
     # Production SLSQP recovers the certified optimum.
     sim, opt = build_case(params.name, tmp_path, ORACLE_DMO)
     scenario = str(sim.input_dict["scenarios"][0])
-    slsqp = suppress_print(opt.optimize_slsqp)(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=20, seed=1)
+    slsqp = suppress_print(opt.solve)(scenario, dmo_name=ORACLE_DMO, budget=params.budget, n_starts=20, seed=1)
     assert abs(oracle["per_scenario"][scenario]["f_star"] - float(slsqp.appreciation)) <= 1e-6
 
 
@@ -101,7 +101,7 @@ def test_oracle_curved_kkt(tmp_path):
 
     sim, opt = build_case(params.name, tmp_path, ORACLE_DMO)
     scenario = str(sim.input_dict["scenarios"][0])
-    slsqp = suppress_print(opt.optimize_slsqp)(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=20, seed=1)
+    slsqp = suppress_print(opt.solve)(scenario, dmo_name=ORACLE_DMO, budget=params.budget, n_starts=20, seed=1)
     assert abs(oracle["per_scenario"][scenario]["f_star"] - float(slsqp.appreciation)) <= 1e-3
 
 
@@ -244,7 +244,7 @@ def test_grid_oracle_verifies_nonconvex_low_k(tmp_path):
     # the certified optimum must not be beaten by production SLSQP
     sim, opt = build_case(params.name, tmp_path, ORACLE_DMO)
     scenario = str(sim.input_dict["scenarios"][0])
-    slsqp = suppress_print(opt.optimize_slsqp)(scenario, params.budget, dmo_name=ORACLE_DMO, n_starts=10, seed=1)
+    slsqp = suppress_print(opt.solve)(scenario, dmo_name=ORACLE_DMO, budget=params.budget, n_starts=10, seed=1)
     assert scen["f_star"] >= float(slsqp.appreciation) - 1e-6
 
 

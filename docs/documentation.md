@@ -207,11 +207,31 @@ case.optimize("SCENARIO_NAME")
 # or use a copy if you do not want to change the original case
 case_optimizer = case.copy()
 case_optimizer.optimize("SCENARIO_NAME")
+
+# or pick the method yourself instead of letting the case decide
+case.optimize("SCENARIO_NAME", method="grid")
+
+# the details of the run are kept on the case
+print(case.optimization_result.summary())
 ```
 **What does it do?**
-- Finds an improved budget allocation for decision makers options in a selected scenario by means of a grid search.
-- Adds this allocation as a DMO to the `input_dict` with default name `CASE_NAME - Optimized`. Use `new_dmo_name` to
-provide a custom name for the optimized DMO name. 
+- Finds an improved budget allocation for decision makers options in a selected scenario.
+- By default (`method="auto"`) it first probes the case and lets a decision tree pick the optimization method that
+fits the shape of that case: a local solver (`"slsqp"`) when the appreciation surface is provably concave, and the
+global-escape method (`"basin_hopping"`) when it can have several optima. It prints which method it picked and why.
+- Pass `method` yourself to overrule that choice: `"grid"` (the combinatorial grid search), `"slsqp"`,
+`"basin_hopping"`, `"genetic_algorithm"`, `"mdbh"` (a mirror-descent + basin-hopping hybrid), or a list of names to
+run several and keep the best. Solver settings such as `n_starts`, `n_hops` or `max_combinations` can be passed
+alongside `method="auto"` as well, and then override the budget the decision tree attached to its choice.
+- Adds this allocation as a DMO to the `input_dict`. The name records both the method and the scenario, for example
+`Optimized (SLSQP) (Base case)`, so optimizing the same case for a second scenario adds a second DMO instead of
+overwriting the first. Use `dmo_name` to choose your own name; the scenario is still appended to it.
+- **Returns the updated `input_dict`.** The full result of the run, including the appreciation, the allocation, the
+budget actually spent, the number of evaluations, the calculation time and (for `method="auto"`) the reason the
+method was chosen, is available afterwards as `case.optimization_result`.
+- Note that grid search enumerates only allocations that spend the budget exactly, while the continuous methods allow
+spending at most the budget. On a case where leaving part of the budget unspent scores better, grid search cannot
+reach that allocation. 
 
 ## 🖨️ copy()
 **Usage:**

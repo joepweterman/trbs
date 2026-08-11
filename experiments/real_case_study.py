@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import vlinder as vl
-from vlinder.optimize import Optimize, evaluate_allocation
+from vlinder.optimize import BaseSolver, evaluate_allocation
 from vlinder.trbs import TheResponsibleBusinessSimulator
 
 # Headless rendering; switching after import keeps every import at the top.
@@ -148,7 +148,8 @@ class RealCaseStudy:
         kwargs = {"seed": SEED} if method != "grid" else {}
         started = time.perf_counter()
         with contextlib.redirect_stdout(io.StringIO()):
-            result = sim.optimize(scenario, method=method, budget=budget, **kwargs)
+            sim.optimize(scenario, method=method, budget=budget, **kwargs)
+        result = sim.optimization_result
         elapsed = time.perf_counter() - started
         allocation = np.asarray(result.allocation, dtype=float)
         effective_budget = (
@@ -259,7 +260,7 @@ class RealCaseStudy:
         # One prepared dictionary per case, reused read-only across the
         # cross-evaluations so every cell is scored on identical boundaries.
         sim = build_case(name)
-        optimizer = Optimize(sim.input_dict, sim.output_dict)
+        optimizer = BaseSolver(sim.input_dict, sim.output_dict)
         with contextlib.redirect_stdout(io.StringIO()):
             optimizer._prepare_input_dict(  # pylint: disable=protected-access
                 "CrossEval", sim.input_dict["decision_makers_option_value"][0].copy()
@@ -324,7 +325,8 @@ class RealCaseStudy:
             for seed in range(n_seeds):
                 sim = build_case(name)
                 with contextlib.redirect_stdout(io.StringIO()):
-                    result = sim.optimize(scenario, method="slsqp", seed=seed, n_starts=1)
+                    sim.optimize(scenario, method="slsqp", seed=seed, n_starts=1)
+                result = sim.optimization_result
                 rows.append(
                     {
                         "case": name,

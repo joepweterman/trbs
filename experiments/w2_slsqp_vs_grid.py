@@ -69,13 +69,14 @@ def run_grid_baseline():
 def run_slsqp(n_starts: int, seed: int):
     """Run SLSQP multi-start once. Returns the structured result as a dict."""
     case = build_case()
-    result = case.optimize(
+    case.optimize(
         SCENARIO,
         method="slsqp",
         n_starts=n_starts,
         seed=seed,
         dmo_name=f"SLSQP n{n_starts} seed{seed}",
     )
+    result = case.optimization_result
     return {
         "method": "slsqp",
         "n_starts": n_starts,
@@ -84,7 +85,7 @@ def run_slsqp(n_starts: int, seed: int):
         "appreciation": result.appreciation,
         "n_converged": result.n_converged,
         "n_function_evals": result.n_function_evals,
-        "wall_time_s": result.wall_time_s,
+        "wall_time_s": result.calculation_time,
     }
 
 

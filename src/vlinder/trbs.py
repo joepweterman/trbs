@@ -13,7 +13,6 @@ import copy
 
 import numpy as np
 import matplotlib
-import pandas as pd
 import vlinder as vl
 from vlinder.case_exporter import CaseExporter
 from vlinder.case_importer import CaseImporter
@@ -21,7 +20,7 @@ from vlinder.evaluate import Evaluate
 from vlinder.appreciate import Appreciate
 from vlinder.visualize import Visualize, DependencyGraph
 from vlinder.make_report import MakeReport
-from vlinder.optimize import Optimize, OptimizationResult
+from vlinder.optimize import Optimize
 
 
 def list_demo_cases(file_path=None):
@@ -63,6 +62,8 @@ class TheResponsibleBusinessSimulator:
         self.visualizer = None
         self.exporter = None
         self.report = None
+        # Set by optimize(): the full result of the most recent optimization run.
+        self.optimization_result = None
 
         self.possible_status = {0: "build", 1: "evaluate", 2: "appreciate", 3: "optimize"}
         self.status = {}
@@ -187,58 +188,57 @@ class TheResponsibleBusinessSimulator:
         location_report = self.report.create_report(scenario, output_path)
         print(location_report)
 
-    def optimize(self, scenario, method="grid", **kwargs) -> OptimizationResult:
+    def optimize(self, scenario, method="auto", **kwargs):
         """Find the optimal distribution of internal inputs for a scenario.
 
-        One entry point for every optimization method. ``method`` is a single
-        method name or a list of names:
+        One entry point for every optimization method. ``method`` is ``"auto"``
+        (the default), a single method name, or a list of names:
 
-          * single name   → run it, return its :class:`OptimizationResult`
+          * ``"auto"``      → probe the case, let the decision tree in
+            :mod:`vlinder.method_selection` pick the method that fits the shape
+            of its appreciation surface, run it, and report which one it picked
+            and why. The pick is also recorded on the result, as ``.selection``.
+          * single name   → run that method
           * list of names → run each, print every method's appreciation +
-            allocation, and return the best (only the winner is written back)
+            allocation, and keep the best (only the winner is written back)
 
-        Supported methods: ``"grid"`` (combinatorial grid search, default),
-        ``"slsqp"`` (continuous multi-start SLSQP), ``"basin_hopping"``
-        (global escape: random perturbations between SLSQP local solves) and
-        ``"genetic_algorithm"`` (derivative-free real-coded GA).
+        Supported methods: ``"grid"`` (combinatorial grid search), ``"slsqp"``
+        (continuous multi-start SLSQP), ``"basin_hopping"`` (SLSQP with an
+        escape loop for surfaces with more than one optimum),
+        ``"genetic_algorithm"`` (derivative-free evolutionary search) and
+        ``"mdbh"`` (research method: mirror descent inside an escape loop).
+        Naming one overrides the automatic choice; keyword arguments override
+        the solver budget that ``"auto"`` attaches to its choice.
+
+        The optimized allocation is written to a new decision-maker option whose
+        name records both the method and the scenario it was optimized for, so a
+        case optimized for several scenarios keeps them apart.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
-        :param method: method name or list of names.
-        :param kwargs: ``new_dmo_name`` / ``dmo_name`` for the optimizer DMO,
-            ``new_case_name`` for the optimized case name; grid takes
-            ``max_combinations`` (default 60000), slsqp takes ``n_starts``
-            (default 100), ``seed``, ``reference_allocation``; basin_hopping
-            takes ``n_hops``, ``n_starts``, ``temperature``, ``step_frac``,
-            ``seed``; genetic_algorithm takes ``population_size``,
-            ``n_generations``, ``crossover_prob``, ``eta_crossover``,
-            ``eta_mutation``, ``seed``.
-        :return: the (best) :class:`OptimizationResult`.
+        :param method: ``"auto"``, a method name, or a list of names.
+        :param kwargs: ``dmo_name`` for the optimizer's decision-maker option,
+            ``new_case_name`` for the optimized case name, plus the parameters of
+            the chosen solver. Grid takes ``max_combinations`` (default 60000);
+            slsqp takes ``n_starts`` (default 100), ``seed``; basin_hopping takes
+            ``n_hops``, ``n_starts``, ``temperature``, ``step_frac``, ``seed``;
+            genetic_algorithm takes ``population_size``, ``n_generations``,
+            ``crossover_prob``, ``eta_crossover``, ``eta_mutation``, ``seed``.
+            A parameter passed directly goes to every method that runs. To give
+            two methods different parameters, pass ``method_kwargs`` as
+            ``{method name: {setting: value}}``; those win over the direct ones.
+        :return: the updated ``input_dict``. The full
+            :class:`~vlinder.optimize.OptimizationResult` of this run is
+            available as ``self.optimization_result``.
         """
         self._status_check([0, 1, 2])
         case_optimizer = Optimize(self.input_dict, self.output_dict)
 
-        dmo_name = kwargs.pop("new_dmo_name", None) or kwargs.pop("dmo_name", None)
-        # Single grid run with no explicit name → fall back to the configured DMO
-        # name (legacy behaviour). For a list, each method keeps its own default
-        # name so the case shows which method produced the winning allocation.
-        if dmo_name is None and method == "grid":
-            dmo_name = self._resolve_grid_dmo_name()
-
+        dmo_name = kwargs.pop("dmo_name", None)
         new_case_name = kwargs.pop("new_case_name", None)
         result = case_optimizer.run(scenario, method=method, dmo_name=dmo_name, **kwargs)
         # case_optimizer.input_dict holds the winning DMO (appended/updated); sync back.
         self.input_dict = case_optimizer.input_dict
+        self.optimization_result = result
         self.name = new_case_name or f"{self.name} - Optimized"
         self._set_and_reset_status(3)
-        return result
-
-    def _resolve_grid_dmo_name(self):
-        """Look up the configured grid optimizer DMO name (preserves legacy behaviour)."""
-        try:
-            index = list(self.input_dict["configurations"]).index("Optimize_DMO_name")
-            optimized_dmo_name = self.input_dict["configuration_value"][index]
-            if pd.isna(optimized_dmo_name):
-                raise CaseError("Optimized DMO name is NaN")
-            return optimized_dmo_name
-        except (ValueError, IndexError, KeyError) as error:
-            raise CaseError("cannot find optimized DMO name") from error
+        return self.input_dict
