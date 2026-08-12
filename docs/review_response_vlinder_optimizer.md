@@ -1,16 +1,23 @@
-# Reactie op de review van optimize.py, vlinder_demo.ipynb en trbs.py
+# Reactie op de feedback op de optimizer en de synthetic case generator
 
-Per punt uit `review_feedback_vlinder_optimizer.docx` (Louise) staat hieronder of en hoe het is
-verwerkt. De feedback van Ruben (`joep_feedback.docx`) staat in deel 5, omdat die deels over
-dezelfde regels gaat.
+Dit document beantwoordt alle ontvangen feedback, per punt.
+
+| deel | bron |
+| --- | --- |
+| 1 tot en met 4 | Louise, `review_feedback_vlinder_optimizer.docx`: optimize.py, vlinder_demo.ipynb, trbs.py |
+| 5 | Ruben, `joep_feedback.docx` |
+| 6 | Louise, mail over de synthetic case generator |
+
+Deel 1 tot en met 5 gaat over werk dat af is. Deel 6 gaat over afspraken: daar is alleen de
+MDBH-run uitgevoerd die het hernoemen blokkeerde, de rest moet nog gebeuren.
 
 **Uitgangspunt bij de refactor:** het rekengedrag mocht niet veranderen, behalve waar de
 feedback daar expliciet om vraagt. Dat is nagemeten. Twaalf combinaties van case en methode
 (beerwiser, refugee, IZZ x slsqp, basin-hopping, GA, MDBH) leveren na de herstructurering exact
 dezelfde appreciatie en exact hetzelfde aantal objective-evaluaties als ervoor. De enige
-bedoelde uitzondering is de budget-bepaling, zie punt 1.4.
+bedoelde uitzondering is de budget-bepaling, zie punt 1.5.
 
-**Status van de suites:** 255 tests slagen. Eén test faalt, `test_make_report.py::test_create_report[Optimistic]`,
+**Status van de suites:** 259 tests slagen. Eén test faalt, `test_make_report.py::test_create_report[Optimistic]`,
 op een bestaande Windows-bug: `strftime("%H:%M:%S")` zet dubbele punten in een bestandsnaam, wat
 Windows niet toestaat. Die stond er al en staat los van deze wijzigingen.
 
@@ -388,6 +395,57 @@ Adaptieve stapgrootte gebeurt al: scipy stelt het `stepsize`-attribuut van de ho
 een doelacceptatieratio.
 
 ---
+
+## Deel 6: de synthetic case generator
+
+Dit deel beantwoordt Louise' tweede mail. Anders dan de rest van dit document gaat het hier om
+afspraken, niet om werk dat al af is. Alleen het eerste punt is uitgevoerd.
+
+### De MDBH-run is klaar, dus het hernoemen kan
+
+De benchmark die het hernoemen blokkeerde is gedraaid: 1.260 cellen, alle resultaten in een
+aparte store. Daarmee is elke vastgelegde run afgerond en kan `Zero spend` worden hernoemd.
+
+De naam wordt `Lowest spend`, zoals voorgesteld. Ter herinnering waarom dit als laatste moest:
+het hernoemen verandert geen enkele uitkomst, alleen het label, maar het verandert wel de sha256
+van elk gegenereerd bestand, en die hashes liggen vast in de pre-registratie.
+
+### Wat er in `01_generating_synthetic_cases` bij komt
+
+Een uitleg van alle veertien parameters, met extra tekst bij de vijf die genoemd zijn:
+
+| parameter | wat het doet |
+| --- | --- |
+| `coef_low` / `coef_high` | het bereik waaruit de coefficienten van internal variable input naar KPI worden getrokken; beide positief, zodat elke KPI monotoon stijgt in de toewijzing |
+| `n_bilinear` | het aantal KPI's dat een product van twee internal variable inputs bevat, wat kromming met een onbepaald teken introduceert en dus een tweede optimum mogelijk maakt |
+| `bracketing_factor` | schuift elke DMO een stukje naar de gelijke verdeling toe; onder 1 komt de ondergrens van de appreciatieschaal te hoog te liggen en wordt er afgekapt, wat het landschap knikt |
+| `scenario_dispersion` | de sterkte van de vermenigvuldigende factoren per KPI per scenario |
+
+Daarnaast komt er een stuk over wanneer Blend- en Envelope-DMO's ontstaan en hoe ze bepaald
+worden, en een uitleg van het verschil tussen `Ext` en `Fac`: `Ext 01` telt op, staat los van de
+verdeling en verschuift alle toewijzingen met hetzelfde bedrag, terwijl `Fac` vermenigvuldigt per
+KPI en per scenario en daardoor de rangorde wel kan omgooien.
+
+De dubbele DMO's blijven in de visualisatie staan, met een uitleg erbij dat ze kunnen samenvallen.
+Dat is eerlijker dan ze wegfilteren.
+
+### De nieuwe `scenario_mode`
+
+De huidige willekeurige factoren gaan `independent` heten en blijven de default, zodat de al
+gedraaide runs niets merken. Daarnaast komt `coherent`, precies zoals voorgesteld: elk scenario
+krijgt een positie op een schaal van slecht naar goed, elke KPI een eigen gevoeligheid, en de
+factor wordt `Fac = 1 + sensitivity x dispersion x positie`.
+
+**Eén vraag daarover.** Bij `dispersion = 1,0` en een gevoeligheid van 1,0 wordt de factor in het
+pessimistische scenario precies 0, en dan valt die KPI daar helemaal weg uit de doelfunctie. Zal
+het product van gevoeligheid en dispersie worden afgekapt op bijvoorbeeld 0,9, of wordt dispersie
+in coherente modus begrensd op 0,8?
+
+### Naamgeving
+
+`levers` wordt overal `internal variable inputs`. Dat landt op drie plekken: de generator-code, de
+uitleg in de notebooks, en de melding die de optimizer print bij automatische methodekeuze, waar nu
+nog "The case has 2 levers and a budget of ..." staat.
 
 ## Vergelijkingstabel
 
