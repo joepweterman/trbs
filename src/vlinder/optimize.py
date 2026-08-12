@@ -162,6 +162,8 @@ class BaseSolver:
     default_dmo_name = "Optimized"
     #: Name of the method as reported on :class:`OptimizationResult`.
     method_name = "base"
+    #: Short label used when a configured base name is extended with the method.
+    method_label = "base"
 
     def __init__(self, input_dict, output_dict):
         self.input_dict = input_dict
@@ -282,6 +284,7 @@ class GridSearch(BaseSolver):
 
     default_dmo_name = "Optimized (grid)"
     method_name = "grid"
+    method_label = "grid"
 
     def solve(self, scenario, dmo_name, budget=None, *, max_combinations=60000, **_ignored):
         """Enumerate the budget face for ``scenario`` and write back the best allocation.
@@ -439,6 +442,7 @@ class SLSQPSolver(BaseSolver):
 
     default_dmo_name = "Optimized (SLSQP)"
     method_name = "slsqp"
+    method_label = "SLSQP"
 
     def solve(self, scenario, dmo_name, budget, *, reference_allocation=None, n_starts=100, seed=None, **_ignored):
         """Run ``n_starts`` local solves and write back the best allocation.
@@ -553,6 +557,7 @@ class BasinHoppingSolver(SLSQPSolver):
 
     default_dmo_name = "Optimized (basin-hopping)"
     method_name = "basin_hopping"
+    method_label = "basin-hopping"
 
     class _RandomFeasibleHop:  # pylint: disable=too-few-public-methods
         """The jump between two local solves, landing inside the feasible set.
@@ -681,6 +686,7 @@ class GeneticAlgorithmSolver(BaseSolver):
 
     default_dmo_name = "Optimized (GA)"
     method_name = "genetic_algorithm"
+    method_label = "GA"
 
     def solve(
         self,
@@ -806,6 +812,7 @@ class MdbhSolver(BaseSolver):
 
     default_dmo_name = "Optimized (MDBH)"
     method_name = "mdbh"
+    method_label = "MDBH"
 
     def solve(
         self,
@@ -1058,13 +1065,41 @@ class Optimize:
         return select_method(diagnosis)
 
     @staticmethod
-    def _dmo_name_for(dmo_name, solver, scenario):
-        """Name the optimizer's decision-maker option, recording the scenario it solved for.
+    def _configured_dmo_name(input_dict):
+        """The optimizer name configured on the case, or None.
 
-        An allocation is only optimal for the scenario it was optimized under, so optimizing the
-        same case for two scenarios has to produce two options rather than overwrite one.
+        A case can carry an ``Optimize_DMO_name`` entry in its configuration sheet. When the
+        caller does not pass a name, that entry is the base of the option name. A missing sheet,
+        a missing entry or an empty (NaN) value all mean no configured name.
         """
-        return f"{dmo_name or solver.default_dmo_name} ({scenario})"
+        configurations = input_dict.get("configurations")
+        if configurations is None:
+            return None
+        matches = np.where(np.asarray(configurations) == "Optimize_DMO_name")[0]
+        if not matches.size:
+            return None
+        value = input_dict["configuration_value"][matches[0]]
+        if value is None or (isinstance(value, float) and math.isnan(value)):
+            return None
+        return str(value)
+
+    def _dmo_name_for(self, dmo_name, solver, scenario):
+        """Name the optimizer's decision-maker option.
+
+        The name always records the scenario it was optimized for: an allocation is only optimal
+        for that scenario, so optimizing the same case for two scenarios has to produce two
+        options rather than overwrite one. A name passed by the caller is used as given, plus the
+        scenario. Without one, the name configured on the case is the base, extended with the
+        method and the scenario, so a configured "Show me what you got" becomes
+        "Show me what you got (grid) (Base case)". Without either, the solver's default (which
+        already names the method) plus the scenario.
+        """
+        if dmo_name:
+            return f"{dmo_name} ({scenario})"
+        configured = self._configured_dmo_name(self.input_dict)
+        if configured:
+            return f"{configured} ({solver.method_label}) ({scenario})"
+        return f"{solver.default_dmo_name} ({scenario})"
 
     @staticmethod
     def _describe_selection(selection):

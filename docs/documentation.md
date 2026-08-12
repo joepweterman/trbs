@@ -223,9 +223,11 @@ global-escape method (`"basin_hopping"`) when it can have several optima. It pri
 `"basin_hopping"`, `"genetic_algorithm"`, `"mdbh"` (a mirror-descent + basin-hopping hybrid), or a list of names to
 run several and keep the best. Solver settings such as `n_starts`, `n_hops` or `max_combinations` can be passed
 alongside `method="auto"` as well, and then override the budget the decision tree attached to its choice.
-- Adds this allocation as a DMO to the `input_dict`. The name records both the method and the scenario, for example
-`Optimized (SLSQP) (Base case)`, so optimizing the same case for a second scenario adds a second DMO instead of
-overwriting the first. Use `dmo_name` to choose your own name; the scenario is still appended to it.
+- Adds this allocation as a DMO to the `input_dict`. The name records both the method and the scenario, so
+optimizing the same case for a second scenario adds a second DMO instead of overwriting the first. When the case
+configures an `Optimize_DMO_name`, that name is the base: a configured `Show me what you got` becomes
+`Show me what you got (grid) (Base case)`. Without one the default is e.g. `Optimized (SLSQP) (Base case)`. Use
+`dmo_name` to choose your own name; the scenario is still appended to it.
 - **Returns the updated `input_dict`.** The full result of the run, including the appreciation, the allocation, the
 budget actually spent, the number of evaluations, the calculation time and (for `method="auto"`) the reason the
 method was chosen, is available afterwards as `case.optimization_result`.

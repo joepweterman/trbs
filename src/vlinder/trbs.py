@@ -212,7 +212,10 @@ class TheResponsibleBusinessSimulator:
 
         The optimized allocation is written to a new decision-maker option whose
         name records both the method and the scenario it was optimized for, so a
-        case optimized for several scenarios keeps them apart.
+        case optimized for several scenarios keeps them apart. When the case
+        configures an ``Optimize_DMO_name``, that name is the base: a configured
+        "Show me what you got" becomes "Show me what you got (grid) (Base case)".
+        A ``dmo_name`` passed here overrides it.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
         :param method: ``"auto"``, a method name, or a list of names.

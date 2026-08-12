@@ -156,9 +156,37 @@ def test_method_kwargs_for_a_method_that_is_not_running_raises(orchestrator):
         orchestrator.run("Base case", method="slsqp", method_kwargs={"genetic_algorithm": {"seed": 1}})
 
 
+@suppress_print
+def test_without_a_configured_name_the_solver_default_applies(orchestrator):
+    """The test fixtures carry no Optimize_DMO_name, so the solver default names the option."""
+    result = orchestrator.run("Base case", method="slsqp", n_starts=2, seed=1)
+
+    assert result.dmo_name == f"{SLSQPSolver.default_dmo_name} (Base case)"
+
+
 # ======================================================================
 # Through the case: TheResponsibleBusinessSimulator.optimize()
 # ======================================================================
+@suppress_print
+def test_configured_name_is_extended_with_method_and_scenario(beerwiser_appreciated):
+    """A configured Optimize_DMO_name is the base; the method and scenario are appended."""
+    beerwiser_appreciated.optimize("Base case", method="grid")
+    result = beerwiser_appreciated.optimization_result
+
+    assert result.dmo_name == "Optimized_DMO (grid) (Base case)"
+    assert result.dmo_name in beerwiser_appreciated.input_dict["decision_makers_options"]
+
+
+@suppress_print
+def test_an_explicit_name_overrides_the_configured_one(beerwiser_appreciated):
+    """A caller-supplied name wins over the configuration sheet and gets the scenario only."""
+    beerwiser_appreciated.optimize("Base case", method="grid", dmo_name="My Grid Run")
+
+    names = list(beerwiser_appreciated.input_dict["decision_makers_options"])
+    assert "My Grid Run (Base case)" in names
+    assert not any(name.startswith("Optimized_DMO (") for name in names)
+
+
 @suppress_print
 def test_case_optimize_returns_the_input_dict(beerwiser_appreciated):
     """optimize() hands back the updated case, which is what the front end reads."""
@@ -188,7 +216,9 @@ def test_case_optimize_dispatches_every_method(beerwiser_appreciated):
     result = beerwiser_appreciated.optimization_result
 
     assert result.method == "basin_hopping"
-    expected_name = f"{BasinHoppingSolver.default_dmo_name} (Base case)"
+    # The packaged case configures Optimize_DMO_name = "Optimized_DMO", which is
+    # the base of the default name, extended with the method and the scenario.
+    expected_name = "Optimized_DMO (basin-hopping) (Base case)"
     assert expected_name in beerwiser_appreciated.input_dict["decision_makers_options"]
 
 
