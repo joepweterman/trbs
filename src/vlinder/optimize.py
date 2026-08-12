@@ -1084,7 +1084,9 @@ class Optimize:
                 if diagnosis.is_provably_concave
                 else "possibly more than one optimum"
             )
-            lines.append(f"  The case has {diagnosis.k} levers and a budget of {diagnosis.budget:,.2f}.")
+            lines.append(
+                f"  The case has {diagnosis.k} internal variable inputs and a budget of {diagnosis.budget:,.2f}."
+            )
             lines.append(f"  Its appreciation surface has {shape}.")
             lines.append(f"  Diagnosed in {diagnosis.n_probe_evaluations} evaluations.")
         lines.append(f"  Why: {selection.reason}.")

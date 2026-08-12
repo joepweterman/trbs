@@ -60,7 +60,7 @@ def test_auto_picks_a_method_and_explains_itself(orchestrator, capsys):
     assert result.selection.method == "basin_hopping"
     assert result.n_starts == 1, "an explicit setting must win over the budget the tree attached"
     assert "Automatic method selection chose basin-hopping" in printed
-    assert "levers" in printed
+    assert "internal variable inputs" in printed
 
 
 def test_selection_leaves_no_probe_option_behind(orchestrator):
