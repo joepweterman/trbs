@@ -17,3 +17,6 @@ generated/study/*
 !generated/study/meta.json
 !generated/study/scip_results.jsonl
 !generated/study/analysis/
+!generated/study/results_mdbh.jsonl
+!generated/study/meta_mdbh.json
+!generated/study/analysis_mdbh/
