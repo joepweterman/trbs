@@ -66,7 +66,7 @@ class SyntheticCaseParams:
     regime/mechanism map). Knob validity is enforced in ``__post_init__``."""
 
     name: str = ""  # left empty, a descriptive name is derived from the knobs
-    k: int = 3  # number of internal variables (levers)
+    k: int = 3  # number of internal variable inputs
     budget: float = 100.0  # B (capped simplex: sum x <= B)
     n_key_outputs: int = 3
     themes: Tuple[str, ...] = ("People", "Planet", "Profit")
@@ -74,17 +74,25 @@ class SyntheticCaseParams:
     regime: str = "convex"  # convex | smooth_nonconvex | nonsmooth
     appreciation: str = "linear"  # linear (affine, vertex optimum) | sinusoidal (concave, interior optimum)
     seed: int = 0
-    coef_low: float = 0.5  # lever->KO coefficient range (positive => monotone)
+    coef_low: float = 0.5  # internal-variable-input->KO coefficient range (positive => monotone)
     coef_high: float = 1.5
     # -- smooth_nonconvex mechanisms (convex-curvature carriers = "ruggedness") --
     n_stb1: int = 0  # KOs flipped to smaller_the_better=1 + sinusoidal (convex decreasing)
-    n_bilinear: int = 0  # KOs with one bilinear lever-pair term (indefinite curvature)
+    n_bilinear: int = 0  # KOs with one bilinear input-pair term (indefinite curvature)
     # -- nonsmooth mechanisms --
     bracketing_factor: float = 1.0  # (0,1]; <1 shrinks bracketing DMOs => clipping inside the feasible set
-    n_saturation: int = 0  # levers with a min(x/sp, 1) cap chain (kinks, no clipping)
-    saturation_point: float = 0.5  # sp = saturation_point * B for the saturated levers
-    # -- orthogonal knob --
+    n_saturation: int = 0  # internal variable inputs with a min(x/sp, 1) cap chain (kinks, no clipping)
+    saturation_point: float = 0.5  # sp = saturation_point * B for the saturated inputs
+    # -- orthogonal knobs --
     scenario_dispersion: float = 0.0  # [0,1]; per-KO multiplicative scenario factors 1 +/- delta
+    # How the per-scenario factors are drawn (only matters when dispersion > 0):
+    #   independent - each Fac_j(s) drawn independently per KO and scenario, so
+    #                 one KPI can improve in the very scenario another worsens
+    #   coherent    - scenarios are ordered worst to best; each KO draws one
+    #                 sensitivity in [0.2, 1.0] and Fac_j(s) = 1 + sensitivity_j
+    #                 * dispersion * position_s with positions evenly spaced on
+    #                 [-1, +1], floored at Fac >= 0.1 so no KO ever vanishes
+    scenario_mode: str = "independent"
 
     def __post_init__(self):
         if self.regime not in ("convex", "smooth_nonconvex", "nonsmooth"):
@@ -100,7 +108,7 @@ class SyntheticCaseParams:
         if not 0 <= self.n_bilinear <= self.n_key_outputs:
             raise ValueError("n_bilinear must be in [0, n_key_outputs]")
         if self.n_bilinear > 0 and self.k < 2:
-            raise ValueError("n_bilinear > 0 needs k >= 2 (a bilinear term is a lever pair)")
+            raise ValueError("n_bilinear > 0 needs k >= 2 (a bilinear term is a pair of inputs)")
         if not 0 <= self.n_saturation <= self.k:
             raise ValueError("n_saturation must be in [0, k]")
         if not 0.0 < self.bracketing_factor <= 1.0:
@@ -109,6 +117,8 @@ class SyntheticCaseParams:
             raise ValueError("saturation_point must be in (0, 1]")
         if not 0.0 <= self.scenario_dispersion <= 1.0:
             raise ValueError("scenario_dispersion must be in [0, 1]")
+        if self.scenario_mode not in ("independent", "coherent"):
+            raise ValueError(f"scenario_mode={self.scenario_mode!r} must be 'independent' or 'coherent'")
         # Regime <-> mechanism consistency (mechanism exclusivity keeps the
         # factorial design clean and the analytic envelope exact).
         if self.regime == "convex":
@@ -156,6 +166,8 @@ class SyntheticCaseParams:
                 parts.append(f"sat{self.n_saturation}")
         if self.scenario_dispersion > 0:
             parts.append(f"disp{self.scenario_dispersion:g}".replace(".", ""))
+            if self.scenario_mode == "coherent":
+                parts.append("coh")
         parts.append(f"k{self.k:02d}")
         parts.append(f"s{self.seed}")
         return "_".join(parts)
@@ -169,6 +181,10 @@ class SyntheticCaseFactory:
 
         p = params
         # Zero-padded names so the importer's alphabetical pivot order matches 1..k.
+        # The generated column labels keep the historical "Lever" word: the
+        # locked study's cases and hash records were generated with it, and a
+        # data-level rename would break their byte-reproducibility. The
+        # documentation-level name is "internal variable inputs" (vlinder).
         self.levers: List[str] = [f"Lever {i:02d}" for i in range(1, p.k + 1)]
         self.kos: List[str] = [f"KO {j:02d}" for j in range(1, p.n_key_outputs + 1)]
         self.evi = "Ext 01"
@@ -184,7 +200,7 @@ class SyntheticCaseFactory:
         # unrelated draws (e.g. coefficients), and tables() stays idempotent.
         # NOTE: children 0-3 match the Phase-0.75 streams, so pure-convex cases
         # reproduce the previously generated tables byte-identically.
-        coef_ss, ko_w_ss, theme_w_ss, scen_w_ss, disp_ss, bil_ss = np.random.SeedSequence(p.seed).spawn(6)
+        coef_ss, ko_w_ss, theme_w_ss, scen_w_ss, disp_ss, bil_ss, sens_ss = np.random.SeedSequence(p.seed).spawn(7)
         # Dense positive coefficients c[j, i] for KO_j += x_i * c[j, i] (affine => convex).
         self.coef = np.random.default_rng(coef_ss).uniform(p.coef_low, p.coef_high, size=(p.n_key_outputs, p.k))
         self.ce = 1.0  # external-variable coefficient (used in KO 01)
@@ -192,9 +208,20 @@ class SyntheticCaseFactory:
         self.theme_weights = np.random.default_rng(theme_w_ss).integers(1, 4, size=len(self.used_themes))
         self.scenario_weights = np.random.default_rng(scen_w_ss).integers(1, 4, size=len(self.scenarios))
 
-        # Dispersion factors Fac_j(s) = 1 + delta * u_js (always drawn, used iff delta > 0).
+        # Dispersion factors (always drawn, used iff delta > 0). Independent mode
+        # draws Fac_j(s) = 1 + delta * u_js per KO and scenario; coherent mode
+        # orders the scenarios worst to best and scales one per-KO sensitivity
+        # along that axis, floored at 0.1 so an extreme combination flattens a
+        # KO's contribution without removing it from the objective.
         u = np.random.default_rng(disp_ss).uniform(-1.0, 1.0, size=(p.n_key_outputs, p.n_scenarios))
-        self.disp_factors = 1.0 + p.scenario_dispersion * u
+        self.sensitivity = np.random.default_rng(sens_ss).uniform(0.2, 1.0, size=p.n_key_outputs)
+        if p.scenario_mode == "coherent":
+            positions = np.linspace(-1.0, 1.0, p.n_scenarios) if p.n_scenarios > 1 else np.zeros(1)
+            self.disp_factors = np.maximum(
+                0.1, 1.0 + p.scenario_dispersion * self.sensitivity[:, None] * positions[None, :]
+            )
+        else:
+            self.disp_factors = 1.0 + p.scenario_dispersion * u
 
         # Bilinear structure (always drawn where possible, used iff n_bilinear > 0):
         # KO j (j < n_bilinear) gets one term q_j * x_a * x_b. q ~ U(coef range)/B
@@ -327,7 +354,7 @@ class SyntheticCaseFactory:
     def _bracketing_allocations(self) -> dict:
         """The f=1 bracketing DMO set: {name: allocation}.
 
-        Corners + zero spend realise the affine extremes; 'Blend' DMOs realise
+        Corners + lowest spend realise the affine extremes; 'Blend' DMOs realise
         each bilinear KO's edge max; greedy 'Envelope' DMOs realise the per-KO
         max under saturation. Together the observed DMO grid equals the exact
         feasible envelope (NO-CLIP at bracketing_factor = 1).
@@ -335,7 +362,13 @@ class SyntheticCaseFactory:
         B, k = self.p.budget, self.p.k
         allocs = {f"Corner {i + 1:02d}": B * np.eye(k)[i] for i in range(k)}
         allocs["Equal spread"] = np.full(k, B / k)
-        allocs["Zero spend"] = np.zeros(k)
+        # Named "Lowest spend" rather than "Zero spend": under a bracketing
+        # factor below 1 every DMO, this one included, is pulled toward the
+        # equal spread, so the row is the lowest spend the case observes, not
+        # necessarily zero. Renamed 2026-08-13 (review), after every locked
+        # study run had completed, because the label changes the bytes of
+        # newly generated cases.
+        allocs["Lowest spend"] = np.zeros(k)
         for j in range(self.p.n_bilinear):
             allocs[f"Blend {j + 1:02d}"] = self._blend_alloc(j)
         if self.saturated:

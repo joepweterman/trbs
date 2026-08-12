@@ -257,3 +257,69 @@ def test_multistart_proxy_high_k_is_labelled(tmp_path):
     assert oracle["verified"] is False
     scen = next(iter(oracle["per_scenario"].values()))
     assert "PROXY ONLY" in scen["certificate"]["basis"]
+
+# ----------------------------------------------------------------------
+# Scenario mode (coherent vs independent) and the Lowest spend rename
+# ----------------------------------------------------------------------
+def test_lowest_spend_replaces_zero_spend():
+    """The all-zeros bracketing DMO carries its post-review name."""
+    factory = SyntheticCaseFactory(_params())
+    allocations = factory._bracketing_allocations()
+
+    assert "Lowest spend" in allocations
+    assert "Zero spend" not in allocations
+    assert not allocations["Lowest spend"].any()
+
+
+def test_coherent_mode_orders_scenarios_worst_to_best():
+    """In coherent mode every KO's factor rises monotonically along the scenarios,
+    and the middle scenario of three sits exactly at the neutral factor 1."""
+    factory = SyntheticCaseFactory(_params(scenario_dispersion=0.6, scenario_mode="coherent"))
+
+    fac = factory.disp_factors
+    assert fac.shape == (3, 3)
+    assert (np.diff(fac, axis=1) >= 0).all()
+    assert np.allclose(fac[:, 1], 1.0)
+
+
+def test_coherent_mode_floors_the_factor_at_a_tenth():
+    """At dispersion 1.0 a sensitive KO would hit factor 0 in the worst scenario;
+    the hard floor keeps every factor at 0.1 or above (review decision)."""
+    hit_floor = False
+    for seed in range(25):
+        factory = SyntheticCaseFactory(
+            _params(seed=seed, scenario_dispersion=1.0, scenario_mode="coherent")
+        )
+        assert factory.disp_factors.min() >= 0.1
+        if (factory.sensitivity > 0.9).any():
+            assert factory.disp_factors.min() == 0.1
+            hit_floor = True
+    assert hit_floor, "no seed in range drew a sensitivity above 0.9; widen the range"
+
+
+def test_dispersion_zero_makes_the_modes_identical(tmp_path):
+    """The mode only matters when dispersion is on: at zero both write identical bytes."""
+    independent = _params(name="T_mode_a", scenario_mode="independent")
+    coherent = _params(name="T_mode_b", scenario_mode="coherent")
+    SyntheticCaseFactory(independent).write(tmp_path)
+    SyntheticCaseFactory(coherent).write(tmp_path)
+
+    hash_a = read_manifest(independent.name, tmp_path)["table_sha256"]
+    hash_b = read_manifest(coherent.name, tmp_path)["table_sha256"]
+    assert hash_a == hash_b
+
+
+def test_coherent_cases_get_their_own_name():
+    """Coherent cases land in their own folders, so the two modes never collide."""
+    independent = SyntheticCaseParams(k=3, seed=1, scenario_dispersion=0.6)
+    coherent = SyntheticCaseParams(k=3, seed=1, scenario_dispersion=0.6, scenario_mode="coherent")
+
+    assert "coh" in coherent.name
+    assert "coh" not in independent.name
+
+
+def test_unknown_scenario_mode_is_rejected():
+    """A typo in the mode fails loudly instead of silently drawing independent factors."""
+    with pytest.raises(ValueError):
+        SyntheticCaseParams(scenario_mode="correlated")
+
