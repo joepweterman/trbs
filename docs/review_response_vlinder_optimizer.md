@@ -398,8 +398,20 @@ een doelacceptatieratio.
 
 ## Deel 6: de synthetic case generator
 
-Dit deel beantwoordt Louise' tweede mail. Anders dan de rest van dit document gaat het hier om
-afspraken, niet om werk dat al af is. Alleen het eerste punt is uitgevoerd.
+Dit deel beantwoordt Louise' tweede mail. **Status 2026-08-13: alles hieronder is uitgevoerd** -
+de hernoeming naar "Lowest spend", de parameterdocumentatie met de Blend/Envelope- en
+Ext-versus-Fac-uitleg in notebook 01 (headless uitgevoerd, geen fouten), en `scenario_mode`
+(`independent` als default, byte-identiek aan het gelockte gedrag; `coherent` volgens het
+voorstel, met de harde ondergrens Fac >= 0.1 uit de vervolgmail zodat dispersion 1.0 mag).
+De DMO-naamgeving uit de vervolgmail is ook gebouwd: een geconfigureerde `Optimize_DMO_name`
+is de basis en krijgt methode en scenario erbij ("Show me what you got (grid) (Base case)").
+De zeven issues staan op upstream: #143 t/m #149.
+
+Eén bewuste afwijking: het woord "levers" is overal in documentatie, uitleg en de
+optimizer-melding vervangen door "internal variable inputs", maar de kolomlabels in de
+gegenereerde tabellen heten nog "Lever 01..k". Die labels data-niveau hernoemen zou de
+byte-reproduceerbaarheid van de gelockte studie breken; dat staat nu als comment bij de
+definitie en kan desgewenst na de scriptie alsnog.
 
 ### De MDBH-run is klaar, dus het hernoemen kan
 
