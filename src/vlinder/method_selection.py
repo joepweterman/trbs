@@ -21,7 +21,7 @@ Why exactly those three conditions:
 
   * a concave function of an affine map is concave, so affine key outputs
     preserve concavity while a nonlinear dependency (a ``min``/``max`` operator,
-    a product of two levers) can introduce a second basin;
+    a product of two internal variable inputs) can introduce a second basin;
   * a linear appreciation term is affine in its key output, and a sinusoidal
     term with ``smaller_the_better = 0`` is ``100*sin(0.5*pi*u)``, concave and
     increasing. A sinusoidal term with ``smaller_the_better = 1`` is
@@ -114,9 +114,9 @@ class MethodChoice:
 
 def _probe_allocations(k, budget):
     """
-    This function builds the deterministic probe set: zero spend, every single-lever
+    This function builds the deterministic probe set: zero spend, every single-input
     corner, and interior points of the capped simplex.
-    :param k: number of internal variable inputs (levers)
+    :param k: number of internal variable inputs
     :param budget: total allocation budget
     :return: an array of shape (1 + k + N_INTERIOR_PROBES, k)
     """
@@ -182,7 +182,7 @@ def _active_key_outputs(input_dict, key_output_values):
 def _max_affine_residual(allocations, key_output_values, budget, active):
     """
     This function measures how far the key outputs deviate from the affine model fitted on
-    zero spend and the single-lever corners, relative to each key output's own spread.
+    zero spend and the single-input corners, relative to each key output's own spread.
     A residual of order 1 means the dependency is genuinely nonlinear.
     :param allocations: the probe allocations
     :param key_output_values: key output matrix from the probe
@@ -192,7 +192,7 @@ def _max_affine_residual(allocations, key_output_values, budget, active):
     """
     if not active.any():
         return 0.0
-    first_interior = 1 + allocations.shape[1]  # zero spend, then one corner per lever
+    first_interior = 1 + allocations.shape[1]  # zero spend, then one corner per input
     base, corners = key_output_values[0], key_output_values[1:first_interior]
     interior_allocations, interior_values = allocations[first_interior:], key_output_values[first_interior:]
 
@@ -256,11 +256,11 @@ def _plateau_fraction(objective, k, budget, best_objective):
     The points are drawn the way the solvers draw their own starts, Dirichlet over the
     budget face, because flatness only matters where a solver actually begins: the deep
     interior of a case like Refugee is flat (every appreciation term clipped) while its
-    whole start distribution is not. On the face a lever can only grow at another lever's
+    whole start distribution is not. On the face one input can only grow at another's
     expense, so flatness is tested along the transfer directions the solver can take.
 
     :param objective: callable mapping an allocation to the weighted appreciation
-    :param k: number of internal variable inputs (levers)
+    :param k: number of internal variable inputs
     :param budget: total allocation budget
     :param best_objective: the best objective value observed on the probe set
     :return: the fraction of start points that are flat in every feasible direction
@@ -276,7 +276,7 @@ def _plateau_fraction(objective, k, budget, best_objective):
     for point, value in zip(points, values):
         if value >= reference - PLATEAU_TOL:
             continue
-        # Move budget from the largest lever into each of the others.
+        # Move budget from the largest internal variable input into each of the others.
         largest = int(np.argmax(point))
         step = min(PLATEAU_STEP_FRAC * budget, point[largest])
         transfers = (np.eye(k) - np.eye(k)[largest]) * step
