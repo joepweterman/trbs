@@ -254,6 +254,55 @@ class BaseSolver:
         eval_counter[0] += 1
         return -evaluate_allocation(self.input_dict, x, scenario, dmo_name, self._frozen_boundaries)
 
+    def find_dict_values(self, scenario):
+        """
+        This function retrieves values based on the input and output dictionaries.
+        """
+        # Identify the decision-maker's option (DMO) with the highest appreciation in the given scenario
+        dmo_name = self.output_dict[scenario]["highest_weighted_dmo"]
+
+        # Identify the highest appreciation of that DMO
+        max_appreciated_value = self.output_dict[scenario][dmo_name]["decision_makers_option_appreciation"]
+
+        # Identify the distibution of that DMO
+        decision_maker_options = self.input_dict["decision_makers_option_value"][
+            np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
+        ]
+
+        best_dmo_data = {
+            "dmo_name": dmo_name,
+            "decision_maker_options": decision_maker_options,
+            "max_appreciated_value": max_appreciated_value,
+        }
+
+        # Sum the values for this DMO (this represents the total investment)
+        max_investment = sum(decision_maker_options)
+
+        return best_dmo_data, max_investment
+
+    def _settle_incumbent(self, dmo_name, scenario, allocation, appreciation):
+        """
+        This function applies the rule every solver shares: an optimizer may not
+        report an answer worse than a decision-maker option the case already has.
+
+        If nothing the solver found beats the best-performing existing option,
+        that option is the answer and the optimizer's own option mirrors it. The
+        rule used to live inside grid search alone, so a continuous solver could
+        report an allocation below one the user had already defined.
+        :param dmo_name: the solver's own decision-maker option name
+        :param scenario: the scenario being solved
+        :param allocation: the best allocation the solver found
+        :param appreciation: the appreciation of that allocation
+        :return: the winning option name, allocation and appreciation
+        """
+        best_dmo_data, _ = self.find_dict_values(scenario)
+        incumbent_value = float(best_dmo_data["max_appreciated_value"])
+        if not np.isfinite(appreciation) or appreciation <= incumbent_value:
+            allocation = np.asarray(best_dmo_data["decision_maker_options"], dtype=float)
+            self._write_back_result(dmo_name, allocation)
+            return best_dmo_data["dmo_name"], allocation, incumbent_value
+        return dmo_name, np.asarray(allocation, dtype=float), float(appreciation)
+
     @staticmethod
     def _project_capped_simplex(x, budget):
         """Pull a point back into ``{x >= 0, sum(x) <= budget}``.
@@ -286,7 +335,7 @@ class GridSearch(BaseSolver):
     method_name = "grid"
     method_label = "grid"
 
-    def solve(self, scenario, dmo_name, budget=None, *, max_combinations=60000, **_ignored):
+    def solve(self, scenario, dmo_name, budget=None, *, max_combinations=60000, max_calculation_time=None, **_ignored):
         """Enumerate the budget face for ``scenario`` and write back the best allocation.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
@@ -294,11 +343,17 @@ class GridSearch(BaseSolver):
         :param budget: accepted for a uniform solver signature but unused. Grid search derives
             its own total from the best-performing decision-maker option.
         :param max_combinations: upper bound on the number of combinations to build.
+        :param max_calculation_time: seconds the evaluation loop may take. When given, it
+            replaces ``max_combinations``: the solver times a short sample of evaluations on
+            this case and keeps the finest lattice whose points fit in that time.
         :return: an :class:`OptimizationResult`.
         """
         started_at = time.perf_counter()
         best_dmo_data, max_investment = self.find_dict_values(scenario)
         self._prepare_input_dict(dmo_name, best_dmo_data["decision_maker_options"])
+
+        if max_calculation_time is not None:
+            max_combinations = self.combinations_within_time(scenario, dmo_name, max_calculation_time)
 
         scaled_max_investment = self.scale_max_investment(max_investment)
         step_size = self.calculate_step_size(max_investment, scaled_max_investment, self._k, max_combinations)
@@ -319,15 +374,10 @@ class GridSearch(BaseSolver):
                 best_appreciation = appreciation
                 best_allocation = allocation
 
-        # An existing option may already beat everything on the grid; then that option is the
-        # answer and the optimizer's own option mirrors it.
-        if best_appreciation > best_dmo_data["max_appreciated_value"]:
-            winning_dmo = dmo_name
-        else:
-            best_allocation = best_dmo_data["decision_maker_options"]
-            best_appreciation = best_dmo_data["max_appreciated_value"]
-            winning_dmo = best_dmo_data["dmo_name"]
         self._write_back_result(dmo_name, best_allocation)
+        winning_dmo, best_allocation, best_appreciation = self._settle_incumbent(
+            dmo_name, scenario, best_allocation, best_appreciation
+        )
 
         return self._build_result(
             dmo_name=winning_dmo,
@@ -339,31 +389,32 @@ class GridSearch(BaseSolver):
             n_function_evals=len(combinations),
         )
 
-    def find_dict_values(self, scenario):
+    def combinations_within_time(self, scenario, dmo_name, max_calculation_time, n_sample=25):
         """
-        This function retrieves values based on the input and output dictionaries.
+        This function turns a time budget into a number of lattice points.
+
+        It times a short sample of objective evaluations on this very case, so the
+        answer reflects the case's own cost per evaluation rather than a constant
+        measured elsewhere. What it deliberately does not model is the cost of
+        building the lattice: for a direct enumeration that cost is negligible,
+        but this class expands every valid budget split through all of its
+        orderings, which at twelve internal variable inputs takes about 430
+        seconds of processor time before a single evaluation happens. A time
+        budget therefore holds at the dimensions where the baseline competes and
+        is exceeded, by the construction step alone, at the dimensions where it
+        does not.
+        :param scenario: the scenario being solved
+        :param dmo_name: the solver's own decision-maker option name
+        :param max_calculation_time: the seconds available for evaluations
+        :param n_sample: how many evaluations to time for the estimate
+        :return: the number of lattice points that fit in the budget
         """
-        # Identify the decision-maker's option (DMO) with the highest appreciation in the given scenario
-        dmo_name = self.output_dict[scenario]["highest_weighted_dmo"]
-
-        # Identify the highest appreciation of that DMO
-        max_appreciated_value = self.output_dict[scenario][dmo_name]["decision_makers_option_appreciation"]
-
-        # Identify the distibution of that DMO
-        decision_maker_options = self.input_dict["decision_makers_option_value"][
-            np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
-        ]
-
-        best_dmo_data = {
-            "dmo_name": dmo_name,
-            "decision_maker_options": decision_maker_options,
-            "max_appreciated_value": max_appreciated_value,
-        }
-
-        # Sum the values for this DMO (this represents the total investment)
-        max_investment = sum(decision_maker_options)
-
-        return best_dmo_data, max_investment
+        probe = np.full(self._k, self.budget / self._k, dtype=float)
+        started_at = time.perf_counter()
+        for _ in range(n_sample):
+            evaluate_allocation(self.input_dict, probe, scenario, dmo_name, self._frozen_boundaries)
+        seconds_per_evaluation = (time.perf_counter() - started_at) / n_sample
+        return max(1, int(max_calculation_time / seconds_per_evaluation))
 
     @staticmethod
     def scale_max_investment(max_investment):
@@ -485,11 +536,15 @@ class SLSQPSolver(BaseSolver):
         if best_x is not None:
             self._write_back_result(dmo_name, best_x)
 
+        found_x = best_x if best_x is not None else np.full(self._k, np.nan)
+        found_f = -best_neg_f if best_x is not None else float("nan")
+        winning_dmo, found_x, found_f = self._settle_incumbent(dmo_name, scenario, found_x, found_f)
+
         return self._build_result(
-            dmo_name=dmo_name,
+            dmo_name=winning_dmo,
             scenario=scenario,
-            allocation=best_x if best_x is not None else np.full(self._k, np.nan),
-            appreciation=-best_neg_f if best_x is not None else float("nan"),
+            allocation=found_x,
+            appreciation=found_f,
             budget=budget,
             started_at=started_at,
             n_starts=n_starts,
@@ -658,11 +713,15 @@ class BasinHoppingSolver(SLSQPSolver):
         if best_x is not None:
             self._write_back_result(dmo_name, best_x)
 
+        found_x = best_x if best_x is not None else np.full(self._k, np.nan)
+        found_f = -best_neg_f if best_x is not None else float("nan")
+        winning_dmo, found_x, found_f = self._settle_incumbent(dmo_name, scenario, found_x, found_f)
+
         return self._build_result(
-            dmo_name=dmo_name,
+            dmo_name=winning_dmo,
             scenario=scenario,
-            allocation=best_x if best_x is not None else np.full(self._k, np.nan),
-            appreciation=-best_neg_f if best_x is not None else float("nan"),
+            allocation=found_x,
+            appreciation=found_f,
             budget=budget,
             started_at=started_at,
             n_starts=n_starts,
@@ -759,12 +818,13 @@ class GeneticAlgorithmSolver(BaseSolver):
         best_idx = int(np.argmax(scores))
         best_x = population[best_idx] * float(budget)
         self._write_back_result(dmo_name, best_x)
+        winning_dmo, best_x, best_f = self._settle_incumbent(dmo_name, scenario, best_x, float(scores[best_idx]))
 
         return self._build_result(
-            dmo_name=dmo_name,
+            dmo_name=winning_dmo,
             scenario=scenario,
             allocation=best_x,
-            appreciation=float(scores[best_idx]),
+            appreciation=best_f,
             budget=budget,
             started_at=started_at,
             n_starts=population_size,
@@ -879,12 +939,13 @@ class MdbhSolver(BaseSolver):
 
         best_x = self._project_capped_simplex(best_w[: self._k] * float(budget), float(budget))
         self._write_back_result(dmo_name, best_x)
+        winning_dmo, best_x, best_f = self._settle_incumbent(dmo_name, scenario, best_x, float(best_f))
 
         return self._build_result(
-            dmo_name=dmo_name,
+            dmo_name=winning_dmo,
             scenario=scenario,
             allocation=best_x,
-            appreciation=float(best_f),
+            appreciation=best_f,
             budget=budget,
             started_at=started_at,
             n_starts=n_starts,

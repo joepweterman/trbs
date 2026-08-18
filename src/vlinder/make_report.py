@@ -152,10 +152,12 @@ class MakeReport:
         }
         # update pages based on Excel
         self.page_selection = {
-            key: self.input_dict["configuration_value"][list(self.input_dict["configurations"]).index(key)].lower()
-            == "true"
-            if key in self.input_dict["configurations"]
-            else self.page_selection[key]
+            key: (
+                self.input_dict["configuration_value"][list(self.input_dict["configurations"]).index(key)].lower()
+                == "true"
+                if key in self.input_dict["configurations"]
+                else self.page_selection[key]
+            )
             for key in self.page_selection
         }
         # update pages based on hardcoded input
@@ -360,7 +362,8 @@ class MakeReport:
         :return: a success message including the location of the report
         """
         date_year = str(datetime.now().strftime("%Y-%m-%d"))
-        date_hour = str(datetime.now().strftime("%H:%M:%S"))
+        # Colons are illegal in Windows filenames, so the time is written with hyphens.
+        date_hour = str(datetime.now().strftime("%H-%M-%S"))
 
         pdf = self.make_slides_pdf(scenario)
         filename = "Report " + self.name + " tRBS " + f'{date_year + " " + date_hour}.pdf'
