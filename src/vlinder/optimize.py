@@ -12,8 +12,9 @@ specific:
      single allocation. Every solver calls them and nothing else touches the tRBS engine.
   2. ``OptimizationResult`` is the container every solver returns.
   3. ``BaseSolver`` holds what all solvers share: the budget, registering the optimizer's own
-     decision-maker option, writing the winning allocation back, and staying inside the feasible
-     set.
+     decision-maker option, writing the winning allocation back, staying inside the feasible set,
+     and the rule that no solver may report an answer worse than a decision-maker option the case
+     already contains.
   4. The solvers themselves. ``GridSearch`` enumerates the budget face. ``SLSQPSolver`` runs
      multi-start gradient optimization. ``BasinHoppingSolver`` extends it with an escape loop for
      surfaces with more than one optimum. ``GeneticAlgorithmSolver`` is the derivative-free
