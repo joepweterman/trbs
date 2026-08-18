@@ -85,21 +85,34 @@ def run_once(case_name, scenario, method, kwargs):
     return sim.optimization_result
 
 
-def units_within(case_name, scenario, method, seconds):
+def units_within(case_name, scenario, method, seconds, probe_units=4):
     """
-    This function calibrates a continuous method's budget knob to a time limit by
-    timing a single unit of its work and buying as many as fit.
+    This function calibrates a continuous method's budget knob to a time limit.
+
+    Timing a single unit is not enough, because that measurement carries the
+    solver's fixed set-up cost as well: scaling it linearly then underestimates
+    the marginal cost and the run overshoots its budget, in one measurement by a
+    factor two. Two probes separate the two terms, so the knob is set from the
+    marginal cost of a unit rather than from the average.
     :param case_name: the bundled case name
     :param scenario: the scenario to solve
     :param method: the method name
     :param seconds: the time budget
+    :param probe_units: how many units the second probe buys
     :return: the keyword arguments for the timed run
     """
     knob, minimal = KNOBS[method]
-    result = run_once(case_name, scenario, method, minimal)
-    per_unit = max(result.calculation_time, 1e-6)
+    one = run_once(case_name, scenario, method, minimal).calculation_time
+
+    many_kwargs = dict(minimal)
+    many_kwargs[knob] = probe_units
+    many = run_once(case_name, scenario, method, many_kwargs).calculation_time
+
+    marginal = max((many - one) / (probe_units - 1), 1e-6)
+    fixed = max(one - marginal, 0.0)
+
     kwargs = dict(minimal)
-    kwargs[knob] = max(1, int(seconds / per_unit))
+    kwargs[knob] = max(1, int((seconds - fixed) / marginal))
     return kwargs
 
 
