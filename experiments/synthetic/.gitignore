@@ -20,3 +20,6 @@ generated/study/*
 !generated/study/results_mdbh.jsonl
 !generated/study/meta_mdbh.json
 !generated/study/analysis_mdbh/
+!generated/study/results_equalfooting.jsonl
+!generated/study/meta_equalfooting.json
+!generated/study/analysis_equalfooting/

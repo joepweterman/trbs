@@ -1,0 +1,59 @@
+{
+  "python": "3.11.9",
+  "numpy": "2.3.2",
+  "scipy": "1.17.1",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "vlinder_commit": "50ff42e8da7f7a6132ad48dfe5ed1e7f7f43eb06",
+  "method_defaults": {
+    "grid": {
+      "max_combinations": 60000
+    },
+    "slsqp": {
+      "n_starts": 100
+    },
+    "basin_hopping": {
+      "n_hops": 25,
+      "n_starts": 1
+    },
+    "genetic_algorithm": {
+      "population_size": 50,
+      "n_generations": 60
+    }
+  },
+  "spec": {
+    "variants": [
+      "linear",
+      "sinusoidal"
+    ],
+    "ks": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "methods": [
+      "grid",
+      "grid_capped",
+      "slsqp",
+      "basin_hopping",
+      "genetic_algorithm",
+      "mdbh"
+    ],
+    "runtime_cap_s": 600.0,
+    "recovery_eps": 0.1,
+    "root": "C:\\Users\\joepw\\tRBS\\experiments\\synthetic\\generated\\study"
+  },
+  "written": "2026-08-17T17:52:08+00:00"
+}

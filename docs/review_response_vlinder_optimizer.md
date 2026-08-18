@@ -515,3 +515,102 @@ Wat er verder uit de tabel valt af te lezen:
    Ruben maakt, nu op de echte cases.
 3. Het genetische algoritme is consequent het goedkoopst en op refugee verrassend goed, maar
    verliest overal een klein beetje nauwkeurigheid.
+
+---
+
+## Deel 7: de twee aanvullingen van 18 augustus
+
+### 7.1 `max_calculation_time` op grid search
+
+**Gebouwd.** `GridSearch.solve` accepteert nu `max_calculation_time` in seconden. Als je hem
+meegeeft vervangt hij `max_combinations`: de solver timet een kort monster van evaluaties op de
+case die voor hem ligt en houdt het fijnste rooster waarvan de punten in die tijd passen. Dat
+staat als `combinations_within_time` in de class, zodat je hem ook los kunt aanroepen.
+
+```python
+sim.optimize("Base case", method="grid", max_calculation_time=30)
+```
+
+**Jouw aanname klopt niet meer.** Je herinnerde je 60.000 iteraties in 120 seconden. Gemeten kosten
+per evaluatie nu: 0,154 ms op Beerwiser, 0,399 ms op Refugee, 0,611 ms op IZZ. Zestigduizend
+evaluaties zijn dus ongeveer 9, 24 en 37 seconden. De code is drie tot dertien keer sneller dan je
+in gedachten had.
+
+**Eén beperking die je moet weten, en die ik gemeten heb in plaats van aangenomen.** De parameter
+begrenst de evaluatielus, niet het bouwen van het rooster. En dat bouwen is bij hoge dimensie het
+duurste deel: `generate_combinations` loopt alle multisets af en klapt elke overlevende open via
+`set(permutations(...))`, wat alle k! volgordes genereert om er de unieke uit te houden. Gemeten,
+alleen het bouwen, zonder één evaluatie:
+
+| case | k | bouwen | aandeel van de hele solve |
+| --- | --- | --- | --- |
+| Beerwiser | 2 | 0,80 s | 78% |
+| Refugee | 5 | 0,11 s | 0,5% |
+| IZZ | 9 | 1,56 s | 8,1% |
+| synthetisch | 12 | **430 s CPU** | vrijwel de hele solve |
+
+Een tijdslimiet houdt dus stand op de dimensies waar grid meedoet, en wordt bij twaalf variabelen
+al door het bouwen alleen overschreden voordat er iets geëvalueerd is. Ter vergelijking: een
+enumeratie die het rooster direct opbouwt doet er bij k=12 **0,03 seconde** over. Als je de
+tijdslimiet daar betrouwbaar wilt hebben, is de enumeratie zelf wat aangepakt moet worden, niet de
+parameter.
+
+### 7.2 De stapgrootte bij Σx ≤ B
+
+De regel is dezelfde als bij Σx = B, alleen telt hij een ander rooster.
+
+- **Op het budgetvlak** (huidige grid) zijn de roosterpunten de geordende k-tallen die precies
+  optellen tot het budget. Dat zijn er `C(units + k - 1, k - 1)`.
+- **Op de capped simplex** komt er een slack-coördinaat bij: de punten zijn de composities van de
+  resolutie over k+1 delen, waarvan we de eerste k houden. Dat zijn er `C(units + k, k)`.
+
+`calculate_step_size` doet in beide gevallen hetzelfde: begin bij stap 1, vergroot de stap tot het
+aantal punten onder het plafond ligt én de stap het geschaalde budget precies deelt. Alleen de
+tellingsformule verschilt. Concreet bij een plafond van 60.000:
+
+| case | vlak: stap / punten | capped: stap / punten |
+| --- | --- | --- |
+| Beerwiser (k=2) | 1 / 3.001 | 10 / 45.451 |
+| IZZ (k=9) | 300 / 43.758 | 375 / 24.310 |
+
+Je ziet de ruil: de capped simplex is een k-dimensionaal lichaam in plaats van een (k-1)-dimensionaal
+vlak, dus bij hetzelfde plafond moet de stap grover om het inwendige mee te nemen.
+
+**En dat kost meer dan het oplevert, op deze drie cases.** Ik heb beide baselines naast elkaar
+gedraaid. De capped variant sluit het gat niet maar vergroot het meestal: op IZZ 0,458 tegen 0,117
+appreciatiepunt op de Base case, beter op alleen het pessimistische scenario. Op alle negen cellen
+geven beide grids het hele budget uit. De vrijheid om te onderbesteden levert hier dus niets op,
+terwijl de resolutie die je ervoor inlevert wel kost. Goed nieuws voor de huidige implementatie:
+de beperking tot het budgetvlak kost jullie op deze cases niets meetbaars.
+
+### 7.3 De incumbent-regel voor alle solvers
+
+**Verwerkt, precies zoals je voorstelt.** `find_dict_values` en de regel zelf staan nu als
+`_settle_incumbent` in `BaseSolver`, en het blok is uit `GridSearch` verdwenen. Alle vijf de solvers
+roepen hem aan vlak voor ze hun resultaat opbouwen, dus de Mont Blanc blijft de Mont Blanc,
+ongeacht welke methode je kiest.
+
+Eén ding is het waard om expliciet te maken, want het maakt de regel meer dan een nettigheidje:
+**de bestaande DMO's liggen zelf in de toegestane verzameling.** Een continue solver die
+geconvergeerd is kan er dus niet onder eindigen. Gaat de regel bij `slsqp`, `basin_hopping`, het
+genetisch algoritme of MDBH toch af, dan is dat een convergentiefout en geen voorkeur. Hij is
+daarmee tegelijk een vangnet en een bugdetector, en het is de moeite waard om het te loggen als hij
+afgaat.
+
+Nagemeten dat de vergelijking klopt: `output_dict` wordt tijdens een solve niet ververst, dus de
+regel vergelijkt met de opties van de gebruiker en nooit met de zojuist geschreven optie van de
+solver zelf. Gecontroleerd op Beerwiser en Refugee, incumbent identiek voor en na.
+
+### 7.4 Twee dingen die uit de demo rolden
+
+Ik heb `vlinder_demo.ipynb` headless gedraaid om te zien of er iets omvalt.
+
+1. **Een bug die de demo halverwege stopte, en die nu weg is.** `make_report.py` bouwde zijn
+   bestandsnaam met `strftime("%H:%M:%S")`. Dubbele punten mogen niet in een Windows-bestandsnaam,
+   dus de demo brak af op de rapportcel en `test_make_report` faalde al maanden. Nu `%H-%M-%S`.
+   **De suite is daarmee voor het eerst helemaal groen: 242 geslaagd, nul gefaald.** De demo loopt
+   end to end door, 62 cellen, nul fouten, en de DMO-naam komt er goed uit
+   ("Optimized_DMO (basin-hopping) (Base case)").
+2. **Een die ik heb laten staan.** `visualize.py:709` doet `os.system(f"open '{graph_location}'")`.
+   Dat is een macOS-commando; op Windows print het "'open' is not recognized" en doet niets. Niet
+   blokkerend, en ik kan macOS niet testen, dus ik heb het niet aangeraakt. Wel een issue waard.
