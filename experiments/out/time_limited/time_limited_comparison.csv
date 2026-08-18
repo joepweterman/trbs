@@ -1,0 +1,73 @@
+case,scenario,limit_s,method,appreciation,seconds,evaluations,budget_spent,reported_dmo,settings
+Beerwiser,Base case,15,grid,65.7115899862911,1.1773179000010714,3001,300000.0,Timed (Base case),{'max_calculation_time': 15}
+Beerwiser,Base case,15,grid_capped,65.70490546625933,13.869246300018858,125751,300000.0,Timed (Base case),{'max_calculation_time': 15}
+Beerwiser,Base case,15,slsqp,65.7115899745153,22.616802900040057,104629,299999.9999994013,Timed (Base case),{'n_starts': 5127}
+Beerwiser,Base case,15,basin_hopping,65.71158991096567,12.709448400011752,54610,299999.99999999994,Timed (Base case),"{'n_hops': 3037, 'n_starts': 1}"
+Beerwiser,Base case,15,genetic_algorithm,65.7014195960705,17.809314600017387,123150,300000.0,Timed (Base case),"{'population_size': 50, 'n_generations': 2462}"
+Beerwiser,Base case,15,mdbh,65.71157321358413,12.209504700032994,102490,299999.99999976193,Timed (Base case),"{'n_starts': 77, 'n_hops': 10, 'n_local_steps': 50}"
+Beerwiser,Base case,30,grid,65.7115899862911,1.0817109000054188,3001,300000.0,Timed (Base case),{'max_calculation_time': 30}
+Beerwiser,Base case,30,grid_capped,65.7115899862911,20.50256370002171,180901,300000.0,Timed (Base case),{'max_calculation_time': 30}
+Beerwiser,Base case,30,slsqp,65.7115899745153,38.06645159999607,169167,299999.9999994013,Timed (Base case),{'n_starts': 8249}
+Beerwiser,Base case,30,basin_hopping,65.71158991096567,26.45347429998219,102871,299999.99999999994,Timed (Base case),"{'n_hops': 6820, 'n_starts': 1}"
+Beerwiser,Base case,30,genetic_algorithm,65.70141959607051,36.949502900009975,249950,300000.00000000006,Timed (Base case),"{'population_size': 50, 'n_generations': 4998}"
+Beerwiser,Base case,30,mdbh,65.71158819099136,27.316966900019906,251772,299999.99999977153,Timed (Base case),"{'n_starts': 191, 'n_hops': 10, 'n_local_steps': 50}"
+Beerwiser,Base case,60,grid,65.7115899862911,1.1139530999935232,3001,300000.0,Timed (Base case),{'max_calculation_time': 60}
+Beerwiser,Base case,60,grid_capped,65.70490546625933,50.7450322000077,501501,300000.0,Timed (Base case),{'max_calculation_time': 60}
+Beerwiser,Base case,60,slsqp,65.71158998181767,88.29449890000978,449357,299999.99999999994,Timed (Base case),{'n_starts': 21809}
+Beerwiser,Base case,60,basin_hopping,65.71158991096567,50.809665599954315,218906,299999.99999999994,Timed (Base case),"{'n_hops': 15881, 'n_starts': 1}"
+Beerwiser,Base case,60,genetic_algorithm,65.70141959607068,60.10173629998462,417200,300000.0,Timed (Base case),"{'population_size': 50, 'n_generations': 8343}"
+Beerwiser,Base case,60,mdbh,65.71158819099136,64.73989009996876,489622,299999.99999977153,Timed (Base case),"{'n_starts': 371, 'n_hops': 10, 'n_local_steps': 50}"
+Beerwiser,Base case,120,grid,65.7115899862911,1.3853106999886222,3001,300000.0,Timed (Base case),{'max_calculation_time': 120}
+Beerwiser,Base case,120,grid_capped,65.70490546625933,60.82798870000988,501501,300000.0,Timed (Base case),{'max_calculation_time': 120}
+Beerwiser,Base case,120,slsqp,65.71158998401461,204.66013859998202,914806,299999.9999964623,Timed (Base case),{'n_starts': 44214}
+Beerwiser,Base case,120,basin_hopping,65.71158991096567,130.51148029998876,528277,299999.99999999994,Timed (Base case),"{'n_hops': 40190, 'n_starts': 1}"
+Beerwiser,Base case,120,genetic_algorithm,65.70141959607069,155.49329209997086,1126650,300000.00000000006,Timed (Base case),"{'population_size': 50, 'n_generations': 22532}"
+Beerwiser,Base case,120,mdbh,65.71158955356319,121.51176939997822,1008686,299999.9999997484,Timed (Base case),"{'n_starts': 773, 'n_hops': 10, 'n_local_steps': 50}"
+Refugee,Base case,15,grid,96.5129905067434,9.825817000004463,22771,6469004.0,Timed (Base case),{'max_calculation_time': 15}
+Refugee,Base case,15,grid_capped,96.59078848804796,8.504360999970231,20349,6469004.0,Timed (Base case),{'max_calculation_time': 15}
+Refugee,Base case,15,slsqp,96.83343979782767,19.115732299978845,40873,6469004.0,Timed (Base case),{'n_starts': 276}
+Refugee,Base case,15,basin_hopping,96.87095475862941,17.502217400004156,37923,6469003.999938259,Timed (Base case),"{'n_hops': 296, 'n_starts': 1}"
+Refugee,Base case,15,genetic_algorithm,96.87213284449672,16.249145400011912,36750,6469004.0,Timed (Base case),"{'population_size': 50, 'n_generations': 734}"
+Refugee,Base case,15,mdbh,96.85587639286501,13.130235199991148,33571,6469003.99999467,Timed (Base case),"{'n_starts': 17, 'n_hops': 10, 'n_local_steps': 50}"
+Refugee,Base case,30,grid,96.80843181793827,23.386087500024587,58905,6469004.0,Timed (Base case),{'max_calculation_time': 30}
+Refugee,Base case,30,grid_capped,96.45551977052958,22.31839170004241,53130,6469004.0,Timed (Base case),{'max_calculation_time': 30}
+Refugee,Base case,30,slsqp,96.84042555012437,40.52325040003052,50197,6469003.999975658,Timed (Base case),{'n_starts': 342}
+Refugee,Base case,30,basin_hopping,96.87095475862941,33.6646422999911,37067,6469003.999938259,Timed (Base case),"{'n_hops': 290, 'n_starts': 1}"
+Refugee,Base case,30,genetic_algorithm,96.87189517323088,21.903764299990144,32550,6469004.000000001,Timed (Base case),"{'population_size': 50, 'n_generations': 650}"
+Refugee,Base case,30,mdbh,96.85587639286501,22.97551839996595,38435,6469003.99999467,Timed (Base case),"{'n_starts': 19, 'n_hops': 10, 'n_local_steps': 50}"
+Refugee,Base case,60,grid,96.80843181793827,41.15626370004611,58905,6469004.0,Timed (Base case),{'max_calculation_time': 60}
+Refugee,Base case,60,grid_capped,96.45551977052958,38.85813489998691,53130,6469004.0,Timed (Base case),{'max_calculation_time': 60}
+Refugee,Base case,60,slsqp,96.85924971373258,81.49093670002185,96060,6469003.999962816,Timed (Base case),{'n_starts': 666}
+Refugee,Base case,60,basin_hopping,96.87215296959971,87.77947990002576,103324,6469003.999710751,Timed (Base case),"{'n_hops': 768, 'n_starts': 1}"
+Refugee,Base case,60,genetic_algorithm,96.87213745437029,57.52398359996732,70900,6469004.0,Timed (Base case),"{'population_size': 50, 'n_generations': 1417}"
+Refugee,Base case,60,mdbh,96.86454956174276,61.47939379996387,89343,6469003.999994436,Timed (Base case),"{'n_starts': 44, 'n_hops': 10, 'n_local_steps': 50}"
+Refugee,Base case,120,grid,96.6719466825098,89.70521759998519,125791,6469004.0,Timed (Base case),{'max_calculation_time': 120}
+Refugee,Base case,120,grid_capped,96.45551977052958,37.70840960001806,53130,6469004.0,Timed (Base case),{'max_calculation_time': 120}
+Refugee,Base case,120,slsqp,96.87172911591861,157.50238510000054,187709,6469004.0,Timed (Base case),{'n_starts': 1273}
+Refugee,Base case,120,basin_hopping,96.87215296959971,180.3382512999815,213805,6469003.999710751,Timed (Base case),"{'n_hops': 1559, 'n_starts': 1}"
+Refugee,Base case,120,genetic_algorithm,96.87215029740386,117.38556209998205,149150,6469003.999999999,Timed (Base case),"{'population_size': 50, 'n_generations': 2982}"
+Refugee,Base case,120,mdbh,96.86454956174276,103.59537519997684,141365,6469003.999994436,Timed (Base case),"{'n_starts': 72, 'n_hops': 10, 'n_local_steps': 50}"
+IZZ,Base case,15,grid,68.73221825071926,12.059362400032114,12870,100.0,Timed (Base case),{'max_calculation_time': 15}
+IZZ,Base case,15,grid_capped,68.22065559483372,1.6268650999991223,2002,100.0,Timed (Base case),{'max_calculation_time': 15}
+IZZ,Base case,15,slsqp,69.1904728172757,13.40491139999358,14936,100.0,Timed (Base case),{'n_starts': 49}
+IZZ,Base case,15,basin_hopping,69.19053246952963,14.275198100018315,15754,100.00000000000001,Timed (Base case),"{'n_hops': 53, 'n_starts': 1}"
+IZZ,Base case,15,genetic_algorithm,69.18761316302523,15.155700800009072,17400,99.97410069489807,Timed (Base case),"{'population_size': 50, 'n_generations': 347}"
+IZZ,Base case,15,mdbh,69.19031466008605,15.080481700017117,24278,99.99999805615231,Timed (Base case),"{'n_starts': 8, 'n_hops': 10, 'n_local_steps': 50}"
+IZZ,Base case,30,grid,69.07359656168389,34.30894320004154,43758,100.0,Timed (Base case),{'max_calculation_time': 30}
+IZZ,Base case,30,grid_capped,68.73221825071926,19.24030289996881,24310,100.0,Timed (Base case),{'max_calculation_time': 30}
+IZZ,Base case,30,slsqp,69.1904728172757,28.538691900030244,31802,100.0,Timed (Base case),{'n_starts': 104}
+IZZ,Base case,30,basin_hopping,69.19053246952963,27.74322140001459,31028,100.00000000000001,Timed (Base case),"{'n_hops': 109, 'n_starts': 1}"
+IZZ,Base case,30,genetic_algorithm,69.18922965088518,30.983095499977935,35750,100.0,Timed (Base case),"{'population_size': 50, 'n_generations': 714}"
+IZZ,Base case,30,mdbh,69.19031466008605,29.790132599999197,36762,99.99999805615231,Timed (Base case),"{'n_starts': 12, 'n_hops': 10, 'n_local_steps': 50}"
+IZZ,Base case,60,grid,69.07359656168389,38.6575131000136,43758,100.0,Timed (Base case),{'max_calculation_time': 60}
+IZZ,Base case,60,grid_capped,68.73221825071926,19.666925700032152,24310,100.0,Timed (Base case),{'max_calculation_time': 60}
+IZZ,Base case,60,slsqp,69.19054162760311,54.323063599993475,59989,99.99999999999999,Timed (Base case),{'n_starts': 200}
+IZZ,Base case,60,basin_hopping,69.19053600973002,50.094585600018036,61863,99.99999999997439,Timed (Base case),"{'n_hops': 216, 'n_starts': 1}"
+IZZ,Base case,60,genetic_algorithm,69.1902790738936,77.83580619998975,163750,99.9990713461138,Timed (Base case),"{'population_size': 50, 'n_generations': 3274}"
+IZZ,Base case,60,mdbh,69.19031466008605,63.28656819998287,144895,99.99999805615231,Timed (Base case),"{'n_starts': 45, 'n_hops': 10, 'n_local_steps': 50}"
+IZZ,Base case,120,grid,69.07359656168389,21.556122399982996,43758,100.0,Timed (Base case),{'max_calculation_time': 120}
+IZZ,Base case,120,grid_capped,69.07359656168389,41.099724300031085,92378,100.0,Timed (Base case),{'max_calculation_time': 120}
+IZZ,Base case,120,slsqp,69.19054162760311,118.35098419996211,225172,99.99999999999999,Timed (Base case),{'n_starts': 746}
+IZZ,Base case,120,basin_hopping,69.19054817721226,119.1939961000462,232608,100.0,Timed (Base case),"{'n_hops': 807, 'n_starts': 1}"
+IZZ,Base case,120,genetic_algorithm,69.1902790738936,127.09119040000951,128450,99.9990713461138,Timed (Base case),"{'population_size': 50, 'n_generations': 2568}"
+IZZ,Base case,120,mdbh,69.19031466008605,134.1069011000218,155068,99.99999805615231,Timed (Base case),"{'n_starts': 48, 'n_hops': 10, 'n_local_steps': 50}"

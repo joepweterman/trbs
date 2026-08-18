@@ -614,3 +614,71 @@ Ik heb `vlinder_demo.ipynb` headless gedraaid om te zien of er iets omvalt.
 2. **Een die ik heb laten staan.** `visualize.py:709` doet `os.system(f"open '{graph_location}'")`.
    Dat is een macOS-commando; op Windows print het "'open' is not recognized" en doet niets. Niet
    blokkerend, en ik kan macOS niet testen, dus ik heb het niet aangeraakt. Wel een issue waard.
+
+### 7.5 De vergelijking onder een tijdslimiet
+
+Gedraaid met `experiments/time_limited_comparison.py`, op het eerste scenario van elke case. Elke
+methode krijgt dezelfde seconden en zijn eigen knop wordt daarop geschaald, dus niet iedereen op
+zijn eigen default. Appreciatie per limiet:
+
+**Beerwiser (k=2)**
+
+| methode | 15 s | 30 s | 60 s | 120 s |
+| --- | --- | --- | --- | --- |
+| grid | 65,711590 | 65,711590 | 65,711590 | 65,711590 |
+| grid capped | 65,704905 | 65,711590 | 65,704905 | 65,704905 |
+| slsqp | 65,711590 | 65,711590 | 65,711590 | 65,711590 |
+| basin-hopping | 65,711590 | 65,711590 | 65,711590 | 65,711590 |
+| genetisch | 65,701420 | 65,701420 | 65,701420 | 65,701420 |
+| mdbh | 65,711573 | 65,711588 | 65,711588 | 65,711590 |
+
+**IZZ (k=9)**
+
+| methode | 15 s | 30 s | 60 s | 120 s |
+| --- | --- | --- | --- | --- |
+| grid | 68,732218 | 69,073597 | 69,073597 | 69,073597 |
+| grid capped | 68,220656 | 68,732218 | 68,732218 | 69,073597 |
+| slsqp | 69,190473 | 69,190473 | 69,190542 | 69,190542 |
+| basin-hopping | 69,190532 | 69,190532 | 69,190536 | 69,190548 |
+| genetisch | 69,187613 | 69,189230 | 69,190279 | 69,190279 |
+| mdbh | 69,190315 | 69,190315 | 69,190315 | 69,190315 |
+
+**Refugee (k=5)**
+
+| methode | 15 s | 30 s | 60 s | 120 s |
+| --- | --- | --- | --- | --- |
+| grid | 96,512991 | 96,808432 | 96,808432 | **96,671947** |
+| grid capped | 96,590788 | **96,455520** | 96,455520 | 96,455520 |
+| slsqp | 96,833440 | 96,840426 | 96,859250 | 96,871729 |
+| basin-hopping | 96,870955 | 96,870955 | 96,872153 | 96,872153 |
+| genetisch | 96,872133 | 96,871895 | 96,872137 | 96,872150 |
+| mdbh | 96,855876 | 96,855876 | 96,864550 | 96,864550 |
+
+**Je verwachting klopt.** Basin-hopping wordt niet beter van meer tijd. Op Beerwiser staat hij vanaf
+15 seconden al op de eindwaarde, en op IZZ en Refugee zit de winst tussen 15 en 120 seconden in de
+vierde tot zesde decimaal. Er valt daar niets meer te halen.
+
+**Twee dingen die ik niet had verwacht en die belangrijker zijn.**
+
+*Meer tijd redt grid search niet.* Op IZZ loopt grid van 68,73 naar 69,07 en blijft daar vanaf 30
+seconden staan, terwijl de continue methodes vanaf 15 seconden al op 69,1905 zitten. Het gat van
+ongeveer 0,12 appreciatiepunt gaat met geen enkele tijdslimiet dicht. De reden is die uit 7.1: de
+resolutie is niet door tijd begrensd maar door `scale_max_investment`, die het budget op ongeveer
+duizend eenheden vastzet. Op Beerwiser is dat het scherpst: het rooster bestaat daar uit maximaal
+3.001 punten, dus grid gebruikt van zijn 15 seconden er maar 1,2, en van zijn 120 seconden nog
+steeds 1,2. Willen jullie fijnere roosters, dan moet die schaalfunctie aangepakt worden en niet de
+tijdslimiet.
+
+*Meer tijd kan grid search zelfs slechter maken.* Kijk naar Refugee: 96,51 bij 15 seconden, 96,81
+bij 30 en 60, en dan **96,67 bij 120 seconden**. De capped variant doet hetzelfde, van 96,59 terug
+naar 96,46. Dat is geen fout in de meting. Een grotere tijdslimiet geeft een fijner rooster, en
+roosters van verschillende resolutie liggen niet in elkaar: een punt dat op het grove rooster
+toevallig dicht bij het optimum lag, hoeft op het fijne rooster niet te bestaan. Voor een gebruiker
+is dat contra-intuïtief en het is de moeite waard om te weten: bij grid search is "meer tijd" geen
+garantie op een beter antwoord, bij de continue methodes wel.
+
+Voor de volledigheid: de kalibratie van de continue methodes is niet exact. Ik meet de marginale
+kosten van een start of hop en koop er zoveel als passen, maar hoe lang een start convergeert weet
+je vooraf niet, dus de runs schieten er 10 tot 60 procent overheen. Wil je een harde tijdslimiet
+over alle methodes, dan moeten de solvers zelf tussen starts een deadline controleren. Dat is een
+grotere ingreep en die laat ik aan jullie.

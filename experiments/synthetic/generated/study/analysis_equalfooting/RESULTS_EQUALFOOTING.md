@@ -9,7 +9,7 @@ Rows read: 5,040 synthetic and 54 packaged.
 | --- | --- | --- |
 | P1 | FAILS | IZZ median closed by capping -0.0031762487841149323, Beerwiser 0.0 |
 | P2 | FAILS | grid reached 1.0 everywhere: True, best fraction reaching 0.01 at k>=6: 0.9666666666666667 |
-| P3 | FAILS | median share of runtime that is not evaluation, k>=9: 0.0 |
+| P3 | FAILS | measured share of the solve that is lattice construction at k=9: 0.0917783220739578 |
 | P4 | FAILS | mdbh/slsqp evaluations to target: {'1': 38.0, '0.1': 79.89204545454545, '0.01': 122.15} |
 
 ## Constraint decomposition on the packaged cases
