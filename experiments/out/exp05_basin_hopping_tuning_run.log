@@ -1,0 +1,158 @@
+Beerwiser  baseline        seed 1  appr  65.711590     0.3s  evals    3109
+Beerwiser  baseline        seed 2  appr  65.711590     0.3s  evals    2904
+Beerwiser  baseline        seed 3  appr  65.711589     0.3s  evals    2818
+Beerwiser  baseline        seed 4  appr  65.711589     0.3s  evals    3005
+Beerwiser  baseline        seed 5  appr  65.711590     0.4s  evals    3666
+Beerwiser  restarts 5x20   seed 1  appr  65.711588     0.2s  evals    2362
+Beerwiser  restarts 5x20   seed 2  appr  65.711609     0.3s  evals    2826
+Beerwiser  restarts 5x20   seed 3  appr  65.711590     0.3s  evals    2935
+Beerwiser  restarts 5x20   seed 4  appr  65.711590     0.3s  evals    3347
+Beerwiser  restarts 5x20   seed 5  appr  65.711590     0.4s  evals    3507
+Beerwiser  T=0.1           seed 1  appr  65.711590     0.3s  evals    2979
+Beerwiser  T=0.1           seed 2  appr  65.711590     0.3s  evals    2805
+Beerwiser  T=0.1           seed 3  appr  65.711589     0.3s  evals    2818
+Beerwiser  T=0.1           seed 4  appr  65.711589     0.3s  evals    3113
+Beerwiser  T=0.1           seed 5  appr  65.711590     0.4s  evals    3674
+Beerwiser  T=5             seed 1  appr  65.711590     0.3s  evals    3109
+Beerwiser  T=5             seed 2  appr  65.711590     0.3s  evals    2904
+Beerwiser  T=5             seed 3  appr  65.711589     0.3s  evals    2818
+Beerwiser  T=5             seed 4  appr  65.711589     0.3s  evals    2945
+Beerwiser  T=5             seed 5  appr  65.711590     0.4s  evals    3666
+Beerwiser  T=auto          seed 1  appr  65.711590     0.3s  evals    3141
+Beerwiser  T=auto          seed 2  appr  65.711590     0.3s  evals    2936
+Beerwiser  T=auto          seed 3  appr  65.711589     0.3s  evals    2850
+Beerwiser  T=auto          seed 4  appr  65.711589     0.3s  evals    3037
+Beerwiser  T=auto          seed 5  appr  65.711590     0.4s  evals    3698
+Beerwiser  wide kick       seed 1  appr  65.711587     0.3s  evals    2600
+Beerwiser  wide kick       seed 2  appr  65.711589     0.3s  evals    2503
+Beerwiser  wide kick       seed 3  appr  65.711589     0.2s  evals    2266
+Beerwiser  wide kick       seed 4  appr  65.711590     0.3s  evals    2555
+Beerwiser  wide kick       seed 5  appr  65.711589     0.3s  evals    2665
+Beerwiser  inner=Powell    seed 1  appr  65.701420     0.8s  evals   11299
+Beerwiser  inner=Powell    seed 2  appr  65.701420     0.8s  evals   11084
+Beerwiser  inner=Powell    seed 3  appr  65.701420     0.8s  evals   10946
+Beerwiser  inner=Powell    seed 4  appr  65.701420     0.8s  evals   10557
+Beerwiser  inner=Powell    seed 5  appr  65.701420     0.8s  evals   11429
+Beerwiser  inner=COBYLA    seed 1  appr  65.711332     1.8s  evals    2962
+Beerwiser  inner=COBYLA    seed 2  appr  65.711293     1.7s  evals    3011
+Beerwiser  inner=COBYLA    seed 3  appr  65.711338     1.8s  evals    2910
+Beerwiser  inner=COBYLA    seed 4  appr  65.701420     1.8s  evals    2984
+Beerwiser  inner=COBYLA    seed 5  appr  65.711458     1.8s  evals    3009
+Refugee    baseline        seed 1  appr  96.871555     3.4s  evals   13220
+Refugee    baseline        seed 2  appr  96.788031     3.1s  evals   11823
+Refugee    baseline        seed 3  appr  96.870821     3.8s  evals   15054
+Refugee    baseline        seed 4  appr  96.872159     3.6s  evals   14132
+Refugee    baseline        seed 5  appr  96.815456     3.3s  evals   12919
+Refugee    restarts 5x20   seed 1  appr  96.871685     3.3s  evals   12846
+Refugee    restarts 5x20   seed 2  appr  85.226297     3.3s  evals   12987
+Refugee    restarts 5x20   seed 3  appr  96.870821     3.4s  evals   13219
+Refugee    restarts 5x20   seed 4  appr  96.854526     3.3s  evals   12846
+Refugee    restarts 5x20   seed 5  appr  85.226297     3.5s  evals   13581
+Refugee    T=0.1           seed 1  appr  96.871572     3.4s  evals   13318
+Refugee    T=0.1           seed 2  appr  96.788031     3.0s  evals   11823
+Refugee    T=0.1           seed 3  appr  96.870821     3.6s  evals   14163
+Refugee    T=0.1           seed 4  appr  96.869279     3.6s  evals   14318
+Refugee    T=0.1           seed 5  appr  96.815456     3.3s  evals   12919
+Refugee    T=5             seed 1  appr  96.871555     3.5s  evals   13125
+Refugee    T=5             seed 2  appr  96.788031     3.0s  evals   11823
+Refugee    T=5             seed 3  appr  96.870709     3.8s  evals   14852
+Refugee    T=5             seed 4  appr  96.869279     3.2s  evals   12315
+Refugee    T=5             seed 5  appr  96.815452     3.3s  evals   12917
+Refugee    T=auto          seed 1  appr  96.862612     3.2s  evals   12329
+Refugee    T=auto          seed 2  appr  96.740829     3.0s  evals   12024
+Refugee    T=auto          seed 3  appr  96.871455     3.7s  evals   14455
+Refugee    T=auto          seed 4  appr  96.740531     3.2s  evals   12445
+Refugee    T=auto          seed 5  appr  96.738617     3.3s  evals   12670
+Refugee    wide kick       seed 1  appr  96.872096     4.1s  evals   16004
+Refugee    wide kick       seed 2  appr  96.871498     3.9s  evals   15216
+Refugee    wide kick       seed 3  appr  96.870709     3.6s  evals   13902
+Refugee    wide kick       seed 4  appr  96.871994     3.5s  evals   13622
+Refugee    wide kick       seed 5  appr  96.872008     3.5s  evals   14087
+Refugee    inner=Powell    seed 1  appr  96.871408    14.8s  evals   61716
+Refugee    inner=Powell    seed 2  appr  96.872177    15.6s  evals   65510
+Refugee    inner=Powell    seed 3  appr  96.871945    15.0s  evals   63555
+Refugee    inner=Powell    seed 4  appr  96.861845    13.8s  evals   56749
+Refugee    inner=Powell    seed 5  appr  96.872176    15.0s  evals   64202
+Refugee    inner=COBYLA    seed 1  appr  96.872143     6.8s  evals    6507
+Refugee    inner=COBYLA    seed 2  appr  96.871919     6.7s  evals    6336
+Refugee    inner=COBYLA    seed 3  appr  96.872078     6.7s  evals    6449
+Refugee    inner=COBYLA    seed 4  appr  96.872174     6.6s  evals    6459
+Refugee    inner=COBYLA    seed 5  appr  96.872067     6.8s  evals    6622
+IZZ        baseline        seed 1  appr  69.190431     8.5s  evals   30417
+IZZ        baseline        seed 2  appr  69.190551     8.1s  evals   28937
+IZZ        baseline        seed 3  appr  69.190532     8.6s  evals   30286
+IZZ        baseline        seed 4  appr  69.190531     8.1s  evals   28965
+IZZ        baseline        seed 5  appr  69.190477     8.8s  evals   29763
+IZZ        restarts 5x20   seed 1  appr  69.190464     8.3s  evals   29682
+IZZ        restarts 5x20   seed 2  appr  69.190447     8.0s  evals   29107
+IZZ        restarts 5x20   seed 3  appr  69.190459     8.2s  evals   29538
+IZZ        restarts 5x20   seed 4  appr  69.190531     7.6s  evals   27838
+IZZ        restarts 5x20   seed 5  appr  69.190491     8.3s  evals   30004
+IZZ        T=0.1           seed 1  appr  69.190479     8.1s  evals   29779
+IZZ        T=0.1           seed 2  appr  69.190419     7.6s  evals   27580
+IZZ        T=0.1           seed 3  appr  69.190535     7.7s  evals   28331
+IZZ        T=0.1           seed 4  appr  69.190531     7.9s  evals   28597
+IZZ        T=0.1           seed 5  appr  69.190550     8.0s  evals   29049
+IZZ        T=5             seed 1  appr  69.190474     8.3s  evals   30312
+IZZ        T=5             seed 2  appr  69.190551     8.0s  evals   28937
+IZZ        T=5             seed 3  appr  69.190534     8.1s  evals   29125
+IZZ        T=5             seed 4  appr  69.190531     7.8s  evals   28562
+IZZ        T=5             seed 5  appr  69.190477     8.3s  evals   29763
+IZZ        T=auto          seed 1  appr  69.190474     8.3s  evals   30344
+IZZ        T=auto          seed 2  appr  69.190551     8.1s  evals   28969
+IZZ        T=auto          seed 3  appr  69.190534     8.6s  evals   31196
+IZZ        T=auto          seed 4  appr  69.190531     7.9s  evals   28723
+IZZ        T=auto          seed 5  appr  69.190477     8.2s  evals   29795
+IZZ        wide kick       seed 1  appr  69.190535     7.8s  evals   29094
+IZZ        wide kick       seed 2  appr  69.190507     7.6s  evals   27827
+IZZ        wide kick       seed 3  appr  69.190429     7.8s  evals   28086
+IZZ        wide kick       seed 4  appr  69.190542     7.7s  evals   27841
+IZZ        wide kick       seed 5  appr  69.190488     8.1s  evals   29630
+IZZ        inner=Powell    seed 1  appr  69.190458    25.4s  evals   94536
+IZZ        inner=Powell    seed 2  appr  69.190359    22.8s  evals   86490
+IZZ        inner=Powell    seed 3  appr  69.190448    25.4s  evals   97864
+IZZ        inner=Powell    seed 4  appr  69.190504    23.5s  evals   89790
+IZZ        inner=Powell    seed 5  appr  69.190533    23.0s  evals   86975
+IZZ        inner=COBYLA    seed 1  appr  69.190231    13.3s  evals    9307
+IZZ        inner=COBYLA    seed 2  appr  69.190506    12.8s  evals    9104
+IZZ        inner=COBYLA    seed 3  appr  69.190275    13.0s  evals    9072
+IZZ        inner=COBYLA    seed 4  appr  69.190188    12.8s  evals    9101
+IZZ        inner=COBYLA    seed 5  appr  69.190437    13.2s  evals    9204
+
+Median appreciation per case and configuration:
+case           Beerwiser        IZZ    Refugee
+config                                        
+T=0.1          65.711590  69.190531  96.869279
+T=5            65.711590  69.190531  96.869279
+T=auto         65.711590  69.190531  96.740829
+baseline       65.711590  69.190531  96.870821
+inner=COBYLA   65.711332  69.190275  96.872078
+inner=Powell   65.701420  69.190458  96.871945
+restarts 5x20  65.711590  69.190464  96.854526
+wide kick      65.711589  69.190507  96.871994
+
+Median evaluations per case and configuration:
+case           Beerwiser      IZZ  Refugee
+config                                    
+T=0.1             2979.0  28597.0  13318.0
+T=5               2945.0  29125.0  12917.0
+T=auto            3037.0  29795.0  12445.0
+baseline          3005.0  29763.0  13220.0
+inner=COBYLA      2984.0   9104.0   6459.0
+inner=Powell     11084.0  89790.0  63555.0
+restarts 5x20     2935.0  29538.0  12987.0
+wide kick         2555.0  28086.0  14087.0
+
+Median seconds per case and configuration:
+case           Beerwiser        IZZ    Refugee
+config                                        
+T=0.1           0.306254   7.885952   3.442393
+T=5             0.300808   8.058750   3.287915
+T=auto          0.309066   8.165076   3.234564
+baseline        0.301506   8.450909   3.389961
+inner=COBYLA    1.769770  13.017107   6.693221
+inner=Powell    0.820809  23.531546  14.982063
+restarts 5x20   0.299624   8.154147   3.304677
+wide kick       0.265984   7.790537   3.578303
+
+[exp05] written to C:\Users\joepw\tRBS\experiments\out\exp05_basin_hopping_tuning\exp05_basin_hopping_tuning.csv
