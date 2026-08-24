@@ -122,6 +122,36 @@ def test_generate_combinations(max_investment, step_size, num_inputs, expected_r
         assert sum(combination) == max_investment
 
 
+def test_refinement_points_cover_the_face_and_skip_the_previous_round():
+    """The first round is the whole lattice; later rounds yield only the new points."""
+    first = list(GridSearch.refinement_points(2, 2, include_all=True))
+    assert sorted(first) == [(0, 2), (1, 1), (2, 0)]
+
+    second = list(GridSearch.refinement_points(4, 2, include_all=False))
+    assert sorted(second) == [(1, 3), (3, 1)]
+
+    # Together the two rounds cover the finer lattice exactly, with nothing evaluated twice.
+    doubled = {tuple(2 * count for count in point) for point in first}
+    assert sorted(doubled | set(second)) == sorted(GridSearch._face_compositions(4, 2))
+
+
+@suppress_print
+def test_grid_time_budget_starts_at_half_the_budget_and_refines(beerwiser_dicts):
+    """Under a time budget the grid halves its step, round after round, until time runs out."""
+    input_dict, output_dict = beerwiser_dicts
+    solver = GridSearch(input_dict, output_dict)
+    result = solver.solve("Base case", "Test DMO", max_calculation_time=1.5)
+
+    steps = [level["step_size"] for level in result.per_start_results]
+    assert steps[0] == pytest.approx(BEERWISER_BUDGET / 2)
+    for coarse, fine in zip(steps, steps[1:]):
+        assert fine == pytest.approx(coarse / 2)
+    # Every evaluation is a new lattice point, and the equal split of the first round
+    # guarantees the answer is at least as good as that split.
+    assert result.n_function_evals == sum(level["new_points"] for level in result.per_start_results)
+    assert result.appreciation >= 65.4
+
+
 def test_grid_find_dict_values(prepared_solver):
     """Grid search starts from the best-performing option already in the case."""
     grid = GridSearch(prepared_solver.input_dict, prepared_solver.output_dict)
@@ -360,3 +390,50 @@ def test_every_solver_is_reproducible(beerwiser_dicts, solver_class, settings):
 
     assert first.appreciation == second.appreciation
     assert np.array_equal(first.allocation, second.allocation)
+
+
+# ======================================================================
+# spend_all: the budget as an equality instead of an upper bound
+# ======================================================================
+def test_project_budget_face_restores_the_face():
+    """Solver tolerance dust is clipped and the sum is rescaled to the budget, in either direction."""
+    projected = SLSQPSolver._project_budget_face(np.array([-1e-9, 100.0, 100.0]), 300.0)
+    assert float(np.sum(projected)) == pytest.approx(300.0)
+    assert (projected >= 0.0).all()
+
+    all_clipped = SLSQPSolver._project_budget_face(np.array([-1.0, -2.0]), 300.0)
+    assert float(np.sum(all_clipped)) == pytest.approx(300.0)
+
+
+@suppress_print
+@pytest.mark.parametrize(
+    "solver_class, settings",
+    [
+        (SLSQPSolver, {"n_starts": 10_000, "seed": 1}),
+        (BasinHoppingSolver, {"n_starts": 1, "n_hops": 1_000_000, "seed": 1}),
+        (GeneticAlgorithmSolver, {"population_size": 12, "n_generations": 1_000_000, "seed": 1}),
+        (MdbhSolver, {"n_starts": 10_000, "n_hops": 10, "n_local_steps": 50, "seed": 1}),
+    ],
+)
+def test_every_continuous_solver_stops_at_its_time_limit(beerwiser_dicts, solver_class, settings):
+    """With the unit knob out of reach, the clock is what ends the run, close to the limit."""
+    input_dict, output_dict = beerwiser_dicts
+    solver = solver_class(input_dict, output_dict)
+    result = solver.solve("Base case", "Solver DMO", BEERWISER_BUDGET, max_calculation_time=1.0, **settings)
+
+    assert result.calculation_time < 3.0, "the solver ran far past its time limit"
+    assert result.appreciation > 0
+    assert_feasible(result.allocation, BEERWISER_BUDGET)
+
+
+@suppress_print
+@pytest.mark.parametrize("solver_class, settings", SOLVER_SETTINGS[1:])
+def test_spend_all_answers_on_the_budget_face(beerwiser_dicts, solver_class, settings):
+    """With ``spend_all`` every continuous solver spends the budget exactly, like grid search."""
+    input_dict, output_dict = beerwiser_dicts
+    solver = solver_class(input_dict, output_dict)
+    result = solver.solve("Base case", "Solver DMO", BEERWISER_BUDGET, spend_all=True, **settings)
+
+    assert float(np.sum(result.allocation)) == pytest.approx(BEERWISER_BUDGET)
+    assert (np.asarray(result.allocation) >= -1e-6).all()
+    assert result.appreciation > 0

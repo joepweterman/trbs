@@ -100,6 +100,24 @@ class CappedGridSearch(GridSearch):
             tuple(count * step_size for count in point) for point in bounded_compositions(units, num_internal_inputs)
         ]
 
+    @staticmethod
+    def refinement_points(units, parts, include_all):
+        """
+        This function yields one refinement round of the capped lattice, in units of the step.
+
+        Same skip rule as the packaged grid's refinement: halving the step doubles every
+        count, so an all-even point was already evaluated at the previous, coarser round.
+        The implicit slack count (unspent units) is even whenever the spent counts are,
+        because the total is a power of two, so checking the spent counts is enough.
+        :param units: the resolution, in steps, of the budget
+        :param parts: the number of internal variable inputs
+        :param include_all: whether this is the first round, which has no previous round
+        :return: a generator of integer tuples of length ``parts``
+        """
+        for point in bounded_compositions(units, parts):
+            if include_all or any(count % 2 for count in point):
+                yield point
+
 
 def register():
     """
