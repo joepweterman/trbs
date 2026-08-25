@@ -2,13 +2,13 @@
 # pylint: disable=C0302  # single home for ALL optimization methods (Vlinder decision 2026-06-01)
 
 """
-This module contains the Optimize class, which performs grid search optimization to maximize the
-appreciation of decision-maker options.
+This module contains the Optimize class, which maximizes the appreciation of decision-maker
+options.
 
 Grid search is no longer the only way to do that, so the module is built up from general to
 specific:
 
-  1. ``evaluate_and_appreciate()`` and ``evaluate_allocation()`` are free functions that score a
+  1. ``evaluate_and_appreciate()`` and ``score_allocation()`` are free functions that score a
      single allocation. Every solver calls them and nothing else touches the tRBS engine.
   2. ``OptimizationResult`` is the container every solver returns.
   3. ``BaseSolver`` holds what all solvers share: the budget, registering the optimizer's own
@@ -85,7 +85,7 @@ def evaluate_and_appreciate(input_dict, x, scenario, dmo_name, start_and_end_poi
     return output
 
 
-def evaluate_allocation(input_dict, x, scenario, dmo_name, start_and_end_points=None):
+def score_allocation(input_dict, x, scenario, dmo_name, start_and_end_points=None):
     """
     Weighted appreciation of allocation ``x``: :func:`evaluate_and_appreciate` reduced to
     the single number every optimizer maximises. Same preconditions.
@@ -103,6 +103,11 @@ def evaluate_allocation(input_dict, x, scenario, dmo_name, start_and_end_points=
             "decision_makers_option_appreciation"
         ]
     )
+
+
+#: Backward-compatible alias: this function was called ``evaluate_allocation`` before the
+#: rename to ``score_allocation``, and existing callers keep working under the old name.
+evaluate_allocation = score_allocation
 
 
 @dataclass
@@ -255,7 +260,7 @@ class BaseSolver:
     def _objective(self, x, scenario, dmo_name, eval_counter):
         """Negated appreciation (scipy minimizes); ``eval_counter`` counts calls."""
         eval_counter[0] += 1
-        return -evaluate_allocation(self.input_dict, x, scenario, dmo_name, self._frozen_boundaries)
+        return -score_allocation(self.input_dict, x, scenario, dmo_name, self._frozen_boundaries)
 
     def find_dict_values(self, scenario):
         """
@@ -387,7 +392,7 @@ class GridSearch(BaseSolver):
                 allocation = np.array(combination)
                 if len(allocation) != self._k:
                     continue
-                appreciation = evaluate_allocation(
+                appreciation = score_allocation(
                     self.input_dict, allocation, scenario, dmo_name, self._frozen_boundaries
                 )
                 if appreciation > best_appreciation:
@@ -442,7 +447,7 @@ class GridSearch(BaseSolver):
                 if time.perf_counter() >= deadline:
                     break
                 allocation = np.array(point, dtype=float) * step_size
-                appreciation = evaluate_allocation(
+                appreciation = score_allocation(
                     self.input_dict, allocation, scenario, dmo_name, self._frozen_boundaries
                 )
                 n_evals += 1
@@ -560,7 +565,7 @@ class SLSQPSolver(BaseSolver):
     surface has a single optimum; when it has more than one, a start can settle in the wrong one,
     which is what :class:`BasinHoppingSolver` addresses.
 
-    The budget is an upper bound by default, not an equality: under-spending is feasible. That
+    The budget is an upper bound by default, not an equality: under-spending could be feasible. That
     matters on surfaces where spending the whole budget lowers appreciation. Where it does not,
     the constraint binds and the solution spends everything anyway. ``spend_all=True`` turns
     the bound into an equality, so every solution spends the budget exactly, the way grid
@@ -912,7 +917,7 @@ class GeneticAlgorithmSolver(BaseSolver):
 
         def fitness(z):
             eval_counter[0] += 1
-            return evaluate_allocation(self.input_dict, z * float(budget), scenario, dmo_name, self._frozen_boundaries)
+            return score_allocation(self.input_dict, z * float(budget), scenario, dmo_name, self._frozen_boundaries)
 
         # Uniform initial population: a Dirichlet draw on the budget face, or over the capped
         # simplex via a draw on k+1 coordinates with the slack coordinate dropped.

@@ -12,7 +12,7 @@ and what the caller gets back.
 import numpy as np
 import pytest
 
-from vlinder.optimize import BasinHoppingSolver, GridSearch, Optimize, SLSQPSolver, evaluate_allocation
+from vlinder.optimize import GridSearch, Optimize, SLSQPSolver, score_allocation
 from vlinder.utils import suppress_print
 from .conftest import BEERWISER_BUDGET, BEERWISER_OPTIMUM
 
@@ -249,6 +249,6 @@ def test_the_written_back_allocation_scores_what_the_result_claims(beerwiser_app
     input_dict = beerwiser_appreciated.input_dict
     idx = np.where(input_dict["decision_makers_options"] == "Check (Base case)")[0][0]
     stored = input_dict["decision_makers_option_value"][idx]
-    scored = evaluate_allocation(input_dict, stored, "Base case", "Check (Base case)")
+    scored = score_allocation(input_dict, stored, "Base case", "Check (Base case)")
 
     assert scored == pytest.approx(result.appreciation, abs=1e-9)

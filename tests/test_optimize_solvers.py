@@ -22,7 +22,7 @@ from vlinder.optimize import (
     MdbhSolver,
     OptimizationResult,
     SLSQPSolver,
-    evaluate_allocation,
+    score_allocation,
 )
 from vlinder.utils import get_values_from_target, suppress_print
 from .conftest import BEERWISER_BUDGET, BEERWISER_EQUAL_SPREAD, BEERWISER_OPTIMUM
@@ -227,7 +227,7 @@ def test_slsqp_moves_away_from_its_starting_point(prepared_solver):
     """
     solver = SLSQPSolver(prepared_solver.input_dict, prepared_solver.output_dict)
     x0 = np.array([60000.0, 240000.0])
-    start_appreciation = evaluate_allocation(solver.input_dict, x0, "Base case", "Test DMO")
+    start_appreciation = score_allocation(solver.input_dict, x0, "Base case", "Test DMO")
 
     res = solver._slsqp_from_start(x0, "Base case", "Test DMO", BEERWISER_BUDGET, [0])
 
@@ -240,7 +240,7 @@ def test_slsqp_beats_an_even_split(prepared_solver):
     """From an even split the solver can only improve."""
     solver = SLSQPSolver(prepared_solver.input_dict, prepared_solver.output_dict)
     uniform = np.array([BEERWISER_BUDGET / 2, BEERWISER_BUDGET / 2])
-    uniform_appreciation = evaluate_allocation(solver.input_dict, uniform, "Base case", "Test DMO")
+    uniform_appreciation = score_allocation(solver.input_dict, uniform, "Base case", "Test DMO")
 
     res = solver._slsqp_from_start(uniform, "Base case", "Test DMO", BEERWISER_BUDGET, [0])
 

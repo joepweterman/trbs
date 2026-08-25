@@ -12,7 +12,7 @@ import copy
 import numpy as np
 import pytest
 
-from vlinder.optimize import OptimizationResult, evaluate_allocation, evaluate_and_appreciate
+from vlinder.optimize import OptimizationResult, score_allocation, evaluate_and_appreciate
 from .conftest import BEERWISER_BUDGET, BEERWISER_EQUAL_SPREAD
 
 
@@ -25,24 +25,24 @@ def assert_unchanged(input_dict, snapshot):
             assert input_dict[key] == expected, f"input_dict['{key}'] was mutated"
 
 
-def test_evaluate_allocation_returns_the_known_appreciation(prepared_solver):
+def test_score_allocation_returns_the_known_appreciation(prepared_solver):
     """The "Equal spread" allocation must score its documented appreciation."""
-    appreciation = evaluate_allocation(
+    appreciation = score_allocation(
         prepared_solver.input_dict, np.array([150000, 150000]), "Base case", "Equal spread"
     )
 
     assert appreciation == pytest.approx(BEERWISER_EQUAL_SPREAD, abs=1e-9)
 
 
-def test_evaluate_allocation_responds_to_the_allocation(prepared_solver):
+def test_score_allocation_responds_to_the_allocation(prepared_solver):
     """A different allocation must give a different appreciation."""
-    equal = evaluate_allocation(prepared_solver.input_dict, np.array([150000, 150000]), "Base case", "Equal spread")
-    skewed = evaluate_allocation(prepared_solver.input_dict, np.array([100000, 200000]), "Base case", "Equal spread")
+    equal = score_allocation(prepared_solver.input_dict, np.array([150000, 150000]), "Base case", "Equal spread")
+    skewed = score_allocation(prepared_solver.input_dict, np.array([100000, 200000]), "Base case", "Equal spread")
 
     assert skewed != pytest.approx(equal, abs=1e-9)
 
 
-def test_evaluate_allocation_does_not_mutate_the_case(prepared_solver):
+def test_score_allocation_does_not_mutate_the_case(prepared_solver):
     """The caller's case must survive repeated evaluation untouched.
 
     Solvers call this hundreds of thousands of times against one shared dictionary, so any
@@ -50,21 +50,21 @@ def test_evaluate_allocation_does_not_mutate_the_case(prepared_solver):
     """
     snapshot = copy.deepcopy(prepared_solver.input_dict)
 
-    evaluate_allocation(prepared_solver.input_dict, np.array([150000, 150000]), "Base case", "Equal spread")
-    evaluate_allocation(prepared_solver.input_dict, np.array([100000, 200000]), "Base case", "Equal spread")
+    score_allocation(prepared_solver.input_dict, np.array([150000, 150000]), "Base case", "Equal spread")
+    score_allocation(prepared_solver.input_dict, np.array([100000, 200000]), "Base case", "Equal spread")
 
     assert_unchanged(prepared_solver.input_dict, snapshot)
 
 
-def test_evaluate_allocation_accepts_a_float_allocation(prepared_solver):
+def test_score_allocation_accepts_a_float_allocation(prepared_solver):
     """A fractional allocation must not be silently rounded.
 
     Beerwiser's option values import as whole numbers. Writing a float into that table without
     casting rounds it, which flattens the small perturbations a gradient-based solver relies on
     and leaves it stuck at its starting point.
     """
-    base = evaluate_allocation(prepared_solver.input_dict, np.array([150000.0, 150000.0]), "Base case", "Test DMO")
-    nudged = evaluate_allocation(prepared_solver.input_dict, np.array([150000.5, 149999.5]), "Base case", "Test DMO")
+    base = score_allocation(prepared_solver.input_dict, np.array([150000.0, 150000.0]), "Base case", "Test DMO")
+    nudged = score_allocation(prepared_solver.input_dict, np.array([150000.5, 149999.5]), "Base case", "Test DMO")
 
     assert base != nudged
 
@@ -92,8 +92,8 @@ def test_precomputed_boundaries_do_not_change_the_answer(prepared_solver):
     paths have to agree to the last digit.
     """
     allocation = np.array([123456.0, 176544.0])
-    derived = evaluate_allocation(prepared_solver.input_dict, allocation, "Base case", "Test DMO")
-    passed_in = evaluate_allocation(
+    derived = score_allocation(prepared_solver.input_dict, allocation, "Base case", "Test DMO")
+    passed_in = score_allocation(
         prepared_solver.input_dict, allocation, "Base case", "Test DMO", prepared_solver._frozen_boundaries
     )
 
