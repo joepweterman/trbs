@@ -29,6 +29,7 @@ ROW_LABELS = {
     "genetic_algorithm": "Genetic algorithm (capped simplex)",
     "genetic_algorithm (spend all)": "Genetic algorithm (budget face)",
     "mdbh": "MDBH (capped simplex)",
+    "mdbh (spend all)": "MDBH (budget face)",
 }
 CASES = ("Beerwiser", "Refugee", "IZZ")
 

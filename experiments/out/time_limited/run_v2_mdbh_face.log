@@ -1,0 +1,109 @@
+Beerwiser    15s  mdbh (spend all)             seed 1  appr  65.711567  used   15.0s  evals    140208
+Beerwiser    15s  mdbh (spend all)             seed 2  appr  65.711578  used   15.0s  evals    142934
+Beerwiser    15s  mdbh (spend all)             seed 3  appr  65.711583  used   15.0s  evals    140802
+Beerwiser    15s  mdbh (spend all)             seed 4  appr  65.711589  used   15.0s  evals    135585
+Beerwiser    15s  mdbh (spend all)             seed 5  appr  65.711580  used   15.0s  evals    144717
+Beerwiser    30s  mdbh (spend all)             seed 1  appr  65.711572  used 6367.2s  evals    240953
+Beerwiser    30s  mdbh (spend all)             seed 2  appr  65.711418  used 40854.3s  evals      6754
+Beerwiser    30s  mdbh (spend all)             seed 3  appr  65.711590  used   30.0s  evals    263754
+Beerwiser    30s  mdbh (spend all)             seed 4  appr  65.711589  used   30.0s  evals    145474
+Beerwiser    30s  mdbh (spend all)             seed 5  appr  65.711580  used   30.0s  evals    172234
+Beerwiser    60s  mdbh (spend all)             seed 1  appr  65.711577  used   60.1s  evals    375487
+Beerwiser    60s  mdbh (spend all)             seed 2  appr  65.711578  used   60.0s  evals    392101
+Beerwiser    60s  mdbh (spend all)             seed 3  appr  65.711590  used   60.0s  evals    502419
+Beerwiser    60s  mdbh (spend all)             seed 4  appr  65.711589  used   60.0s  evals    486594
+Beerwiser    60s  mdbh (spend all)             seed 5  appr  65.711580  used   60.0s  evals    506280
+Beerwiser   120s  mdbh (spend all)             seed 1  appr  65.711588  used  120.0s  evals   1093915
+Beerwiser   120s  mdbh (spend all)             seed 2  appr  65.711589  used  120.0s  evals   1054854
+Beerwiser   120s  mdbh (spend all)             seed 3  appr  65.711590  used  120.0s  evals   1184636
+Beerwiser   120s  mdbh (spend all)             seed 4  appr  65.711589  used  120.0s  evals   1804855
+Beerwiser   120s  mdbh (spend all)             seed 5  appr  65.711586  used  120.0s  evals   1581329
+Refugee      15s  mdbh (spend all)             seed 1  appr  96.857723  used   15.0s  evals     63406
+Refugee      15s  mdbh (spend all)             seed 2  appr  96.861408  used   15.0s  evals     58726
+Refugee      15s  mdbh (spend all)             seed 3  appr  96.859926  used   15.0s  evals     58057
+Refugee      15s  mdbh (spend all)             seed 4  appr  96.860691  used   15.0s  evals     61867
+Refugee      15s  mdbh (spend all)             seed 5  appr  96.863043  used   15.0s  evals     62259
+Refugee      30s  mdbh (spend all)             seed 1  appr  96.860260  used   30.0s  evals    122554
+Refugee      30s  mdbh (spend all)             seed 2  appr  96.869541  used   30.0s  evals     91438
+Refugee      30s  mdbh (spend all)             seed 3  appr  96.859926  used   30.0s  evals     45511
+Refugee      30s  mdbh (spend all)             seed 4  appr  96.860691  used   30.0s  evals     35081
+Refugee      30s  mdbh (spend all)             seed 5  appr  96.861155  used   30.0s  evals     40828
+Refugee      60s  mdbh (spend all)             seed 1  appr  96.860260  used   60.0s  evals    102037
+Refugee      60s  mdbh (spend all)             seed 2  appr  96.869541  used   60.0s  evals    162929
+Refugee      60s  mdbh (spend all)             seed 3  appr  96.868841  used   60.0s  evals    152222
+Refugee      60s  mdbh (spend all)             seed 4  appr  96.865785  used   60.0s  evals    159771
+Refugee      60s  mdbh (spend all)             seed 5  appr  96.865105  used   60.0s  evals    129696
+Refugee     120s  mdbh (spend all)             seed 1  appr  96.867867  used  120.0s  evals    180303
+Refugee     120s  mdbh (spend all)             seed 2  appr  96.869541  used  120.0s  evals    187516
+Refugee     120s  mdbh (spend all)             seed 3  appr  96.868841  used  120.0s  evals    171323
+Refugee     120s  mdbh (spend all)             seed 4  appr  96.865785  used  120.0s  evals    171589
+Refugee     120s  mdbh (spend all)             seed 5  appr  96.865105  used  120.0s  evals    207090
+IZZ          15s  mdbh (spend all)             seed 1  appr  69.190282  used   15.0s  evals     37122
+IZZ          15s  mdbh (spend all)             seed 2  appr  69.190142  used   15.0s  evals     36857
+IZZ          15s  mdbh (spend all)             seed 3  appr  69.190141  used   15.0s  evals     36676
+IZZ          15s  mdbh (spend all)             seed 4  appr  69.190190  used   15.0s  evals     38023
+IZZ          15s  mdbh (spend all)             seed 5  appr  69.190304  used   15.0s  evals     38193
+IZZ          30s  mdbh (spend all)             seed 1  appr  69.190282  used   30.0s  evals     73838
+IZZ          30s  mdbh (spend all)             seed 2  appr  69.190462  used   30.0s  evals     69299
+IZZ          30s  mdbh (spend all)             seed 3  appr  69.190225  used   30.0s  evals     74492
+IZZ          30s  mdbh (spend all)             seed 4  appr  69.190190  used   30.0s  evals     69224
+IZZ          30s  mdbh (spend all)             seed 5  appr  69.190390  used   30.0s  evals     57672
+IZZ          60s  mdbh (spend all)             seed 1  appr  69.190282  used   60.0s  evals    141012
+IZZ          60s  mdbh (spend all)             seed 2  appr  69.190462  used   60.0s  evals    141994
+IZZ          60s  mdbh (spend all)             seed 3  appr  69.190225  used   60.0s  evals    136222
+IZZ          60s  mdbh (spend all)             seed 4  appr  69.190219  used   60.0s  evals    143340
+IZZ          60s  mdbh (spend all)             seed 5  appr  69.190390  used   60.0s  evals    145456
+IZZ         120s  mdbh (spend all)             seed 1  appr  69.190431  used  120.0s  evals    287650
+IZZ         120s  mdbh (spend all)             seed 2  appr  69.190462  used  120.0s  evals    285736
+IZZ         120s  mdbh (spend all)             seed 3  appr  69.190376  used  120.0s  evals    290552
+IZZ         120s  mdbh (spend all)             seed 4  appr  69.190329  used  120.0s  evals    276267
+IZZ         120s  mdbh (spend all)             seed 5  appr  69.190390  used  120.0s  evals    185982
+
+Median appreciation per case and limit:
+
+Beerwiser
+limit_s                              15         30         60         120
+label                                                                    
+basin_hopping                  65.711590  65.711590  65.711590  65.711590
+basin_hopping (spend all)      65.711590  65.711590  65.711590  65.711590
+genetic_algorithm              65.701420  65.701420  65.701420  65.701420
+genetic_algorithm (spend all)  65.711571  65.711586  65.711589  65.711589
+grid                           65.711565  65.711584  65.711584  65.711588
+grid (capped)                  65.705062  65.705062  65.709960  65.709960
+mdbh                           65.711580  65.711589  65.711589  65.711589
+mdbh (spend all)               65.711580  65.711580  65.711580  65.711589
+slsqp                          65.711590  65.711590  65.711590  65.711590
+slsqp (spend all)              65.711590  65.711590  65.711590  65.711590
+
+IZZ
+limit_s                              15         30         60         120
+label                                                                    
+basin_hopping                  69.190531  69.190539  69.190548  69.190551
+basin_hopping (spend all)      69.190536  69.190540  69.190543  69.190552
+genetic_algorithm              69.190230  69.190246  69.190289  69.190294
+genetic_algorithm (spend all)  69.190211  69.190373  69.190373  69.190400
+grid                           69.096754  69.096754  69.096754  69.096754
+grid (capped)                  68.732218  68.884502  69.096754  69.096754
+mdbh                           69.190208  69.190254  69.190322  69.190420
+mdbh (spend all)               69.190190  69.190282  69.190282  69.190390
+slsqp                          69.190536  69.190545  69.190548  69.190551
+slsqp (spend all)              69.190543  69.190543  69.190545  69.190550
+
+Refugee
+limit_s                              15         30         60         120
+label                                                                    
+basin_hopping                  96.872171  96.872181  96.872181  96.872188
+basin_hopping (spend all)      96.872172  96.872179  96.872182  96.872191
+genetic_algorithm              96.872119  96.872123  96.872179  96.872188
+genetic_algorithm (spend all)  96.872158  96.872179  96.872191  96.872193
+grid                           96.814020  96.814020  96.814020  96.814020
+grid (capped)                  96.808432  96.808432  96.808432  96.814020
+mdbh                           96.865144  96.868852  96.870130  96.870812
+mdbh (spend all)               96.860691  96.860691  96.865785  96.867867
+slsqp                          96.871730  96.871730  96.872092  96.872149
+slsqp (spend all)              96.871738  96.871738  96.872092  96.872149
+
+[timed] written to C:\Users\joepw\tRBS\experiments\out\time_limited\time_limited_comparison_v2.csv
+[table] written to C:\Users\joepw\tRBS\experiments\out\time_limited\tables\time_limited.tex
+[figure] written to C:\Users\joepw\tRBS\experiments\out\time_limited\fig_time_limited.png
+[figure] written to C:\Users\joepw\tRBS\experiments\out\time_limited\fig_time_limited.pdf

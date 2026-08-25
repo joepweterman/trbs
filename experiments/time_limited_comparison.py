@@ -67,7 +67,6 @@ CEILINGS = {
 
 #: Every method in both budget modes. ``grid`` spends the budget exactly by construction
 #: and ``grid_capped`` is its at-most counterpart, so together they are the two grid rows.
-#: MDBH runs in its native capped mode only; its face twin is available via --methods.
 VARIANTS = [("grid", "grid", {}), ("grid (capped)", "grid_capped", {})]
 for _method in ("slsqp", "basin_hopping", "genetic_algorithm"):
     VARIANTS.append((_method, _method, {}))
@@ -192,9 +191,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cases", nargs="*", default=list(CASES))
     parser.add_argument("--limits", nargs="*", type=int, default=list(LIMITS))
-    parser.add_argument(
-        "--methods", nargs="*", default=[label for label, _, _ in VARIANTS if label != "mdbh (spend all)"]
-    )
+    parser.add_argument("--methods", nargs="*", default=[label for label, _, _ in VARIANTS])
     parser.add_argument("--seeds", nargs="*", type=int, default=list(SEEDS))
     # A fresh file: the round-one CSV next to it has no label, mode or seed columns.
     parser.add_argument("--out", default=str(OUT / "time_limited_comparison_v2.csv"))
