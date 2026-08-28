@@ -51,9 +51,19 @@ def test_named_method_skips_the_selection(orchestrator):
     assert result.selection is None
 
 
+@suppress_print
+def test_the_default_method_is_basin_hopping(orchestrator):
+    """Without a method the orchestrator runs basin-hopping, without an automatic choice."""
+    result = orchestrator.run("Base case", n_starts=1, n_hops=2, seed=1)
+
+    assert result.method == "basin_hopping"
+    assert result.selection is None
+    assert "grid_capped" in Optimize.METHOD_REGISTRY
+
+
 def test_auto_picks_a_method_and_explains_itself(orchestrator, capsys):
     """The automatic choice runs a real solver and says, readably, why it chose it."""
-    result = orchestrator.run("Base case", n_starts=1, n_hops=2, seed=1)
+    result = orchestrator.run("Base case", method="auto", n_starts=1, n_hops=2, seed=1)
     printed = capsys.readouterr().out
 
     assert result.method == "basin_hopping"

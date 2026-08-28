@@ -17,6 +17,7 @@ import pytest
 
 from vlinder.optimize import (
     BasinHoppingSolver,
+    CappedGridSearch,
     GeneticAlgorithmSolver,
     GridSearch,
     MdbhSolver,
@@ -150,6 +151,18 @@ def test_grid_time_budget_starts_at_half_the_budget_and_refines(beerwiser_dicts)
     # guarantees the answer is at least as good as that split.
     assert result.n_function_evals == sum(level["new_points"] for level in result.per_start_results)
     assert result.appreciation >= 65.4
+
+
+@suppress_print
+def test_capped_grid_search_covers_under_spending_points(beerwiser_dicts):
+    """The capped grid enumerates sum(x) <= B, so its lattice holds under-spending points."""
+    combos = CappedGridSearch.generate_combinations(10, 5, 2)
+    assert sorted(combos) == [(0, 0), (0, 5), (0, 10), (5, 0), (5, 5), (10, 0)]
+
+    input_dict, output_dict = beerwiser_dicts
+    result = CappedGridSearch(input_dict, output_dict).solve("Base case", "Capped DMO", max_combinations=300)
+    assert result.method == "grid_capped"
+    assert_feasible(result.allocation, BEERWISER_BUDGET)
 
 
 def test_grid_find_dict_values(prepared_solver):

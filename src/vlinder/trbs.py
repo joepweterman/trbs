@@ -188,11 +188,12 @@ class TheResponsibleBusinessSimulator:
         location_report = self.report.create_report(scenario, output_path)
         print(location_report)
 
-    def optimize(self, scenario, method="auto", **kwargs):
+    def optimize(self, scenario, method="basin_hopping", **kwargs):
         """Find the optimal distribution of internal inputs for a scenario.
 
-        One entry point for every optimization method. ``method`` is ``"auto"``
-        (the default), a single method name, or a list of names:
+        One entry point for every optimization method. ``method`` is
+        ``"basin_hopping"`` (the default), ``"auto"``, a single method name, or
+        a list of names:
 
           * ``"auto"``      → probe the case, let the decision tree in
             :mod:`vlinder.method_selection` pick the method that fits the shape
@@ -202,7 +203,8 @@ class TheResponsibleBusinessSimulator:
           * list of names → run each, print every method's appreciation +
             allocation, and keep the best (only the winner is written back)
 
-        Supported methods: ``"grid"`` (combinatorial grid search), ``"slsqp"``
+        Supported methods: ``"grid"`` (combinatorial grid search over the budget
+        face), ``"grid_capped"`` (the same grid over the capped simplex), ``"slsqp"``
         (continuous multi-start SLSQP), ``"basin_hopping"`` (SLSQP with an
         escape loop for surfaces with more than one optimum),
         ``"genetic_algorithm"`` (derivative-free evolutionary search) and
@@ -218,7 +220,8 @@ class TheResponsibleBusinessSimulator:
         A ``dmo_name`` passed here overrides it.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
-        :param method: ``"auto"``, a method name, or a list of names.
+        :param method: a method name, ``"auto"``, or a list of names; the default
+            is ``"basin_hopping"``.
         :param kwargs: ``dmo_name`` for the optimizer's decision-maker option,
             ``new_case_name`` for the optimized case name, plus the parameters of
             the chosen solver. Grid takes ``max_combinations`` (default 60000);

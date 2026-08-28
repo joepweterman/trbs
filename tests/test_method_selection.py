@@ -120,7 +120,7 @@ def test_select_method_for_leaves_no_dmo_behind(optimize_beerwiser):
 @suppress_print
 def test_optimize_auto_runs_the_selected_method():
     """
-    This function tests the default entry point end to end: the case is probed, the chosen
+    This function tests the "auto" entry point end to end: the case is probed, the chosen
     method runs, and the result reports which method was chosen and why. Keyword arguments
     override the solver budget the tree attached to its choice, which keeps this test cheap.
     """
@@ -128,7 +128,7 @@ def test_optimize_auto_runs_the_selected_method():
     case.build()
     case.evaluate()
     case.appreciate()
-    case.optimize("Base case", n_starts=1, n_hops=2, seed=1)
+    case.optimize("Base case", method="auto", n_starts=1, n_hops=2, seed=1)
     result = case.optimization_result
 
     assert result.method == "basin_hopping"

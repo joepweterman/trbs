@@ -1,130 +1,36 @@
 """
-This file contains the capped-simplex grid baseline of the A4 equal-footing study.
-
-The packaged ``GridSearch`` enumerates the budget face, every combination summing
-to exactly the budget, while all continuous solvers work on the capped simplex
-where under-spending is feasible. The baseline therefore searches a strictly
-smaller set, and on a case whose appreciation is not monotone in total spend that
-is a handicap rather than a technicality. This module adds a second baseline that
-enumerates the capped simplex and is identical to the packaged one in every other
-respect, so that the difference between the two measures the constraint and
-nothing else.
-
-Two deliberate properties:
-
-  * the same scaling and divisibility rule as the packaged grid decides the step,
-    so the two baselines are read at comparable resolutions;
-  * the lattice is generated directly as the compositions of the resolution over
-    k+1 parts, the last part being unspent budget, rather than by filtering
-    multisets and expanding them through ``set(permutations(...))``. That is the
-    enumeration a competent implementation would use, which is the point: the
-    cost comparison should be against the method, not against its bookkeeping.
-
-The class is registered into ``Optimize.METHOD_REGISTRY`` by :func:`register`,
-which the driver calls. It is not added to the package: whether a thesis-side
-solver belongs in the shipped registry is an open question with the vlinder team.
+This file kept the capped-simplex grid baseline of the A4 equal-footing study while it
+lived outside the package. The Vlinder team has since decided it ships with the package,
+so the class now lives in ``vlinder.optimize`` as ``CappedGridSearch``, registered as
+``"grid_capped"``. This module stays as a thin shim so the A4 drivers and the timed
+comparison keep importing from the path they were written against.
 
 Run (self-check against the packaged grid on a bundled case):
   python experiments/synthetic/grid_capped.py
 """
 
-from math import comb
-
-from vlinder.optimize import GridSearch, Optimize
+from vlinder.optimize import CappedGridSearch, Optimize  # noqa: F401  (re-export for the drivers)
 
 
 def bounded_compositions(units, parts):
     """
     This function yields every tuple of ``parts`` non-negative integers summing to
-    at most ``units``: the lattice points of the capped simplex.
+    at most ``units``: the lattice points of the capped simplex. It delegates to the
+    packaged implementation and stays for the older experiment imports.
     :param units: the resolution, in steps, of the budget
     :param parts: the number of internal variable inputs
     :return: a generator of integer tuples of length ``parts``
     """
-    if parts == 0:
-        yield ()
-        return
-    for head in range(units + 1):
-        for tail in bounded_compositions(units - head, parts - 1):
-            yield (head,) + tail
-
-
-class CappedGridSearch(GridSearch):
-    """Grid search over ``sum(x) <= B`` instead of over the budget face.
-
-    Everything the packaged baseline does is inherited unchanged: the budget is
-    still derived from the best-performing decision-maker option, the best point
-    is still written back, and an existing option that beats the whole lattice
-    still wins. Only the set of points enumerated differs.
-    """
-
-    default_dmo_name = "Optimized (capped grid)"
-    method_name = "grid_capped"
-    method_label = "grid (capped simplex)"
-
-    @staticmethod
-    def calculate_step_size(max_investment, scaled_max_investment, num_internal_inputs, max_combinations):
-        """
-        This function picks the finest step whose capped lattice stays under the
-        ceiling. The capped simplex holds ``comb(units + k, k)`` points against the
-        face's ``comb(units + k - 1, k - 1)``, so at an equal ceiling this yields a
-        step one or two units coarser than the packaged grid's.
-        :param max_investment: the budget
-        :param scaled_max_investment: the budget scaled for combinatorial purposes
-        :param num_internal_inputs: the number of internal variable inputs
-        :param max_combinations: upper bound on the number of lattice points
-        :return: the step size, in budget units
-        """
-        step_size_tmp = 1
-        while True:
-            units = scaled_max_investment // step_size_tmp
-            n_points = comb(units + num_internal_inputs, num_internal_inputs)
-            if n_points <= max_combinations and scaled_max_investment % step_size_tmp == 0:
-                break
-            step_size_tmp += 1
-
-        return max_investment / (scaled_max_investment / step_size_tmp)
-
-    @staticmethod
-    def generate_combinations(max_investment, step_size, num_internal_inputs):
-        """
-        This function builds every lattice point of the capped simplex at the given
-        step, generated directly rather than by filtering and permuting.
-        :param max_investment: the budget
-        :param step_size: the step size, in budget units
-        :param num_internal_inputs: the number of internal variable inputs
-        :return: a list of allocation tuples, each summing to at most the budget
-        """
-        units = int(round(max_investment / step_size))
-        return [
-            tuple(count * step_size for count in point) for point in bounded_compositions(units, num_internal_inputs)
-        ]
-
-    @staticmethod
-    def refinement_points(units, parts, include_all):
-        """
-        This function yields one refinement round of the capped lattice, in units of the step.
-
-        Same skip rule as the packaged grid's refinement: halving the step doubles every
-        count, so an all-even point was already evaluated at the previous, coarser round.
-        The implicit slack count (unspent units) is even whenever the spent counts are,
-        because the total is a power of two, so checking the spent counts is enough.
-        :param units: the resolution, in steps, of the budget
-        :param parts: the number of internal variable inputs
-        :param include_all: whether this is the first round, which has no previous round
-        :return: a generator of integer tuples of length ``parts``
-        """
-        for point in bounded_compositions(units, parts):
-            if include_all or any(count % 2 for count in point):
-                yield point
+    return CappedGridSearch._bounded_compositions(units, parts)  # pylint: disable=protected-access
 
 
 def register():
     """
-    This function makes ``grid_capped`` available to ``sim.optimize(method=...)``.
+    This function used to add ``grid_capped`` to the registry; the package now ships it.
+    Kept as a no-op so the existing drivers keep working unchanged.
     :return: None
     """
-    Optimize.METHOD_REGISTRY["grid_capped"] = CappedGridSearch
+    Optimize.METHOD_REGISTRY.setdefault("grid_capped", CappedGridSearch)
 
 
 def main():

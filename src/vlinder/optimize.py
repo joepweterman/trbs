@@ -15,18 +15,19 @@ specific:
      decision-maker option, writing the winning allocation back, staying inside the feasible set,
      and the rule that no solver may report an answer worse than a decision-maker option the case
      already contains.
-  4. The solvers themselves. ``GridSearch`` enumerates the budget face. ``SLSQPSolver`` runs
-     multi-start gradient optimization. ``BasinHoppingSolver`` extends it with an escape loop for
-     surfaces with more than one optimum. ``GeneticAlgorithmSolver`` is the derivative-free
-     alternative. ``MdbhSolver`` is a research method that walks the simplex directly.
-  5. ``Optimize`` is the orchestrator. It picks a solver (automatically, by name, or several at
+  4. The solvers themselves. ``GridSearch`` enumerates the budget face and ``CappedGridSearch``
+     the capped simplex. ``SLSQPSolver`` runs multi-start gradient optimization.
+     ``BasinHoppingSolver`` extends it with an escape loop for surfaces with more than one
+     optimum. ``GeneticAlgorithmSolver`` is the derivative-free alternative. ``MdbhSolver`` is a
+     research method that walks the simplex directly.
+  5. ``Optimize`` is the orchestrator. It picks a solver (by name, automatically, or several at
      once) and runs it.
 
 The feasible set for the continuous solvers is the capped simplex, ``{x : x >= 0, sum(x) <= B}``:
 spending less than the whole budget is allowed. Every continuous solver also accepts
 ``spend_all=True``, which turns the budget into an equality so that every solution spends it
-exactly — the same set grid search enumerates. Grid search itself works on the budget face
-``sum(x) = B`` only; see :class:`GridSearch`.
+exactly. Of the two grids, :class:`GridSearch` works on the budget face ``sum(x) = B`` and
+:class:`CappedGridSearch` on the capped simplex.
 """
 
 import copy
@@ -555,6 +556,94 @@ class GridSearch(BaseSolver):
                     valid_combinations.append(perm)
 
         return valid_combinations
+
+
+class CappedGridSearch(GridSearch):
+    """Grid search over ``sum(x) <= B`` instead of over the budget face.
+
+    Everything the budget-face grid does is inherited unchanged: the budget is still derived
+    from the best-performing decision-maker option, the best point is still written back, and
+    an existing option that beats the whole lattice still wins. Only the set of points differs:
+    the lattice covers the capped simplex, so an optimum that leaves part of the budget unspent
+    is inside the search space. The price is resolution: at an equal ceiling the extra interior
+    points buy a step one or two units coarser than the budget-face grid's.
+    """
+
+    default_dmo_name = "Optimized (capped grid)"
+    method_name = "grid_capped"
+    method_label = "grid (capped simplex)"
+
+    @staticmethod
+    def calculate_step_size(max_investment, scaled_max_investment, num_internal_inputs, max_combinations):
+        """
+        This function picks the finest step whose capped lattice stays under the ceiling.
+
+        The capped simplex holds ``comb(units + k, k)`` points against the face's
+        ``comb(units + k - 1, k - 1)``, so the same ceiling yields a slightly coarser step.
+        :param max_investment: the budget
+        :param scaled_max_investment: the budget scaled for combinatorial purposes
+        :param num_internal_inputs: the number of internal variable inputs
+        :param max_combinations: upper bound on the number of lattice points
+        :return: the step size, in budget units
+        """
+        step_size_tmp = 1
+        while True:
+            units = scaled_max_investment // step_size_tmp
+            n_points = comb(units + num_internal_inputs, num_internal_inputs)
+            if n_points <= max_combinations and scaled_max_investment % step_size_tmp == 0:
+                break
+            step_size_tmp += 1
+        return max_investment / (scaled_max_investment / step_size_tmp)
+
+    @staticmethod
+    def generate_combinations(max_investment, step_size, num_internal_inputs):
+        """
+        This function builds every lattice point of the capped simplex at the given step,
+        generated directly so the cost is proportional to the number of points.
+        :param max_investment: the budget
+        :param step_size: the step size, in budget units
+        :param num_internal_inputs: the number of internal variable inputs
+        :return: a list of allocation tuples, each summing to at most the budget
+        """
+        units = int(round(max_investment / step_size))
+        return [
+            tuple(count * step_size for count in point)
+            for point in CappedGridSearch._bounded_compositions(units, num_internal_inputs)
+        ]
+
+    @staticmethod
+    def refinement_points(units, parts, include_all):
+        """
+        This function yields one refinement round of the capped lattice, in units of the step.
+
+        Same skip rule as the budget-face grid's refinement: halving the step doubles every
+        count, so an all-even point was already evaluated at the previous, coarser round. The
+        implicit slack count (unspent units) is even whenever the spent counts are, because
+        the total is a power of two, so checking the spent counts is enough.
+        :param units: the resolution, in steps, of the budget
+        :param parts: the number of internal variable inputs
+        :param include_all: whether this is the first round, which has no previous round
+        :return: a generator of integer tuples of length ``parts``
+        """
+        for point in CappedGridSearch._bounded_compositions(units, parts):
+            if include_all or any(count % 2 for count in point):
+                yield point
+
+    @staticmethod
+    def _bounded_compositions(units, parts):
+        """
+        This function yields every tuple of ``parts`` non-negative integers summing to at
+        most ``units``: the lattice points of the capped simplex.
+        :param units: the resolution, in steps, of the budget
+        :param parts: the number of internal variable inputs
+        :return: a generator of integer tuples of length ``parts``
+        """
+        if parts == 0:
+            yield ()
+            return
+        for head in range(units + 1):
+            for tail in CappedGridSearch._bounded_compositions(units - head, parts - 1):
+                yield (head,) + tail
 
 
 class SLSQPSolver(BaseSolver):
@@ -1163,8 +1252,9 @@ class Optimize:
     The Optimize class performs grid search optimization to find the optimal distribution of internal input values
     that maximizes the appreciation value of decision-maker options.
 
-    Grid search is the default baseline but no longer the only option: this class chooses a
-    solver and runs it. ``method="auto"`` probes the case and lets the decision tree in
+    Basin-hopping is the default method: reliable when the surface has more than one
+    optimum, and on a single-optimum surface it returns what SLSQP finds. ``method="auto"``
+    instead probes the case and lets the decision tree in
     :mod:`vlinder.method_selection` pick the solver that fits the shape of its appreciation
     surface. A name runs that solver; a list of names runs each and returns the best.
     """
@@ -1172,6 +1262,7 @@ class Optimize:
     #: Method name to solver class.
     METHOD_REGISTRY = {
         "grid": GridSearch,
+        "grid_capped": CappedGridSearch,
         "slsqp": SLSQPSolver,
         "basin_hopping": BasinHoppingSolver,
         "genetic_algorithm": GeneticAlgorithmSolver,
@@ -1191,7 +1282,9 @@ class Optimize:
         """Total budget available to allocate; see :attr:`BaseSolver.budget`."""
         return BaseSolver(self.input_dict, self.output_dict).budget
 
-    def run(self, scenario, method="auto", *, dmo_name=None, budget=None, method_kwargs=None, **shared_kwargs):
+    def run(
+        self, scenario, method="basin_hopping", *, dmo_name=None, budget=None, method_kwargs=None, **shared_kwargs
+    ):
         """Run one or several optimization methods and return the best result.
 
         Solver settings can be given in two ways. Keyword arguments go to every method that
@@ -1208,11 +1301,12 @@ class Optimize:
             )
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
-        :param method: ``"auto"`` (default), a single method name (str) or a list of names.
-            Supported: ``"grid"``, ``"slsqp"``, ``"basin_hopping"``, ``"genetic_algorithm"``,
-            ``"mdbh"``. Unknown names raise ``NotImplementedError``. ``"auto"`` probes the case
-            and picks one of those methods together with a solver budget for it; any setting you
-            pass overrides that budget. It cannot be combined in a list.
+        :param method: a single method name (str), ``"auto"``, or a list of names; the
+            default is ``"basin_hopping"``. Supported: ``"grid"``, ``"grid_capped"``,
+            ``"slsqp"``, ``"basin_hopping"``, ``"genetic_algorithm"``, ``"mdbh"``. Unknown
+            names raise ``NotImplementedError``. ``"auto"`` probes the case and picks one of
+            those methods together with a solver budget for it; any setting you pass
+            overrides that budget. It cannot be combined in a list.
         :param dmo_name: name for the optimizer's decision-maker option. Defaults per solver;
             for a list, each method uses its own default unless an explicit name is given.
         :param budget: total allocation budget; inferred from the case if None.
@@ -1326,6 +1420,7 @@ class Optimize:
         """A readable version of the automatic choice, for the notebook and the console."""
         readable = {
             "grid": "grid search",
+            "grid_capped": "grid search (capped simplex)",
             "slsqp": "multi-start SLSQP",
             "basin_hopping": "basin-hopping",
             "genetic_algorithm": "the genetic algorithm",
