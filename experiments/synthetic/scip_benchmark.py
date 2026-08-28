@@ -8,7 +8,7 @@ runs. Amendment A2 does that; this module is the instrument.
 Why it cannot be a METHOD_REGISTRY entry
 ----------------------------------------
 Every method in the confirmatory roster treats the objective as a black box: it
-calls ``evaluate_allocation`` and looks at the number that comes back. SCIP
+calls ``score_allocation`` and looks at the number that comes back. SCIP
 cannot work that way. It is a branch-and-bound global solver and needs the
 objective as an *algebraic model* it can bound and split, so the model has to be
 rebuilt in SCIP's own expression language. That is only possible where the
@@ -50,7 +50,7 @@ from pyscipopt import Model, quicksum
 from pyscipopt import sin as scip_sin
 from vlinder.appreciate import Appreciate
 from vlinder.evaluate import Evaluate
-from vlinder.optimize import evaluate_allocation
+from vlinder.optimize import score_allocation
 
 STUDY_ROOT = DEFAULT_ROOT / "study"
 #: Model fidelity tolerance: the SCIP objective must agree with the real
@@ -218,7 +218,7 @@ class ScipBenchmark(Oracle):
 
         The verification is the point of the whole exercise: SCIP's objective is
         recomputed by running its own solution back through the real
-        ``evaluate_allocation`` pipeline. If the two disagree the algebraic model
+        ``score_allocation`` pipeline. If the two disagree the algebraic model
         is not the case, and the comparison would be meaningless however
         confident SCIP is.
         :param scenario: the scenario to solve
@@ -243,7 +243,7 @@ class ScipBenchmark(Oracle):
             if arr.sum() > self.budget:
                 arr = arr * (self.budget / arr.sum())
             allocation = [float(v) for v in arr]
-            pipeline_value = float(evaluate_allocation(self.opt.input_dict, arr, scenario, ORACLE_DMO))
+            pipeline_value = float(score_allocation(self.opt.input_dict, arr, scenario, ORACLE_DMO))
             fidelity = abs(pipeline_value - objective)
 
         certified = self.manifest.get("oracle", {}) or {}

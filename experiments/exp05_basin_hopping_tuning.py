@@ -60,32 +60,33 @@ class PowellHoppingSolver(BasinHoppingSolver):  # pylint: disable=too-few-public
         z = self._project_capped_simplex(np.asarray(z, dtype=float), 1.0)
         return super()._objective_z(z, scenario, dmo_name, eval_counter, budget)
 
-    def _slsqp_minimizer_kwargs(
-        self, scenario, dmo_name, eval_counter, budget, spend_all=False
-    ):  # pylint: disable=unused-argument
-        return {
-            "method": "Powell",
-            "bounds": [(0.0, 1.0)] * self._k,
-            "args": (scenario, dmo_name, eval_counter, float(budget)),
-            "options": {"maxiter": 100, "xtol": 1e-6, "ftol": 1e-6},
-        }
+    def _slsqp_minimizer_kwargs(self, scenario, dmo_name, eval_counter, budget, spend_all=False, deadline=None):
+        kwargs = super()._slsqp_minimizer_kwargs(scenario, dmo_name, eval_counter, budget, spend_all, deadline)
+        kwargs.pop("constraints", None)  # Powell cannot hold a constraint; the objective projects
+        kwargs["method"] = "Powell"
+        kwargs["options"] = {"maxiter": 100, "xtol": 1e-6, "ftol": 1e-6}
+        return kwargs
 
 
 class CobylaHoppingSolver(BasinHoppingSolver):  # pylint: disable=too-few-public-methods
-    """Basin-hopping with COBYLA as the inner solve: derivative-free, constraint-aware."""
+    """Basin-hopping with COBYLA as the inner solve: derivative-free, constraint-aware.
+
+    COBYLA holds the budget constraint but satisfies its bounds only approximately, so the
+    objective projects every trial point onto the capped simplex before evaluating, the same
+    rule the Powell variant uses. The iteration budget matches the other inner solvers.
+    """
 
     method_name = "basin_hopping_cobyla"
 
-    def _slsqp_minimizer_kwargs(
-        self, scenario, dmo_name, eval_counter, budget, spend_all=False
-    ):  # pylint: disable=unused-argument
-        return {
-            "method": "COBYLA",
-            "bounds": [(0.0, 1.0)] * self._k,
-            "constraints": ({"type": "ineq", "fun": lambda z: float(1.0 - np.sum(z))},),
-            "args": (scenario, dmo_name, eval_counter, float(budget)),
-            "options": {"maxiter": 200, "rhobeg": 0.3},
-        }
+    def _objective_z(self, z, scenario, dmo_name, eval_counter, budget):
+        z = self._project_capped_simplex(np.asarray(z, dtype=float), 1.0)
+        return super()._objective_z(z, scenario, dmo_name, eval_counter, budget)
+
+    def _slsqp_minimizer_kwargs(self, scenario, dmo_name, eval_counter, budget, spend_all=False, deadline=None):
+        kwargs = super()._slsqp_minimizer_kwargs(scenario, dmo_name, eval_counter, budget, spend_all, deadline)
+        kwargs["method"] = "COBYLA"
+        kwargs["options"] = {"maxiter": 100, "rhobeg": 0.3}
+        return kwargs
 
 
 #: Each configuration varies one thing against the roster's baseline.
@@ -141,14 +142,14 @@ class TuningSweep:
         :param seed: the RNG seed of the probe
         :return: the derived temperature and the number of evaluations spent
         """
-        from vlinder.optimize import evaluate_allocation  # pylint: disable=import-outside-toplevel
+        from vlinder.optimize import score_allocation  # pylint: disable=import-outside-toplevel
 
         probe = BaseSolver(copy.deepcopy(input_dict), output_dict)
         probe._prepare_input_dict("Temperature probe")
         rng = np.random.default_rng(seed)
         draws = rng.dirichlet(np.ones(probe._k), size=n_probe) * probe.budget
         appreciations = [
-            evaluate_allocation(probe.input_dict, draw, scenario, "Temperature probe", probe._frozen_boundaries)
+            score_allocation(probe.input_dict, draw, scenario, "Temperature probe", probe._frozen_boundaries)
             for draw in draws
         ]
         return max(float(np.std(appreciations)), 1e-6), n_probe

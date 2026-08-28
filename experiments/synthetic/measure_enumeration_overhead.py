@@ -1,3 +1,5 @@
+# pylint: disable=too-many-locals,comparison-with-itself,unused-variable,wrong-import-order
+# (pre-existing in the A4 measurement script; silenced rather than rewritten)
 """
 This file measures the enumeration overhead of the two grid baselines directly.
 
@@ -35,7 +37,7 @@ import pandas as pd
 import vlinder as vl
 
 from analyze_study import STUDY_ROOT
-from grid_capped import CappedGridSearch
+from run_equal_footing import CappedGridSearch  # noqa: E402  (the A4 shim)
 
 from vlinder.optimize import GridSearch
 from vlinder.trbs import TheResponsibleBusinessSimulator
@@ -85,9 +87,7 @@ def solve_seconds(store, case_name, scenario, method):
     :return: the wall-clock seconds, or NaN when the cell is not in the store
     """
     label = f"{method}@max_combinations={CEILING}"
-    hit = store[
-        (store["case_name"] == case_name) & (store["scenario"] == scenario) & (store["config_label"] == label)
-    ]
+    hit = store[(store["case_name"] == case_name) & (store["scenario"] == scenario) & (store["config_label"] == label)]
     return float(hit["wall_time_s"].iloc[0]) if len(hit) else float("nan")
 
 
@@ -109,8 +109,9 @@ def main():
             scaled = solver.scale_max_investment(budget)
 
             wall_started, cpu_started = time.perf_counter(), time.process_time()
-            step = solver.calculate_step_size(budget, scaled, k, CEILING)
-            points = solver.generate_combinations(budget, step, k)
+            capped = solver.method_name == "grid_capped"
+            step = solver.calculate_step_size(budget, scaled, k, CEILING, spend_all=not capped)
+            points = solver.generate_combinations(budget, step, k, spend_all=not capped)
             enumeration = time.perf_counter() - wall_started
             enumeration_cpu = time.process_time() - cpu_started
 

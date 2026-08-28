@@ -10,7 +10,7 @@ Reproduces the 2026-07-06 findings (knowledge base: exp04-solver-stall-and-basin
    (b) budget-scale stall: on raw budgets of 1e5-1e7, SLSQP's identity initial
        Hessian makes the first trial step microscopic and the improvement test
        aborts at the start point.
-   Fixed by a float cast in evaluate_allocation and by solving in
+   Fixed by a float cast in score_allocation and by solving in
    budget-normalised z-space (x = B*z on the unit capped simplex).
 
 2. KINK CHARACTERISATION: Beerwiser's global optimum [25000, 275000]
@@ -35,7 +35,7 @@ from pathlib import Path
 import numpy as np
 
 from vlinder.evaluate import Evaluate
-from vlinder.optimize import Optimize, SLSQPSolver, evaluate_allocation
+from vlinder.optimize import Optimize, SLSQPSolver, score_allocation
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.utils import suppress_print
 
@@ -75,7 +75,7 @@ class Exp04BasinHoppingBeerwiser:
         """From [60000, 240000] a working solver must move and improve (>0.5 pts)."""
         opt = self._fresh_solver()
         x0 = np.array([60000.0, 240000.0])
-        start_app = evaluate_allocation(opt.input_dict, x0, "Base case", "EXP04")
+        start_app = score_allocation(opt.input_dict, x0, "Base case", "EXP04")
         eval_counter = [0]
         res = opt._slsqp_from_start(x0, "Base case", "EXP04", self.BUDGET, eval_counter)
         record = {
@@ -116,7 +116,7 @@ class Exp04BasinHoppingBeerwiser:
         scan = []
         for x1 in range(20000, 32001, 1000):
             x = np.array([float(x1), self.BUDGET - x1])
-            scan.append({"x1": x1, "appreciation": evaluate_allocation(opt.input_dict, x, "Base case", "EXP04")})
+            scan.append({"x1": x1, "appreciation": score_allocation(opt.input_dict, x, "Base case", "EXP04")})
 
         clip_status = self._clip_status(opt.input_dict, "EXP04", [25000.0, 275000.0])
         self.results["kink"] = {"face_scan": scan, "clip_status_at_optimum": clip_status}

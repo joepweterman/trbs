@@ -1,8 +1,7 @@
 # pylint: disable=R0913,R0917  # a sweep cell is described by case, limit, method, seed
 """
 This file compares every optimizer on the packaged cases under equal wall-clock
-budgets, which is the comparison Louise asked for: what does a user actually get
-in 15, 30, 60 or 120 seconds?
+budgets: what does a user actually get in 15, 30, 60 or 120 seconds?
 
 Each method is given the same number of seconds through the one parameter every
 solver now understands: ``max_calculation_time``. Grid search evaluates ever
@@ -34,18 +33,12 @@ import argparse
 import contextlib
 import io
 import os
-import sys
 from pathlib import Path
 
 import pandas as pd
 import vlinder as vl
 
 from vlinder.trbs import TheResponsibleBusinessSimulator
-
-sys.path.insert(0, str(Path(__file__).resolve().parent / "synthetic"))
-from grid_capped import register  # noqa: E402  # pylint: disable=wrong-import-position,wrong-import-order
-
-register()
 
 DATA = Path(os.path.dirname(vl.__file__)) / "data"
 OUT = Path(__file__).resolve().parent / "out" / "time_limited"
@@ -58,21 +51,19 @@ SEEDS = (1, 2, 3, 4, 5)
 #: they refine until the time is spent.
 CEILINGS = {
     "grid": {},
-    "grid_capped": {},
     "slsqp": {"n_starts": 10_000},
     "basin_hopping": {"n_starts": 1, "n_hops": 1_000_000},
     "genetic_algorithm": {"population_size": 50, "n_generations": 1_000_000},
     "mdbh": {"n_starts": 10_000, "n_hops": 10, "n_local_steps": 50},
 }
 
-#: Every method in both budget modes. ``grid`` spends the budget exactly by construction
-#: and ``grid_capped`` is its at-most counterpart, so together they are the two grid rows.
-VARIANTS = [("grid", "grid", {}), ("grid (capped)", "grid_capped", {})]
-for _method in ("slsqp", "basin_hopping", "genetic_algorithm"):
-    VARIANTS.append((_method, _method, {}))
+#: Every method in both budget modes; the grid carries the same ``spend_all`` switch as the
+#: continuous solvers, so its two rows are one method in two modes.
+VARIANTS = [("grid", "grid", {"spend_all": True}), ("grid (capped)", "grid", {"spend_all": False})]
+for _method in ("slsqp", "basin_hopping", "genetic_algorithm", "mdbh"):
+    # spend_all is explicit in both directions: the case-level default is True now.
+    VARIANTS.append((_method, _method, {"spend_all": False}))
     VARIANTS.append((f"{_method} (spend all)", _method, {"spend_all": True}))
-VARIANTS.append(("mdbh", "mdbh", {}))
-VARIANTS.append(("mdbh (spend all)", "mdbh", {"spend_all": True}))
 
 
 class TimedComparison:
@@ -146,7 +137,7 @@ class TimedComparison:
                 for label, method, extra_kwargs in self.variants:
                     kwargs = {**CEILINGS[method], **extra_kwargs, "max_calculation_time": seconds}
                     # The grids are deterministic: one run tells the story.
-                    seeds = [0] if method in ("grid", "grid_capped") else self.seeds
+                    seeds = [0] if method == "grid" else self.seeds
                     for seed in seeds:
                         if (case_name, seconds, label, seed) in finished:
                             continue
@@ -194,7 +185,7 @@ def main():
     parser.add_argument("--methods", nargs="*", default=[label for label, _, _ in VARIANTS])
     parser.add_argument("--seeds", nargs="*", type=int, default=list(SEEDS))
     # A fresh file: the round-one CSV next to it has no label, mode or seed columns.
-    parser.add_argument("--out", default=str(OUT / "time_limited_comparison_v2.csv"))
+    parser.add_argument("--out", default=str(OUT / "time_limited_comparison_v3.csv"))
     args = parser.parse_args()
 
     TimedComparison(args.cases, args.limits, args.methods, args.seeds, args.out).run()

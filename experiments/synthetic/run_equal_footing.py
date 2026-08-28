@@ -1,3 +1,5 @@
+# pylint: disable=redefined-outer-name,too-many-nested-blocks,wrong-import-order
+# (pre-existing in the locked A4 driver; silenced rather than rewritten)
 """
 Equal-footing benchmark driver: amendment A4 (2026-08-15, see PREREGISTRATION.md).
 
@@ -39,11 +41,37 @@ import numpy as np
 import vlinder as vl
 
 from eval_tracer import trace_evaluations
-from grid_capped import register
 from study_harness import METHOD_DEFAULTS, StudyHarness, StudySpec
 
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.utils import suppress_print
+
+
+from vlinder.optimize import GridSearch, Optimize  # noqa: E402
+
+
+class CappedGridSearch(GridSearch):  # pylint: disable=too-few-public-methods
+    """The A4 capped baseline: the packaged grid with ``spend_all=False``, under its A4 name.
+
+    The capped lattice now ships inside :class:`vlinder.optimize.GridSearch` behind the
+    ``spend_all`` switch; this shim keeps the ``grid_capped`` method name the A4 store and
+    analysis scripts were written against.
+    """
+
+    default_dmo_name = "Optimized (capped grid)"
+    method_name = "grid_capped"
+    method_label = "grid (capped simplex)"
+
+    def solve(self, scenario, dmo_name, budget=None, *, spend_all=False, **kwargs):
+        """Solve on the capped simplex by default: the one thing this shim changes."""
+        # pylint: disable=useless-parent-delegation  # the flipped spend_all default is the point
+        return super().solve(scenario, dmo_name, budget, spend_all=spend_all, **kwargs)
+
+
+def register():
+    """Make ``grid_capped`` available to the harness under its A4 name."""
+    Optimize.METHOD_REGISTRY.setdefault("grid_capped", CappedGridSearch)
+
 
 register()
 

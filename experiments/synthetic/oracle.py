@@ -50,7 +50,7 @@ from case_factory import (
 )
 
 from vlinder.evaluate import Evaluate
-from vlinder.optimize import evaluate_allocation
+from vlinder.optimize import score_allocation
 from vlinder.appreciate import Appreciate
 
 ORACLE_DMO = "Oracle"
@@ -181,7 +181,7 @@ class Oracle:
         :param scenario: the scenario to evaluate in
         :return: a callable mapping an allocation to its weighted appreciation
         """
-        return lambda x: evaluate_allocation(self.opt.input_dict, x, scenario, ORACLE_DMO)
+        return lambda x: score_allocation(self.opt.input_dict, x, scenario, ORACLE_DMO)
 
     def _scenario_factors(self) -> np.ndarray:
         """
@@ -285,7 +285,7 @@ class Oracle:
         This function evaluates many allocations with a single deepcopy, the
         fast path the grid oracle needs. It relies on the boundaries being
         frozen by ``build_case``, so Appreciate reads its curves from the input
-        dict; ``solve_grid_polish`` cross-checks it against evaluate_allocation.
+        dict; ``solve_grid_polish`` cross-checks it against score_allocation.
         :param X: the allocations to evaluate
         :param scenario: the scenario to evaluate in
         :return: an array of appreciation values
@@ -351,7 +351,7 @@ class Oracle:
                 v_ref = objective(x_chk)
                 assert abs(v_chk - v_ref) <= 1e-9 * max(
                     1.0, abs(v_ref)
-                ), "fast objective path disagrees with evaluate_allocation"
+                ), "fast objective path disagrees with score_allocation"
 
             top = np.argsort(vals)[-GRID_N_POLISH:]
             grid_best = int(top[-1])

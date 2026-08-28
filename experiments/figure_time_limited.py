@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "synthetic"))
 from analyze_study import METHOD_COLORS, _style  # noqa: E402  # pylint: disable=wrong-import-position
 
 OUT = Path(__file__).resolve().parent / "out" / "time_limited"
-CSV = OUT / "time_limited_comparison_v2.csv"
+CSV = OUT / "time_limited_comparison_v3.csv"
 
 COLORS = dict(METHOD_COLORS, mdbh="#6A3D9A")
 BASE_LABELS = {
@@ -45,10 +45,6 @@ def spends_exactly(row):
     :param row: one CSV row
     :return: True on the budget face, False on the capped simplex
     """
-    if row["method"] == "grid":
-        return True
-    if row["method"] == "grid_capped":
-        return False
     return bool(row["spend_all"])
 
 
@@ -62,7 +58,7 @@ def draw(frame, path_stem="fig_time_limited"):
     _style()
     frame = frame.copy()
     frame["face"] = frame.apply(spends_exactly, axis=1)
-    frame["base"] = frame["method"].replace({"grid_capped": "grid"})
+    frame["base"] = frame["method"]
     cases = list(dict.fromkeys(frame["case"]))
 
     fig, axes = plt.subplots(1, len(cases), figsize=(3.1 * len(cases), 2.9), constrained_layout=True)
@@ -72,7 +68,17 @@ def draw(frame, path_stem="fig_time_limited"):
         rows = frame[frame["case"] == case_name]
         for (base, face), group in rows.groupby(["base", "face"]):
             mode = "$= B$" if face else "$\\leq B$"
-            median = group.groupby("limit_s")["appreciation"].median().sort_index()
+            by_limit = group.groupby("limit_s")["appreciation"]
+            median = by_limit.median().sort_index()
+            # The band shows the full seed spread; deterministic rows collapse it to the line.
+            axis.fill_between(
+                by_limit.min().sort_index().index,
+                by_limit.min().sort_index().values,
+                by_limit.max().sort_index().values,
+                color=COLORS[base],
+                alpha=0.12,
+                linewidth=0,
+            )
             axis.plot(
                 median.index,
                 median.values,
@@ -89,7 +95,7 @@ def draw(frame, path_stem="fig_time_limited"):
         axis.set_xticklabels([str(limit) for limit in limits])
         axis.set_xlabel("time limit (s)")
         axis.set_title(case_name)
-    axes[0].set_ylabel("appreciation (median over seeds)")
+    axes[0].set_ylabel("appreciation (median over seeds; band = min-max)")
 
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=5, frameon=False, bbox_to_anchor=(0.5, -0.16))

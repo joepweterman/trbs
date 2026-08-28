@@ -23,7 +23,7 @@ from pathlib import Path
 import numpy as np
 import scipy
 
-from vlinder.optimize import evaluate_allocation
+from vlinder.optimize import score_allocation
 from vlinder.trbs import TheResponsibleBusinessSimulator
 
 # ---------------------------------------------------------------------------
@@ -56,7 +56,7 @@ def run_grid_baseline():
     wall = time.perf_counter() - t0
     idx = np.where(case.input_dict["decision_makers_options"] == "Grid Baseline")[0][0]
     allocation = case.input_dict["decision_makers_option_value"][idx]
-    appreciation = evaluate_allocation(case.input_dict, allocation, SCENARIO, "Grid Baseline")
+    appreciation = score_allocation(case.input_dict, allocation, SCENARIO, "Grid Baseline")
     return {
         "method": "grid",
         "max_combinations": GRID_MAX_COMBINATIONS,

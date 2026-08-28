@@ -21,7 +21,7 @@ Run:
 import json
 import numpy as np
 from vlinder.trbs import TheResponsibleBusinessSimulator
-from vlinder.optimize import Optimize, evaluate_allocation
+from vlinder.optimize import Optimize, score_allocation
 from vlinder.utils import suppress_print
 
 RNG = np.random.default_rng(12345)
@@ -52,7 +52,7 @@ def setup_probe(c):
 
 def f_vals(opt, X, sc):
     """Objective (weighted appreciation) at each allocation row of X."""
-    return np.array([evaluate_allocation(opt.input_dict, x, sc, "Probe") for x in X])
+    return np.array([score_allocation(opt.input_dict, x, sc, "Probe") for x in X])
 
 
 def main():

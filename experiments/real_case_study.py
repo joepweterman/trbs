@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import vlinder as vl
-from vlinder.optimize import BaseSolver, evaluate_allocation
+from vlinder.optimize import BaseSolver, score_allocation
 from vlinder.trbs import TheResponsibleBusinessSimulator
 
 # Headless rendering; switching after import keeps every import at the top.
@@ -268,9 +268,7 @@ class RealCaseStudy:
         rows = []
         for designed_for in scenarios:
             for realised in scenarios:
-                value = float(
-                    evaluate_allocation(optimizer.input_dict, best_alloc[designed_for], realised, "CrossEval")
-                )
+                value = float(score_allocation(optimizer.input_dict, best_alloc[designed_for], realised, "CrossEval"))
                 rows.append(
                     {
                         "case": name,

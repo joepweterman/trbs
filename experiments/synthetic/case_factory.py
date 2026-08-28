@@ -40,7 +40,7 @@ import pandas as pd
 
 from vlinder.trbs import TheResponsibleBusinessSimulator
 from vlinder.evaluate import Evaluate
-from vlinder.optimize import SLSQPSolver, evaluate_allocation
+from vlinder.optimize import SLSQPSolver, score_allocation
 from vlinder.utils import suppress_print
 
 DEFAULT_ROOT = Path(__file__).parent / "generated"
@@ -792,7 +792,7 @@ def validate_case(
     scenario = str(sim.input_dict["scenarios"][0])
     rng = np.random.default_rng(seed)
     X = sample_capped_simplex(rng, n_samples, k, B)
-    vals = np.array([evaluate_allocation(opt.input_dict, x, scenario, "Probe") for x in X])
+    vals = np.array([score_allocation(opt.input_dict, x, scenario, "Probe") for x in X])
 
     finite = np.isfinite(vals)
     assert finite.all(), f"{(~finite).sum()}/{n_samples} objective evaluations were non-finite"

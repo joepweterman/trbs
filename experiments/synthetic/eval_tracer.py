@@ -2,7 +2,7 @@
 This file contains the shared evaluation tracer of the A4 equal-footing study.
 
 Every solver in ``vlinder.optimize`` reaches the objective through the single
-module-level function ``evaluate_allocation``: grid search calls it in its
+module-level function ``score_allocation``: grid search calls it in its
 enumeration loop, the SLSQP family calls it through ``BaseSolver._objective``,
 and the genetic algorithm calls it in its fitness closure. Wrapping that one
 function therefore records every method's evaluations with the same instrument,
@@ -70,18 +70,18 @@ def trace_evaluations():
     :return: the EvalTrace collecting the run inside the block
     """
     trace = EvalTrace()
-    original = vopt.evaluate_allocation
+    original = vopt.score_allocation
 
     def traced(*args, **kwargs):
         value = original(*args, **kwargs)
         trace.record(value)
         return value
 
-    vopt.evaluate_allocation = traced
+    vopt.score_allocation = traced
     try:
         yield trace
     finally:
-        vopt.evaluate_allocation = original
+        vopt.score_allocation = original
 
 
 def main():
