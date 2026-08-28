@@ -58,7 +58,6 @@ def test_the_default_method_is_basin_hopping(orchestrator):
 
     assert result.method == "basin_hopping"
     assert result.selection is None
-    assert "grid_capped" in Optimize.METHOD_REGISTRY
 
 
 def test_auto_picks_a_method_and_explains_itself(orchestrator, capsys):
@@ -87,8 +86,8 @@ def test_the_option_name_records_the_scenario(orchestrator):
     """An allocation is only optimal for the scenario it was optimized under, so the name says so."""
     result = orchestrator.run("Base case", method="slsqp", n_starts=2, seed=1, dmo_name="My DMO")
 
-    assert result.dmo_name == "My DMO (Base case)"
-    assert "My DMO (Base case)" in orchestrator.input_dict["decision_makers_options"]
+    assert result.dmo_name == "My DMO (SLSQP) (Base case)"
+    assert "My DMO (SLSQP) (Base case)" in orchestrator.input_dict["decision_makers_options"]
 
 
 @suppress_print
@@ -180,7 +179,7 @@ def test_without_a_configured_name_the_solver_default_applies(orchestrator):
 @suppress_print
 def test_configured_name_is_extended_with_method_and_scenario(beerwiser_appreciated):
     """A configured Optimize_DMO_name is the base; the method and scenario are appended."""
-    beerwiser_appreciated.optimize("Base case", method="grid")
+    beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
     result = beerwiser_appreciated.optimization_result
 
     assert result.dmo_name == "Optimized_DMO (grid) (Base case)"
@@ -189,18 +188,18 @@ def test_configured_name_is_extended_with_method_and_scenario(beerwiser_apprecia
 
 @suppress_print
 def test_an_explicit_name_overrides_the_configured_one(beerwiser_appreciated):
-    """A caller-supplied name wins over the configuration sheet and gets the scenario only."""
-    beerwiser_appreciated.optimize("Base case", method="grid", dmo_name="My Grid Run")
+    """A caller-supplied name wins over the configuration sheet; method and scenario are added."""
+    beerwiser_appreciated.optimize("Base case", method="grid", dmo_name="My Grid Run", max_calculation_time=None)
 
     names = list(beerwiser_appreciated.input_dict["decision_makers_options"])
-    assert "My Grid Run (Base case)" in names
+    assert "My Grid Run (grid) (Base case)" in names
     assert not any(name.startswith("Optimized_DMO (") for name in names)
 
 
 @suppress_print
 def test_case_optimize_returns_the_input_dict(beerwiser_appreciated):
     """optimize() hands back the updated case, which is what the front end reads."""
-    returned = beerwiser_appreciated.optimize("Base case", method="grid")
+    returned = beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
 
     assert returned is beerwiser_appreciated.input_dict
     assert "decision_makers_options" in returned
@@ -210,7 +209,7 @@ def test_case_optimize_returns_the_input_dict(beerwiser_appreciated):
 @suppress_print
 def test_case_optimize_records_the_result(beerwiser_appreciated):
     """The full result of the run stays available on the case."""
-    beerwiser_appreciated.optimize("Base case", method="grid")
+    beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
     result = beerwiser_appreciated.optimization_result
 
     assert result.method == "grid"
@@ -236,7 +235,9 @@ def test_case_optimize_dispatches_every_method(beerwiser_appreciated):
 def test_continuous_matches_or_beats_the_grid_baseline(beerwiser_appreciated):
     """The whole point of the continuous solvers: at least as good as enumerating the grid."""
     case_grid = beerwiser_appreciated.copy()
-    case_grid.optimize("Base case", method="grid", dmo_name="Grid Baseline", max_combinations=60000)
+    case_grid.optimize(
+        "Base case", method="grid", dmo_name="Grid Baseline", max_combinations=60000, max_calculation_time=None
+    )
     grid_appreciation = case_grid.optimization_result.appreciation
 
     case_slsqp = beerwiser_appreciated.copy()
@@ -247,7 +248,7 @@ def test_continuous_matches_or_beats_the_grid_baseline(beerwiser_appreciated):
     assert (
         result.appreciation >= grid_appreciation - 0.5
     ), f"SLSQP appreciation {result.appreciation:.4f} trails grid {grid_appreciation:.4f} by more than 0.5"
-    assert "SLSQP DMO (Base case)" in case_slsqp.input_dict["decision_makers_options"]
+    assert "SLSQP DMO (SLSQP) (Base case)" in case_slsqp.input_dict["decision_makers_options"]
 
 
 @suppress_print
@@ -257,8 +258,8 @@ def test_the_written_back_allocation_scores_what_the_result_claims(beerwiser_app
     result = beerwiser_appreciated.optimization_result
 
     input_dict = beerwiser_appreciated.input_dict
-    idx = np.where(input_dict["decision_makers_options"] == "Check (Base case)")[0][0]
+    idx = np.where(input_dict["decision_makers_options"] == "Check (SLSQP) (Base case)")[0][0]
     stored = input_dict["decision_makers_option_value"][idx]
-    scored = score_allocation(input_dict, stored, "Base case", "Check (Base case)")
+    scored = score_allocation(input_dict, stored, "Base case", "Check (SLSQP) (Base case)")
 
     assert scored == pytest.approx(result.appreciation, abs=1e-9)

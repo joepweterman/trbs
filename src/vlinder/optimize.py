@@ -5,8 +5,7 @@
 This module contains the Optimize class, which maximizes the appreciation of decision-maker
 options.
 
-Grid search is no longer the only way to do that, so the module is built up from general to
-specific:
+The module is built up from general to specific:
 
   1. ``evaluate_and_appreciate()`` and ``score_allocation()`` are free functions that score a
      single allocation. Every solver calls them and nothing else touches the tRBS engine.
@@ -15,19 +14,19 @@ specific:
      decision-maker option, writing the winning allocation back, staying inside the feasible set,
      and the rule that no solver may report an answer worse than a decision-maker option the case
      already contains.
-  4. The solvers themselves. ``GridSearch`` enumerates the budget face and ``CappedGridSearch``
-     the capped simplex. ``SLSQPSolver`` runs multi-start gradient optimization.
-     ``BasinHoppingSolver`` extends it with an escape loop for surfaces with more than one
-     optimum. ``GeneticAlgorithmSolver`` is the derivative-free alternative. ``MdbhSolver`` is a
-     research method that walks the simplex directly.
+  4. The solvers themselves. ``GridSearch`` enumerates a lattice of allocations. ``SLSQPSolver``
+     runs multi-start gradient optimization. ``BasinHoppingSolver`` extends it with an escape
+     loop for surfaces with more than one optimum. ``GeneticAlgorithmSolver`` is the
+     derivative-free alternative. ``MdbhSolver`` is a research method that walks the simplex
+     directly.
   5. ``Optimize`` is the orchestrator. It picks a solver (by name, automatically, or several at
      once) and runs it.
 
 The feasible set for the continuous solvers is the capped simplex, ``{x : x >= 0, sum(x) <= B}``:
 spending less than the whole budget is allowed. Every continuous solver also accepts
 ``spend_all=True``, which turns the budget into an equality so that every solution spends it
-exactly. Of the two grids, :class:`GridSearch` works on the budget face ``sum(x) = B`` and
-:class:`CappedGridSearch` on the capped simplex.
+exactly. Grid search takes the same switch: with ``spend_all=True`` (its default) it enumerates
+the budget face ``sum(x) = B``, with ``spend_all=False`` the capped simplex.
 """
 
 import copy
@@ -106,11 +105,6 @@ def score_allocation(input_dict, x, scenario, dmo_name, start_and_end_points=Non
     )
 
 
-#: Backward-compatible alias: this function was called ``evaluate_allocation`` before the
-#: rename to ``score_allocation``, and existing callers keep working under the old name.
-evaluate_allocation = score_allocation
-
-
 @dataclass
 class OptimizationResult:  # pylint: disable=too-many-instance-attributes
     """Result of an optimization run, for any method.
@@ -170,9 +164,9 @@ class BaseSolver:
     #: Name of the decision-maker option this solver writes its answer to.
     default_dmo_name = "Optimized"
     #: Name of the method as reported on :class:`OptimizationResult`.
-    method_name = "base"
+    method_name = "base_solver"
     #: Short label used when a configured base name is extended with the method.
-    method_label = "base"
+    method_label = "base_solver"
 
     def __init__(self, input_dict, output_dict):
         self.input_dict = input_dict
@@ -186,7 +180,7 @@ class BaseSolver:
         """Total budget available to allocate.
 
         The largest amount any decision-maker option spends. Taking the first option instead
-        would read a "do nothing" option (all zeros, as in the NEMO case) as a zero budget.
+        would read a "do nothing" option (all zeros) as a zero budget.
         """
         values = np.asarray(self.input_dict["decision_makers_option_value"], dtype=float)
         return float(max(np.sum(row) for row in values))
@@ -295,9 +289,7 @@ class BaseSolver:
         report an answer worse than a decision-maker option the case already has.
 
         If nothing the solver found beats the best-performing existing option,
-        that option is the answer and the optimizer's own option mirrors it. The
-        rule used to live inside grid search alone, so a continuous solver could
-        report an allocation below one the user had already defined.
+        that option is the answer and the optimizer's own option mirrors it.
         :param dmo_name: the solver's own decision-maker option name
         :param scenario: the scenario being solved
         :param allocation: the best allocation the solver found
@@ -343,47 +335,80 @@ class BaseSolver:
 
 
 class GridSearch(BaseSolver):
-    """Enumerate the budget face and keep the best combination.
+    """Enumerate a lattice of allocations and keep the best combination.
 
-    Grid search is the original tRBS optimizer and the baseline the continuous solvers are
-    compared against. Unlike them it works on the ordinary simplex ``sum(x) = B`` rather than
-    the capped simplex ``sum(x) <= B``: it only builds combinations that spend the budget
-    exactly, so an optimum that leaves part of the budget unspent is outside its search space.
+    With ``spend_all=True`` (the default) the lattice covers the budget face ``sum(x) = B``:
+    only combinations that spend the budget exactly. With ``spend_all=False`` it covers the
+    capped simplex ``sum(x) <= B``, so an optimum that leaves part of the budget unspent is
+    inside the search space.
 
-    The step size is coarsened until the number of combinations stays under
-    ``max_combinations``. The true cost is higher than that number, because every combination is
-    expanded into all its distinct permutations.
+    The solver has two modes. Under ``max_combinations`` the step size is coarsened until the
+    number of combinations stays under that ceiling and the whole lattice is evaluated once; on
+    the budget face the true cost is higher than the ceiling, because every combination is
+    expanded into all its distinct permutations. Under ``max_calculation_time`` the ceiling is
+    ignored: the solver evaluates ever finer lattices, halving the step each round and skipping
+    points it already evaluated, until the time runs out.
     """
 
     default_dmo_name = "Optimized (grid)"
     method_name = "grid"
     method_label = "grid"
 
-    def solve(self, scenario, dmo_name, budget=None, *, max_combinations=60000, max_calculation_time=None, **_ignored):
-        """Enumerate the budget face for ``scenario`` and write back the best allocation.
+    def solve(
+        self,
+        scenario,
+        dmo_name,
+        budget=None,
+        *,
+        max_combinations=60000,
+        max_calculation_time=None,
+        spend_all=True,
+        **_ignored,
+    ):
+        """Enumerate the lattice for ``scenario`` and write back the best allocation.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
         :param dmo_name: name under which the winning allocation is written back.
         :param budget: accepted for a uniform solver signature but unused. Grid search derives
             its own total from the best-performing decision-maker option.
-        :param max_combinations: upper bound on the number of combinations to build.
-        :param max_calculation_time: seconds the run may take. When given, it replaces
-            ``max_combinations``: the solver evaluates ever finer lattices, halving the step
-            each round, until the time runs out. See :meth:`_refine_within_time`.
+        :param max_combinations: upper bound on the number of combinations to build. Only used
+            when no ``max_calculation_time`` is given.
+        :param max_calculation_time: seconds the run may take. When given, ``max_combinations``
+            is ignored: the solver evaluates ever finer lattices, halving the step each round,
+            until the time runs out. See :meth:`_refine_within_time`.
+        :param spend_all: when True (the default), the lattice covers the budget face
+            ``sum(x) = B``; when False, the capped simplex ``sum(x) <= B``.
         :return: an :class:`OptimizationResult`.
         """
         started_at = time.perf_counter()
         best_dmo_data, max_investment = self.find_dict_values(scenario)
         self._prepare_input_dict(dmo_name, best_dmo_data["decision_maker_options"])
 
+        if max_investment <= 0:
+            # A zero budget leaves nothing to allocate; the incumbent rule answers directly.
+            winning_dmo, best_allocation, best_appreciation = self._settle_incumbent(
+                dmo_name, scenario, np.zeros(self._k), float("nan")
+            )
+            return self._build_result(
+                dmo_name=winning_dmo,
+                scenario=scenario,
+                allocation=best_allocation,
+                appreciation=best_appreciation,
+                budget=max_investment,
+                started_at=started_at,
+                n_function_evals=0,
+            )
+
         if max_calculation_time is not None:
             best_allocation, best_appreciation, n_evals, levels = self._refine_within_time(
-                scenario, dmo_name, max_investment, started_at, max_calculation_time
+                scenario, dmo_name, max_investment, started_at, max_calculation_time, spend_all=spend_all
             )
         else:
             scaled_max_investment = self.scale_max_investment(max_investment)
-            step_size = self.calculate_step_size(max_investment, scaled_max_investment, self._k, max_combinations)
-            combinations = self.generate_combinations(max_investment, step_size, self._k)
+            step_size = self.calculate_step_size(
+                max_investment, scaled_max_investment, self._k, max_combinations, spend_all=spend_all
+            )
+            combinations = self.generate_combinations(max_investment, step_size, self._k, spend_all=spend_all)
 
             # Evaluate and appreciate without changing self.input_dict during the loop. Only the
             # best result is written back after the loop finishes.
@@ -418,7 +443,9 @@ class GridSearch(BaseSolver):
             per_start_results=levels,
         )
 
-    def _refine_within_time(self, scenario, dmo_name, max_investment, started_at, max_calculation_time):
+    def _refine_within_time(
+        self, scenario, dmo_name, max_investment, started_at, max_calculation_time, spend_all=True
+    ):
         """
         This function evaluates ever finer lattices until the time budget runs out.
 
@@ -444,7 +471,7 @@ class GridSearch(BaseSolver):
             step_size = max_investment / units
             new_points = 0
             first_round = units == 2
-            for point in self.refinement_points(units, self._k, include_all=first_round):
+            for point in self.refinement_points(units, self._k, include_all=first_round, spend_all=spend_all):
                 if time.perf_counter() >= deadline:
                     break
                 allocation = np.array(point, dtype=float) * step_size
@@ -462,21 +489,25 @@ class GridSearch(BaseSolver):
         return best_allocation, best_appreciation, n_evals, levels
 
     @staticmethod
-    def refinement_points(units, parts, include_all):
+    def refinement_points(units, parts, include_all, spend_all=True):
         """
         This function yields the lattice points of one refinement round, in units of the step.
 
-        The lattice of the budget face at ``units`` steps is every tuple of ``parts``
-        non-negative integers summing to ``units``. When ``include_all`` is False the
-        all-even tuples are skipped: halving the step doubles every count, so a point
-        whose counts are all even is a point of the previous, coarser round and has
-        already been evaluated.
+        The lattice at ``units`` steps is every tuple of ``parts`` non-negative integers
+        summing to ``units`` (``spend_all=True``) or to at most ``units``
+        (``spend_all=False``). When ``include_all`` is False the all-even tuples are
+        skipped: halving the step doubles every count, so a point whose counts are all
+        even is a point of the previous, coarser round and has already been evaluated. On
+        the capped lattice the same rule holds, because the implicit slack count is even
+        whenever the spent counts are (the total is a power of two).
         :param units: the resolution, in steps, of the budget
         :param parts: the number of internal variable inputs
         :param include_all: whether this is the first round, which has no previous round
+        :param spend_all: whether the lattice covers the budget face or the capped simplex
         :return: a generator of integer tuples of length ``parts``
         """
-        for point in GridSearch._face_compositions(units, parts):
+        compositions = GridSearch._face_compositions if spend_all else GridSearch._bounded_compositions
+        for point in compositions(units, parts):
             if include_all or any(count % 2 for count in point):
                 yield point
 
@@ -497,6 +528,22 @@ class GridSearch(BaseSolver):
                 yield (head,) + tail
 
     @staticmethod
+    def _bounded_compositions(units, parts):
+        """
+        This function yields every tuple of ``parts`` non-negative integers summing to at
+        most ``units``: the lattice points of the capped simplex.
+        :param units: the resolution, in steps, of the budget
+        :param parts: the number of internal variable inputs
+        :return: a generator of integer tuples of length ``parts``
+        """
+        if parts == 0:
+            yield ()
+            return
+        for head in range(units + 1):
+            for tail in GridSearch._bounded_compositions(units - head, parts - 1):
+                yield (head,) + tail
+
+    @staticmethod
     def scale_max_investment(max_investment):
         """
         This function scales down the maximum investment value to make it more manageable for combinatorial purposes.
@@ -514,10 +561,14 @@ class GridSearch(BaseSolver):
         return scaled_max_investment
 
     @staticmethod
-    def calculate_step_size(max_investment, scaled_max_investment, num_internal_inputs, max_combinations):
+    def calculate_step_size(
+        max_investment, scaled_max_investment, num_internal_inputs, max_combinations, spend_all=True
+    ):
         """
         This function calculates the optimal step size to reduce the number of combinations.
         The goal is to stay under the maximum allowable number of combinations for efficiency.
+        The capped lattice holds ``comb(units + k, k)`` points against the face's
+        ``comb(units + k - 1, k - 1)``, so the same ceiling yields a slightly coarser step.
         """
         step_size_tmp = 1
 
@@ -526,7 +577,10 @@ class GridSearch(BaseSolver):
             units = scaled_max_investment // step_size_tmp
 
             # Calculate the number of combinations using binomial coefficient
-            combinations = comb(units + num_internal_inputs - 1, num_internal_inputs - 1)
+            if spend_all:
+                combinations = comb(units + num_internal_inputs - 1, num_internal_inputs - 1)
+            else:
+                combinations = comb(units + num_internal_inputs, num_internal_inputs)
 
             if combinations <= max_combinations and scaled_max_investment % step_size_tmp == 0:
                 # If the number of combinations is within the constraints, use this step size
@@ -541,10 +595,19 @@ class GridSearch(BaseSolver):
         return step_size
 
     @staticmethod
-    def generate_combinations(max_investment, step_size, num_internal_inputs):
+    def generate_combinations(max_investment, step_size, num_internal_inputs, spend_all=True):
         """
-        This function generates all valid combinations of internal input values whose sum equals max_investment.
+        This function generates the lattice of allocations at the given step: every combination
+        whose sum equals ``max_investment`` (``spend_all=True``), or every combination whose sum
+        stays at or under it (``spend_all=False``, generated directly).
         """
+        if not spend_all:
+            units = int(round(max_investment / step_size))
+            return [
+                tuple(count * step_size for count in point)
+                for point in GridSearch._bounded_compositions(units, num_internal_inputs)
+            ]
+
         base_combinations = np.arange(0, max_investment + step_size, step_size)
         valid_combinations = []
 
@@ -558,94 +621,6 @@ class GridSearch(BaseSolver):
         return valid_combinations
 
 
-class CappedGridSearch(GridSearch):
-    """Grid search over ``sum(x) <= B`` instead of over the budget face.
-
-    Everything the budget-face grid does is inherited unchanged: the budget is still derived
-    from the best-performing decision-maker option, the best point is still written back, and
-    an existing option that beats the whole lattice still wins. Only the set of points differs:
-    the lattice covers the capped simplex, so an optimum that leaves part of the budget unspent
-    is inside the search space. The price is resolution: at an equal ceiling the extra interior
-    points buy a step one or two units coarser than the budget-face grid's.
-    """
-
-    default_dmo_name = "Optimized (capped grid)"
-    method_name = "grid_capped"
-    method_label = "grid (capped simplex)"
-
-    @staticmethod
-    def calculate_step_size(max_investment, scaled_max_investment, num_internal_inputs, max_combinations):
-        """
-        This function picks the finest step whose capped lattice stays under the ceiling.
-
-        The capped simplex holds ``comb(units + k, k)`` points against the face's
-        ``comb(units + k - 1, k - 1)``, so the same ceiling yields a slightly coarser step.
-        :param max_investment: the budget
-        :param scaled_max_investment: the budget scaled for combinatorial purposes
-        :param num_internal_inputs: the number of internal variable inputs
-        :param max_combinations: upper bound on the number of lattice points
-        :return: the step size, in budget units
-        """
-        step_size_tmp = 1
-        while True:
-            units = scaled_max_investment // step_size_tmp
-            n_points = comb(units + num_internal_inputs, num_internal_inputs)
-            if n_points <= max_combinations and scaled_max_investment % step_size_tmp == 0:
-                break
-            step_size_tmp += 1
-        return max_investment / (scaled_max_investment / step_size_tmp)
-
-    @staticmethod
-    def generate_combinations(max_investment, step_size, num_internal_inputs):
-        """
-        This function builds every lattice point of the capped simplex at the given step,
-        generated directly so the cost is proportional to the number of points.
-        :param max_investment: the budget
-        :param step_size: the step size, in budget units
-        :param num_internal_inputs: the number of internal variable inputs
-        :return: a list of allocation tuples, each summing to at most the budget
-        """
-        units = int(round(max_investment / step_size))
-        return [
-            tuple(count * step_size for count in point)
-            for point in CappedGridSearch._bounded_compositions(units, num_internal_inputs)
-        ]
-
-    @staticmethod
-    def refinement_points(units, parts, include_all):
-        """
-        This function yields one refinement round of the capped lattice, in units of the step.
-
-        Same skip rule as the budget-face grid's refinement: halving the step doubles every
-        count, so an all-even point was already evaluated at the previous, coarser round. The
-        implicit slack count (unspent units) is even whenever the spent counts are, because
-        the total is a power of two, so checking the spent counts is enough.
-        :param units: the resolution, in steps, of the budget
-        :param parts: the number of internal variable inputs
-        :param include_all: whether this is the first round, which has no previous round
-        :return: a generator of integer tuples of length ``parts``
-        """
-        for point in CappedGridSearch._bounded_compositions(units, parts):
-            if include_all or any(count % 2 for count in point):
-                yield point
-
-    @staticmethod
-    def _bounded_compositions(units, parts):
-        """
-        This function yields every tuple of ``parts`` non-negative integers summing to at
-        most ``units``: the lattice points of the capped simplex.
-        :param units: the resolution, in steps, of the budget
-        :param parts: the number of internal variable inputs
-        :return: a generator of integer tuples of length ``parts``
-        """
-        if parts == 0:
-            yield ()
-            return
-        for head in range(units + 1):
-            for tail in CappedGridSearch._bounded_compositions(units - head, parts - 1):
-                yield (head,) + tail
-
-
 class SLSQPSolver(BaseSolver):
     """Multi-start sequential least-squares programming on the capped simplex.
 
@@ -657,8 +632,7 @@ class SLSQPSolver(BaseSolver):
     The budget is an upper bound by default, not an equality: under-spending could be feasible. That
     matters on surfaces where spending the whole budget lowers appreciation. Where it does not,
     the constraint binds and the solution spends everything anyway. ``spend_all=True`` turns
-    the bound into an equality, so every solution spends the budget exactly, the way grid
-    search does.
+    the bound into an equality, so every solution spends the budget exactly.
     """
 
     default_dmo_name = "Optimized (SLSQP)"
@@ -706,7 +680,9 @@ class SLSQPSolver(BaseSolver):
         for i, x0 in enumerate(starts):
             if deadline is not None and time.perf_counter() >= deadline:
                 break
-            res = self._slsqp_from_start(x0, scenario, dmo_name, budget, eval_counter, spend_all=spend_all)
+            res = self._slsqp_from_start(
+                x0, scenario, dmo_name, budget, eval_counter, spend_all=spend_all, deadline=deadline
+            )
             per_start.append(
                 {
                     "i": i,
@@ -718,7 +694,7 @@ class SLSQPSolver(BaseSolver):
                     "message": str(res.message),
                 }
             )
-            if res.success and res.fun < best_neg_f:
+            if res.fun < best_neg_f:
                 best_neg_f = res.fun
                 best_x = np.asarray(res.x)
 
@@ -755,7 +731,7 @@ class SLSQPSolver(BaseSolver):
         """:meth:`BaseSolver._objective` in budget-normalised coordinates, ``x = budget * z``."""
         return self._objective(np.asarray(z, dtype=float) * budget, scenario, dmo_name, eval_counter)
 
-    def _slsqp_minimizer_kwargs(self, scenario, dmo_name, eval_counter, budget, spend_all=False):
+    def _slsqp_minimizer_kwargs(self, scenario, dmo_name, eval_counter, budget, spend_all=False, deadline=None):
         """The SLSQP configuration shared by a single solve and by every hop of a hopping run.
 
         The solve runs in normalised coordinates, ``x = B * z``, on the unit capped simplex.
@@ -766,18 +742,33 @@ class SLSQPSolver(BaseSolver):
 
         scipy reads ``ineq`` constraints as ``fun(z) >= 0``, hence ``1 - sum(z) >= 0``, and
         ``eq`` constraints as ``fun(z) == 0``, so the same function serves both modes.
+
+        A ``deadline`` (a ``time.perf_counter()`` value) is enforced through scipy's
+        callback: it runs after every iteration and raises ``StopIteration`` once the time
+        is spent, so a running solve stops within one iteration of its deadline instead of
+        finishing first.
         """
-        return {
+        kwargs = {
             "method": "SLSQP",
             "bounds": [(0.0, 1.0)] * self._k,
             "constraints": ({"type": "eq" if spend_all else "ineq", "fun": lambda z: float(1.0 - np.sum(z))},),
             "args": (scenario, dmo_name, eval_counter, float(budget)),
             "options": {"ftol": 1e-6, "maxiter": 100, "disp": False, "eps": 1e-6},
         }
+        if deadline is not None:
 
-    def _slsqp_from_start(self, x0, scenario, dmo_name, budget, eval_counter, spend_all=False):
+            def _stop_at_deadline(*_args, **_kwargs):
+                if time.perf_counter() >= deadline:
+                    raise StopIteration
+
+            kwargs["callback"] = _stop_at_deadline
+        return kwargs
+
+    def _slsqp_from_start(self, x0, scenario, dmo_name, budget, eval_counter, spend_all=False, deadline=None):
         """Single SLSQP solve from ``x0``; ``res.x`` is mapped back to allocation units."""
-        minimizer_kwargs = self._slsqp_minimizer_kwargs(scenario, dmo_name, eval_counter, budget, spend_all=spend_all)
+        minimizer_kwargs = self._slsqp_minimizer_kwargs(
+            scenario, dmo_name, eval_counter, budget, spend_all=spend_all, deadline=deadline
+        )
         res = minimize(
             self._objective_z,
             np.asarray(x0, dtype=float) / float(budget),
@@ -875,7 +866,9 @@ class BasinHoppingSolver(SLSQPSolver):
 
         # Hopping runs in the same normalised coordinates as the local solve, which also makes
         # step_frac independent of the case's budget scale.
-        minimizer_kwargs = self._slsqp_minimizer_kwargs(scenario, dmo_name, eval_counter, budget, spend_all=spend_all)
+        minimizer_kwargs = self._slsqp_minimizer_kwargs(
+            scenario, dmo_name, eval_counter, budget, spend_all=spend_all, deadline=deadline
+        )
         project = self._project_budget_face if spend_all else self._project_capped_simplex
 
         # scipy stops hopping when the callback returns True, which turns the deadline into a
@@ -1031,7 +1024,16 @@ class GeneticAlgorithmSolver(BaseSolver):
                     child = self._polynomial_mutation(child, eta_mutation, rng)
                     children.append(project(child, 1.0))
             children = np.array(children[:population_size])
-            child_scores = np.array([fitness(z) for z in children])
+            # The deadline is also checked per child: the evaluations are the expensive part,
+            # so stopping between children caps the overshoot at a single evaluation.
+            child_scores = []
+            for child in children:
+                if deadline is not None and time.perf_counter() >= deadline:
+                    break
+                child_scores.append(fitness(child))
+            if len(child_scores) < population_size:
+                break  # time ran out mid-generation: the previous population's best stands
+            child_scores = np.array(child_scores)
 
             # The incumbent best survives unless a child beats it.
             elite_idx = int(np.argmax(scores))
@@ -1249,8 +1251,8 @@ class MdbhSolver(BaseSolver):
 
 class Optimize:
     """
-    The Optimize class performs grid search optimization to find the optimal distribution of internal input values
-    that maximizes the appreciation value of decision-maker options.
+    The Optimize class finds the distribution of internal input values that maximizes the
+    appreciation value of decision-maker options.
 
     Basin-hopping is the default method: reliable when the surface has more than one
     optimum, and on a single-optimum surface it returns what SLSQP finds. ``method="auto"``
@@ -1262,7 +1264,6 @@ class Optimize:
     #: Method name to solver class.
     METHOD_REGISTRY = {
         "grid": GridSearch,
-        "grid_capped": CappedGridSearch,
         "slsqp": SLSQPSolver,
         "basin_hopping": BasinHoppingSolver,
         "genetic_algorithm": GeneticAlgorithmSolver,
@@ -1302,8 +1303,8 @@ class Optimize:
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
         :param method: a single method name (str), ``"auto"``, or a list of names; the
-            default is ``"basin_hopping"``. Supported: ``"grid"``, ``"grid_capped"``,
-            ``"slsqp"``, ``"basin_hopping"``, ``"genetic_algorithm"``, ``"mdbh"``. Unknown
+            default is ``"basin_hopping"``. Supported: ``"grid"``, ``"slsqp"``,
+            ``"basin_hopping"``, ``"genetic_algorithm"``, ``"mdbh"``. Unknown
             names raise ``NotImplementedError``. ``"auto"`` probes the case and picks one of
             those methods together with a solver budget for it; any setting you pass
             overrides that budget. It cannot be combined in a list.
@@ -1402,14 +1403,14 @@ class Optimize:
 
         The name always records the scenario it was optimized for: an allocation is only optimal
         for that scenario, so optimizing the same case for two scenarios has to produce two
-        options rather than overwrite one. A name passed by the caller is used as given, plus the
-        scenario. Without one, the name configured on the case is the base, extended with the
+        options rather than overwrite one. A name passed by the caller keeps the method
+        and the scenario as well. Without one, the name configured on the case is the base, extended with the
         method and the scenario, so a configured "Show me what you got" becomes
         "Show me what you got (grid) (Base case)". Without either, the solver's default (which
         already names the method) plus the scenario.
         """
         if dmo_name:
-            return f"{dmo_name} ({scenario})"
+            return f"{dmo_name} ({solver.method_label}) ({scenario})"
         configured = self._configured_dmo_name(self.input_dict)
         if configured:
             return f"{configured} ({solver.method_label}) ({scenario})"
@@ -1420,7 +1421,6 @@ class Optimize:
         """A readable version of the automatic choice, for the notebook and the console."""
         readable = {
             "grid": "grid search",
-            "grid_capped": "grid search (capped simplex)",
             "slsqp": "multi-start SLSQP",
             "basin_hopping": "basin-hopping",
             "genetic_algorithm": "the genetic algorithm",

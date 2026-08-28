@@ -188,7 +188,7 @@ class TheResponsibleBusinessSimulator:
         location_report = self.report.create_report(scenario, output_path)
         print(location_report)
 
-    def optimize(self, scenario, method="basin_hopping", **kwargs):
+    def optimize(self, scenario, method="basin_hopping", spend_all=True, max_calculation_time=60, **kwargs):
         """Find the optimal distribution of internal inputs for a scenario.
 
         One entry point for every optimization method. ``method`` is
@@ -203,8 +203,7 @@ class TheResponsibleBusinessSimulator:
           * list of names → run each, print every method's appreciation +
             allocation, and keep the best (only the winner is written back)
 
-        Supported methods: ``"grid"`` (combinatorial grid search over the budget
-        face), ``"grid_capped"`` (the same grid over the capped simplex), ``"slsqp"``
+        Supported methods: ``"grid"`` (combinatorial grid search), ``"slsqp"``
         (continuous multi-start SLSQP), ``"basin_hopping"`` (SLSQP with an
         escape loop for surfaces with more than one optimum),
         ``"genetic_algorithm"`` (derivative-free evolutionary search) and
@@ -212,19 +211,29 @@ class TheResponsibleBusinessSimulator:
         Naming one overrides the automatic choice; keyword arguments override
         the solver budget that ``"auto"`` attaches to its choice.
 
-        The optimized allocation is written to a new decision-maker option whose
-        name records both the method and the scenario it was optimized for, so a
-        case optimized for several scenarios keeps them apart. When the case
-        configures an ``Optimize_DMO_name``, that name is the base: a configured
-        "Show me what you got" becomes "Show me what you got (grid) (Base case)".
-        A ``dmo_name`` passed here overrides it.
+        Each run optimizes one scenario. Optimizing for several scenarios means
+        running once per scenario. Each run gets its own decision-maker option.
+
+        The case can set an ``Optimize_DMO_name``. That is a free label the user
+        chooses, for example "Show me what you got". It becomes the base of the
+        name: "Show me what you got (grid) (Base case)". A ``dmo_name`` passed
+        here overrides it, but the method and the scenario are still added.
 
         :param scenario: scenario name (must be in input_dict["scenarios"]).
-        :param method: a method name, ``"auto"``, or a list of names; the default
-            is ``"basin_hopping"``.
+        :param method: a method name, ``"auto"``, or a list of names. The default is
+            ``"basin_hopping"``, because it was the most reliable method in the
+            benchmarks behind this optimizer: on a surface with one optimum it
+            returns what SLSQP finds, and on a surface with several it keeps
+            searching for the best one.
+        :param spend_all: when True (the default), every solver spends the budget
+            exactly (``sum(x) = B``); when False, under-spending is allowed
+            (``sum(x) <= B``), for cases where leaving budget unspent may pay.
+        :param max_calculation_time: seconds a run may take, 60 by default. Every
+            solver stops itself once the time is spent and reports the best answer
+            found so far; grid search spends the time refining its lattice. Pass
+            ``None`` to remove the limit.
         :param kwargs: ``dmo_name`` for the optimizer's decision-maker option,
-            ``new_case_name`` for the optimized case name, plus the parameters of
-            the chosen solver. Grid takes ``max_combinations`` (default 60000);
+            plus the parameters of the chosen solver. Grid takes ``max_combinations`` (default 60000);
             slsqp takes ``n_starts`` (default 100), ``seed``; basin_hopping takes
             ``n_hops``, ``n_starts``, ``temperature``, ``step_frac``, ``seed``;
             genetic_algorithm takes ``population_size``, ``n_generations``,
@@ -240,11 +249,17 @@ class TheResponsibleBusinessSimulator:
         case_optimizer = Optimize(self.input_dict, self.output_dict)
 
         dmo_name = kwargs.pop("dmo_name", None)
-        new_case_name = kwargs.pop("new_case_name", None)
-        result = case_optimizer.run(scenario, method=method, dmo_name=dmo_name, **kwargs)
+        result = case_optimizer.run(
+            scenario,
+            method=method,
+            dmo_name=dmo_name,
+            spend_all=spend_all,
+            max_calculation_time=max_calculation_time,
+            **kwargs,
+        )
         # case_optimizer.input_dict holds the winning DMO (appended/updated); sync back.
         self.input_dict = case_optimizer.input_dict
         self.optimization_result = result
-        self.name = new_case_name or f"{self.name} - Optimized"
+        self.name = f"{self.name} - Optimized ({result.method}) ({result.scenario})"
         self._set_and_reset_status(3)
         return self.input_dict
