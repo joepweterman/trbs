@@ -173,6 +173,21 @@ def test_without_a_configured_name_the_solver_default_applies(orchestrator):
     assert result.dmo_name == f"{SLSQPSolver.default_dmo_name} (Base case)"
 
 
+@suppress_print
+def test_optimize_single_scenario_keeps_the_papilio_contract(orchestrator):
+    """The front end calls this positionally and reads only the returned input dict.
+
+    The call mirrors Papilio's own line: Optimize(...).optimize_single_scenario(scenario,
+    "Optimized DMO", 10000). Whatever the solver internals do, the return value must be the
+    updated input dictionary, with the optimized option on it.
+    """
+    returned = orchestrator.optimize_single_scenario("Base case", "Optimized DMO", 10000, n_hops=2, n_starts=1, seed=1)
+
+    assert returned is orchestrator.input_dict
+    assert "decision_makers_options" in returned
+    assert any(str(name).startswith("Optimized DMO") for name in returned["decision_makers_options"])
+
+
 # ======================================================================
 # Through the case: TheResponsibleBusinessSimulator.optimize()
 # ======================================================================

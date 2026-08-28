@@ -1356,6 +1356,22 @@ class Optimize:
         result.selection = selection
         return result
 
+    def optimize_single_scenario(self, scenario, dmo_name, max_combinations=60000, **kwargs):
+        """Optimize one scenario and return the updated input dictionary.
+
+        This is the entry point the Papilio front end calls, positionally and with a
+        combination ceiling from the grid-search era, so its contract is frozen: it returns
+        the updated ``input_dict`` and nothing else. The run itself uses the package defaults
+        (basin-hopping, ``spend_all=True``, a 60-second time limit); ``max_combinations`` is
+        forwarded and only matters when a caller picks ``method="grid"`` explicitly. Keyword
+        arguments reach the solver, so the defaults can be overridden per call.
+        """
+        kwargs.setdefault("method", "basin_hopping")
+        kwargs.setdefault("spend_all", True)
+        kwargs.setdefault("max_calculation_time", 60)
+        self.run(scenario, dmo_name=dmo_name, max_combinations=max_combinations, **kwargs)
+        return self.input_dict
+
     @staticmethod
     def _settings_for(method, shared_kwargs, method_kwargs):
         """The settings one method runs with: the shared ones, overridden by its own."""
