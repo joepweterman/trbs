@@ -46,7 +46,7 @@ class CaseError(Exception):
         return f"Case Error: {self.message}"
 
 
-class TheResponsibleBusinessSimulator:
+class TheResponsibleBusinessSimulator:  # pylint: disable=too-many-instance-attributes
     """
     This class is the base class of an tRBS-case and contains all necessary information to import data, evaluate
     dependencies and calculate appreciations.
@@ -181,13 +181,40 @@ class TheResponsibleBusinessSimulator:
         location_report = self.report.create_report(scenario, output_path)
         print(location_report)
 
-    def optimize(self, scenario, **kwargs):
+    def optimize(self, scenario, method=None, **kwargs):
         """
         This function deals with finding the optimal distribution of decision maker options.
+
+        Without a ``method`` the original grid search runs, exactly as before, and nothing is
+        returned. Naming a method instead routes the run through
+        :meth:`vlinder.optimize.Optimize.run`, which uses the solver classes and returns the
+        full :class:`~vlinder.optimize.OptimizationResult` of the run.
+
         :param scenario: the selected scenario of the case
+        :param method: ``None`` (the default) for the original grid search, or a method name
+            or list of names for the solver classes: ``"grid"``, ``"slsqp"`` or
+            ``"basin_hopping"``. Basin-hopping is SLSQP wrapped in an escape loop: on a
+            surface with one optimum it returns what SLSQP finds, and on a surface with
+            several it keeps searching for the best one.
+        :param kwargs: ``new_dmo_name`` for the optimizer's decision-maker option and
+            ``new_case_name`` for the optimized case name. Without a ``method``,
+            ``max_combinations`` (default 60000) bounds the grid. With one, the remaining
+            keyword arguments reach the solver: grid takes ``max_combinations``; slsqp takes
+            ``n_starts`` (default 100) and ``seed``; basin_hopping takes ``n_hops``,
+            ``n_starts``, ``temperature``, ``step_frac`` and ``seed``. Every solver takes
+            ``spend_all`` and ``max_calculation_time``.
+        :return: the :class:`~vlinder.optimize.OptimizationResult` when a ``method`` is given,
+            and None otherwise.
         """
         self._status_check([0, 1, 2])
         case_optimizer = Optimize(self.input_dict, self.output_dict)
+
+        if method is not None:
+            new_case_name = kwargs.pop("new_case_name", None)
+            result = case_optimizer.run(scenario, method=method, dmo_name=kwargs.pop("new_dmo_name", None), **kwargs)
+            self.input_dict = case_optimizer.input_dict
+            self.name = new_case_name or f"{self.name} - Optimized"
+            return result
 
         try:
             index = list(self.input_dict["configurations"]).index("Optimize_DMO_name")
@@ -203,3 +230,6 @@ class TheResponsibleBusinessSimulator:
 
         except (ValueError, IndexError, KeyError) as error:
             raise CaseError("cannot find optimized DMO name") from error
+
+        # The original grid search reports through print() and leaves its answer on the case.
+        return None
