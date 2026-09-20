@@ -146,13 +146,13 @@ def test_optimize_single_scenario_keeps_the_papilio_contract(orchestrator):
 # Through the case: TheResponsibleBusinessSimulator.optimize()
 # ======================================================================
 @suppress_print
-def test_case_optimize_without_a_method_runs_the_original_grid(beerwiser_appreciated):
-    """No method means the behaviour that was there before: the grid, named as it always was."""
-    returned = beerwiser_appreciated.optimize("Base case")
+def test_case_optimize_without_a_method_runs_basin_hopping(beerwiser_appreciated):
+    """No method means the default method, which is basin-hopping rather than the grid."""
+    result = beerwiser_appreciated.optimize("Base case", n_hops=3, n_starts=1, seed=42)
 
     names = list(beerwiser_appreciated.input_dict["decision_makers_options"])
-    assert "Optimized_DMO_Base case" in names
-    assert returned is None
+    assert result.method == "basin_hopping"
+    assert "Optimized_DMO (basin-hopping) (Base case)" in names
 
 
 @suppress_print
