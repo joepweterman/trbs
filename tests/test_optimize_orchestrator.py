@@ -8,9 +8,8 @@ names the decision-maker option it writes back to, how settings reach one solver
 them, and what happens when a method or a setting is addressed that is not running. The second
 half goes through TheResponsibleBusinessSimulator, the way a user reaches it.
 
-The original grid search reached through optimize_single_scenario is covered by
-test_optimize.py, and is deliberately left alone here: run() is an addition beside it, not a
-replacement for it.
+optimize_single_scenario is covered here as well: it is the same run behind the frozen
+contract an external front end calls.
 """
 
 import numpy as np
@@ -134,31 +133,47 @@ def test_optimize_single_scenario_keeps_the_papilio_contract(orchestrator):
     """The front end calls this positionally and reads only the returned input dict.
 
     The call mirrors Papilio's own line: Optimize(...).optimize_single_scenario(scenario,
-    "Optimized DMO", 10000). Adding run() beside it must not disturb that contract.
+    "Optimized DMO", 10000). Whatever the solver does, the return value must be the updated
+    input dictionary, with the optimized option on it.
     """
-    returned = orchestrator.optimize_single_scenario("Base case", "Optimized DMO", 10000)
+    returned = orchestrator.optimize_single_scenario("Base case", "Optimized DMO", 10000, n_hops=2, n_starts=1, seed=1)
 
     assert returned is orchestrator.input_dict
-    assert "Optimized DMO" in returned["decision_makers_options"]
+    assert "Optimized DMO (basin-hopping) (Base case)" in returned["decision_makers_options"]
+
+
+@suppress_print
+def test_optimize_single_scenario_is_method_agnostic(orchestrator):
+    """The frozen contract runs the package default, and a caller can still name the method."""
+    orchestrator.optimize_single_scenario(
+        "Base case", "Optimized DMO", 10000, method="grid", max_calculation_time=None
+    )
+
+    assert "Optimized DMO (grid) (Base case)" in orchestrator.input_dict["decision_makers_options"]
 
 
 # ======================================================================
 # Through the case: TheResponsibleBusinessSimulator.optimize()
 # ======================================================================
 @suppress_print
-def test_case_optimize_without_a_method_runs_basin_hopping(beerwiser_appreciated):
-    """No method means the default method, which is basin-hopping rather than the grid."""
-    result = beerwiser_appreciated.optimize("Base case", n_hops=3, n_starts=1, seed=42)
+def test_case_optimize_defaults(beerwiser_appreciated):
+    """No method means basin-hopping, spending the whole budget, under a 60-second limit."""
+    original_name = beerwiser_appreciated.name
+    beerwiser_appreciated.optimize("Base case", n_hops=3, n_starts=1, seed=42)
+    result = beerwiser_appreciated.optimization_result
 
-    names = list(beerwiser_appreciated.input_dict["decision_makers_options"])
     assert result.method == "basin_hopping"
-    assert "Optimized_DMO (basin-hopping) (Base case)" in names
+    assert result.budget_spent == pytest.approx(result.budget)
+    assert result.calculation_time <= 60
+    assert "Optimized_DMO (basin-hopping) (Base case)" in beerwiser_appreciated.input_dict["decision_makers_options"]
+    assert beerwiser_appreciated.name == f"{original_name} - Optimized (basin_hopping) (Base case)"
 
 
 @suppress_print
 def test_configured_name_is_extended_with_method_and_scenario(beerwiser_appreciated):
     """A configured Optimize_DMO_name is the base; the method and scenario are appended."""
-    result = beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
+    beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
+    result = beerwiser_appreciated.optimization_result
 
     assert result.dmo_name == "Optimized_DMO (grid) (Base case)"
     assert result.dmo_name in beerwiser_appreciated.input_dict["decision_makers_options"]
@@ -167,7 +182,7 @@ def test_configured_name_is_extended_with_method_and_scenario(beerwiser_apprecia
 @suppress_print
 def test_an_explicit_name_overrides_the_configured_one(beerwiser_appreciated):
     """A caller-supplied name wins over the configuration sheet; method and scenario are added."""
-    beerwiser_appreciated.optimize("Base case", method="grid", new_dmo_name="My Grid Run", max_calculation_time=None)
+    beerwiser_appreciated.optimize("Base case", method="grid", dmo_name="My Grid Run", max_calculation_time=None)
 
     names = list(beerwiser_appreciated.input_dict["decision_makers_options"])
     assert "My Grid Run (grid) (Base case)" in names
@@ -175,9 +190,19 @@ def test_an_explicit_name_overrides_the_configured_one(beerwiser_appreciated):
 
 
 @suppress_print
+def test_case_optimize_returns_the_input_dict(beerwiser_appreciated):
+    """optimize() hands back the updated input dictionary, as the other case steps do."""
+    returned = beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
+
+    assert returned is beerwiser_appreciated.input_dict
+    assert 3 in beerwiser_appreciated.status
+
+
+@suppress_print
 def test_case_optimize_records_the_result(beerwiser_appreciated):
-    """Naming a method hands back the full result of the run."""
-    result = beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
+    """The full result of the run is kept on the case."""
+    beerwiser_appreciated.optimize("Base case", method="grid", max_calculation_time=None)
+    result = beerwiser_appreciated.optimization_result
 
     assert result.method == "grid"
     assert result.scenario == "Base case"
@@ -186,29 +211,17 @@ def test_case_optimize_records_the_result(beerwiser_appreciated):
 
 
 @suppress_print
-def test_case_optimize_dispatches_basin_hopping(beerwiser_appreciated):
-    """Basin-hopping reaches the case through the same entry point as the grid."""
-    result = beerwiser_appreciated.optimize("Base case", method="basin_hopping", n_hops=3, n_starts=1, seed=42)
-
-    assert result.method == "basin_hopping"
-    # The packaged case configures Optimize_DMO_name = "Optimized_DMO", which is
-    # the base of the default name, extended with the method and the scenario.
-    expected_name = "Optimized_DMO (basin-hopping) (Base case)"
-    assert expected_name in beerwiser_appreciated.input_dict["decision_makers_options"]
-
-
-@suppress_print
 def test_continuous_matches_or_beats_the_grid_baseline(beerwiser_appreciated):
     """The whole point of the continuous solvers: at least as good as enumerating the grid."""
     case_grid = beerwiser_appreciated.copy()
-    grid_appreciation = case_grid.optimize(
-        "Base case", method="grid", new_dmo_name="Grid Baseline", max_combinations=60000, max_calculation_time=None
-    ).appreciation
+    case_grid.optimize(
+        "Base case", method="grid", dmo_name="Grid Baseline", max_combinations=60000, max_calculation_time=None
+    )
+    grid_appreciation = case_grid.optimization_result.appreciation
 
     case_bh = beerwiser_appreciated.copy()
-    result = case_bh.optimize(
-        "Base case", method="basin_hopping", n_hops=10, n_starts=2, seed=42, new_dmo_name="BH DMO"
-    )
+    case_bh.optimize("Base case", method="basin_hopping", n_hops=10, n_starts=2, seed=42, dmo_name="BH DMO")
+    result = case_bh.optimization_result
 
     assert (
         result.appreciation >= grid_appreciation - 0.5
@@ -219,7 +232,8 @@ def test_continuous_matches_or_beats_the_grid_baseline(beerwiser_appreciated):
 @suppress_print
 def test_the_written_back_allocation_scores_what_the_result_claims(beerwiser_appreciated):
     """The allocation stored on the case must reproduce the reported appreciation."""
-    result = beerwiser_appreciated.optimize("Base case", method="slsqp", n_starts=5, seed=7, new_dmo_name="Check")
+    beerwiser_appreciated.optimize("Base case", method="slsqp", n_starts=5, seed=7, dmo_name="Check")
+    result = beerwiser_appreciated.optimization_result
 
     input_dict = beerwiser_appreciated.input_dict
     name = "Check (SLSQP) (Base case)"

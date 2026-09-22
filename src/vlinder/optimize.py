@@ -3,19 +3,20 @@
 """
 This module is the single home for tRBS optimization.
 
-It offers two entry points, and they are deliberately kept apart.
-
-``Optimize.optimize_single_scenario`` is the original grid search: it walks a lattice of
-allocations, keeps the best one, and returns the updated input dictionary. Its behaviour
-is unchanged, and it remains what ``TheResponsibleBusinessSimulator.optimize`` calls by
-default.
-
-``Optimize.run`` is the newer entry point. It dispatches to a named solver class, each of
-which shares one contract (:class:`BaseSolver`) and returns an :class:`OptimizationResult`
-rather than a dictionary. Three solvers are available: ``"grid"`` (a time-budgeted grid
-search), ``"slsqp"`` (continuous multi-start sequential least-squares programming) and
+``Optimize.run`` is the entry point. It dispatches to a named solver class, each of which
+shares one contract (:class:`BaseSolver`) and returns an :class:`OptimizationResult`. Three
+solvers are available: ``"grid"`` (a grid search over a lattice of allocations),
+``"slsqp"`` (continuous multi-start sequential least-squares programming) and
 ``"basin_hopping"`` (SLSQP wrapped in an escape loop, for appreciation surfaces with more
-than one optimum).
+than one optimum). Basin-hopping is the default.
+
+``Optimize.optimize_single_scenario`` is the same run behind a frozen contract: it takes its
+arguments positionally, runs the package defaults whatever the method, and returns only the
+updated input dictionary. External front ends call it that way.
+
+The feasible set for the continuous solvers is the capped simplex, ``{x : x >= 0, sum(x) <= B}``:
+spending less than the whole budget is allowed. Every solver also accepts ``spend_all=True``,
+which turns the budget into an equality so that every solution spends it exactly.
 
 The module also exposes two pure functions, ``evaluate_and_appreciate`` and
 ``score_allocation``, shared by all solvers. Both take a case dictionary and leave it
@@ -37,7 +38,6 @@ from scipy.optimize import basinhopping, minimize
 
 from vlinder.appreciate import Appreciate
 from vlinder.evaluate import Evaluate
-from vlinder.utils import suppress_print
 
 
 def evaluate_and_appreciate(input_dict, x, scenario, dmo_name, start_and_end_points=None):
@@ -934,11 +934,11 @@ class Optimize:
     The Optimize class finds the distribution of internal input values that maximizes the
     appreciation value of decision-maker options.
 
-    It has two entry points. :meth:`optimize_single_scenario` is the original grid search,
-    unchanged: it returns the updated input dictionary. :meth:`run` dispatches to one of the
-    solver classes in this module and returns an :class:`OptimizationResult`, which carries
-    the allocation together with how long the run took, how many evaluations it cost and how
-    much of the budget it spent.
+    :meth:`run` dispatches to one of the solver classes in this module and returns an
+    :class:`OptimizationResult`, which carries the allocation together with how long the run
+    took, how many evaluations it cost and how much of the budget it spent.
+    :meth:`optimize_single_scenario` runs the same thing behind a frozen contract and returns
+    the updated input dictionary instead.
     """
 
     #: Method name to solver class, for :meth:`run`.
@@ -951,7 +951,6 @@ class Optimize:
     def __init__(self, input_dict, output_dict):
         self.input_dict = input_dict
         self.output_dict = output_dict
-        self.boundaries = None
 
     @property
     def budget(self):
@@ -1073,194 +1072,19 @@ class Optimize:
         self.input_dict = best_solver.input_dict
         return best_res
 
-    def find_dict_values(self, scenario):
+    def optimize_single_scenario(self, scenario, dmo_name, max_combinations=60000, **kwargs):
+        """Optimize one scenario and return the updated input dictionary.
+
+        This is the entry point the Papilio front end calls, positionally and with a
+        combination ceiling from the grid-search era, so its contract is frozen: it returns
+        the updated ``input_dict`` and nothing else. The run itself is method agnostic and uses
+        the package defaults (basin-hopping, ``spend_all=True``, a 60-second time limit);
+        ``max_combinations`` is forwarded and only matters when a caller picks
+        ``method="grid"`` explicitly. Keyword arguments reach the solver, so the defaults can be
+        overridden per call.
         """
-        This function retrieves values based on the input and output dictionaries.
-        """
-        # Identify the decision-maker's option (DMO) with the highest appreciation in the given scenario
-        dmo_name = self.output_dict[scenario]["highest_weighted_dmo"]
-
-        # Identify the highest appreciation of that DMO
-        max_appreciated_value = self.output_dict[scenario][dmo_name]["decision_makers_option_appreciation"]
-
-        # Identify the distibution of that DMO
-        decision_maker_options = self.input_dict["decision_makers_option_value"][
-            np.where(self.input_dict["decision_makers_options"] == dmo_name)[0][0]
-        ]
-
-        best_dmo_data = {
-            "dmo_name": dmo_name,
-            "decision_maker_options": decision_maker_options,
-            "max_appreciated_value": max_appreciated_value,
-        }
-
-        # Sum the values for this DMO (this represents the total investment)
-        max_investment = sum(decision_maker_options)
-
-        return best_dmo_data, max_investment
-
-    @staticmethod
-    def scale_max_investment(max_investment):
-        """
-        This function scales down the maximum investment value to make it more manageable for combinatorial purposes.
-        It rounds the investment down to the nearest hundred, taking into account the order of magnitude.
-        """
-        # Determine the order of magnitude of the investment (in thousands)
-        order_of_magnitude = math.floor(math.log10(abs(max_investment))) - 3
-
-        # Normalize the value to thousands
-        normalized_max_investment = max_investment / (10**order_of_magnitude)
-
-        # Round the value to the nearest hundred
-        scaled_max_investment = math.floor(round(normalized_max_investment, 1) / 100) * 100
-
-        return scaled_max_investment
-
-    @staticmethod
-    def calculate_step_size(max_investment, scaled_max_investment, num_internal_inputs, max_combinations):
-        """
-        This function calculates the optimal step size to reduce the number of combinations.
-        The goal is to stay under the maximum allowable number of combinations for efficiency.
-        """
-        step_size_tmp = 1
-
-        while True:
-            # Calculate the number of units with the current step size
-            units = scaled_max_investment // step_size_tmp
-
-            # Calculate the number of combinations using binomial coefficient
-            combinations = comb(units + num_internal_inputs - 1, num_internal_inputs - 1)
-
-            if combinations <= max_combinations and scaled_max_investment % step_size_tmp == 0:
-                # If the number of combinations is within the constraints, use this step size
-                break
-
-            # Increase the step size if the number of combinations exceeds the limit
-            step_size_tmp += 1
-
-        # Scale the step size based on the original max investment
-        step_size = max_investment / (scaled_max_investment / step_size_tmp)
-
-        return step_size
-
-    @staticmethod
-    def generate_combinations(max_investment, step_size, num_internal_inputs):
-        """
-        This function generates all valid combinations of internal input values whose sum equals max_investment.
-        """
-        base_combinations = np.arange(0, max_investment + step_size, step_size)
-        valid_combinations = []
-
-        # Generate combinations and filter those that sum to the max investment
-        for combination in combinations_with_replacement(base_combinations, num_internal_inputs):
-            if sum(combination) == max_investment:
-                # Add all unique permutations of the combination
-                for perm in set(permutations(combination)):
-                    valid_combinations.append(perm)
-
-        return valid_combinations
-
-    @suppress_print
-    def grid_search(self, scenario, combinations, opt_dmo_name, best_dmo_data):
-        """
-        Performs a grid search over all possible combinations of internal input values.
-        The function evaluates each combination, calculates the appreciation value, and returns the best one.
-        """
-        # Get minimum and maximum values for the key outputs across all scenarios
-        self.boundaries = Appreciate(self.input_dict, self.output_dict)._get_start_and_end_points()
-
-        # Initialize the grid search decision-maker option
-        self.input_dict["decision_makers_options"] = np.array(
-            np.append(self.input_dict["decision_makers_options"], opt_dmo_name), dtype=object
-        )
-        self.input_dict["decision_makers_option_value"] = np.vstack(
-            [self.input_dict["decision_makers_option_value"], best_dmo_data["decision_maker_options"]]
-        )
-        self.input_dict["key_output_automatic"] = np.zeros(len(self.input_dict["key_output_automatic"]), dtype=int)
-        self.input_dict["key_output_start"] = np.array([value[0] for value in self.boundaries.values()])
-        self.input_dict["key_output_end"] = np.array([value[1] for value in self.boundaries.values()])
-
-        # Arrays to store results
-        appreciated_values = []
-        tmp_opt_decision_maker_options = None
-        tmp_opt_max_appreciated_value = -np.inf
-
-        # Evaluate each combination
-        for index, combination in enumerate(combinations):
-            comb_array = np.array(combination)
-
-            # Ensure the combination length matches the number of internal inputs
-            if len(comb_array) == len(self.input_dict["internal_variable_inputs"]):
-                self.input_dict["decision_makers_option_value"][
-                    np.where(self.input_dict["decision_makers_options"] == opt_dmo_name)[0][0]
-                ] = comb_array
-
-                # Evaluate and appreciate
-                output_dict = Evaluate(self.input_dict).evaluate_selected_scenario(scenario)[opt_dmo_name]
-                Appreciate(self.input_dict, output_dict).appreciate_single_decision_maker_option(output_dict)
-
-                # Compute the appreciated value
-                appreciated_value = output_dict["decision_makers_option_appreciation"]
-                appreciated_values.append((index, comb_array, appreciated_value))
-
-                # Update the best combination if this is the highest appreciation value
-                if appreciated_value > tmp_opt_max_appreciated_value:
-                    tmp_opt_max_appreciated_value = appreciated_value
-                    tmp_opt_decision_maker_options = comb_array
-
-        if tmp_opt_max_appreciated_value > best_dmo_data["max_appreciated_value"]:
-            self.input_dict["decision_makers_option_value"][
-                np.where(self.input_dict["decision_makers_options"] == opt_dmo_name)[0][0]
-            ] = tmp_opt_decision_maker_options
-            best_appreciated_value = tmp_opt_max_appreciated_value
-        else:
-            self.input_dict["decision_makers_option_value"][
-                np.where(self.input_dict["decision_makers_options"] == opt_dmo_name)[0][0]
-            ] = best_dmo_data["decision_maker_options"]
-            best_appreciated_value = best_dmo_data["max_appreciated_value"]
-
-        return best_appreciated_value
-
-    def optimize_single_scenario(self, scenario, tmp_opt_dmo_name, max_combinations):
-        """
-        Wrapper function that performs the full grid search optimization process.
-        It retrieves values, calculates the step size, generates valid combinations,
-        and finds the best distribution of internal inputs to maximize appreciation.
-        """
-        if tmp_opt_dmo_name in self.input_dict["decision_makers_options"]:
-            print("This case is already optimized for the scenario '", scenario, "'")
-            return self.input_dict
-
-        # Step 1: Retrieve values and setup boundaries
-        best_dmo_data, max_investment = self.find_dict_values(scenario)
-
-        # Step 2: Scale down the maximum investment for more efficient combinatorial calculations
-        scaled_max_investment = self.scale_max_investment(max_investment)
-
-        # TO DO: max_combinations based on CPU
-        # Step 3: Find the optimal step size for generating combinations
-        step_size = self.calculate_step_size(
-            max_investment, scaled_max_investment, len(self.input_dict["internal_variable_inputs"]), max_combinations
-        )
-
-        # Step 4: Generate all valid combinations of internal input values
-        combinations = self.generate_combinations(
-            max_investment, step_size, len(self.input_dict["internal_variable_inputs"])
-        )
-
-        # Step 5: Perform grid search over the generated combinations and fill in input_dict
-        best_appreciated_value = self.grid_search(scenario, combinations, tmp_opt_dmo_name, best_dmo_data)
-
-        # Print the results
-        print("For scenario:", scenario)
-        print(
-            "Initial highest appreciation:",
-            round(best_dmo_data["max_appreciated_value"], 2),
-            "for DMO '",
-            best_dmo_data["dmo_name"],
-            "'",
-        )
-        print("Optimized appreciation:", round(best_appreciated_value, 2))
-        print("Increase appreciated value:", round(best_appreciated_value - best_dmo_data["max_appreciated_value"], 2))
-
+        kwargs.setdefault("method", "basin_hopping")
+        kwargs.setdefault("spend_all", True)
+        kwargs.setdefault("max_calculation_time", 60)
+        self.run(scenario, dmo_name=dmo_name, max_combinations=max_combinations, **kwargs)
         return self.input_dict

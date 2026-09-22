@@ -3,10 +3,9 @@
 """
 Shared fixtures for the optimizer tests.
 
-``test_optimize.py`` covers the original grid search reached through
-``Optimize.optimize_single_scenario``. ``test_optimize_solvers.py`` covers the solver classes
-reached through ``Optimize.run``, one section per solver. Everything they share in terms of
-setup lives here.
+``test_optimize_solvers.py`` covers the solver classes reached through ``Optimize.run``, one
+section per solver, and ``test_optimize_orchestrator.py`` covers the entry points. Everything
+they share in terms of setup lives here.
 
 Every fixture deep-copies the dictionaries from ``params.py``. Those are module-level and a
 shallow copy would let one test's allocation leak into the next one's expected values, which
