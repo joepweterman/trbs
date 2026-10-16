@@ -1,62 +1,119 @@
 """
-This file writes the LaTeX table of the timed comparison: the median appreciation
-each method reaches within each time limit, per packaged case and budget mode.
+This file writes the LaTeX table of the budgeted comparison: the median appreciation
+each method reaches within each budget, per packaged case and budget mode, on the
+seconds axis or on the evaluations axis of ``time_limited_comparison.py``.
 
 The rows mirror the thesis vocabulary: the budget face is the mode that spends
 the budget exactly, the capped simplex the mode where under-spending is allowed.
 Appreciations are printed to four decimals because that is where the packaged
-cases separate: Beerwiser's two optima lie $0.0102$ points apart.
+cases separate: Beerwiser's two optima lie $0.0102$ points apart. A cell carries a
+dagger when, for most of its seeds, the run had not yet beaten an existing
+decision-maker option, so the incumbent rule returned that option instead of the
+method's own answer: the value printed there is the case's, not the method's.
 
 Run (after experiments/time_limited_comparison.py has produced the CSV):
   python experiments/table_time_limited.py
+  python experiments/table_time_limited.py --axis evals
+  python experiments/table_time_limited.py --limits 0.25 0.5 1 2 5 10   # a subset of the columns
+  python experiments/table_time_limited.py --mode capped --limits 0.25 0.5 1 2 5 15   # one budget mode
 """
 
+import argparse
 from pathlib import Path
 
 import pandas as pd
 
-OUT = Path(__file__).resolve().parent / "out" / "time_limited"
-CSV = OUT / "time_limited_comparison_v2.csv"
+from time_limited_comparison import AXES, OUT, parse_limit  # pylint: disable=import-error
 
-#: CSV label to table row, in reading order. The mode suffix matches the grid rows.
+#: CSV label to (method, budget mode), in reading order.
 ROW_LABELS = {
-    "grid": "Grid (budget face)",
-    "grid (capped)": "Grid (capped simplex)",
-    "slsqp": "SLSQP multi-start (capped simplex)",
-    "slsqp (spend all)": "SLSQP multi-start (budget face)",
-    "basin_hopping": "Basin-hopping (capped simplex)",
-    "basin_hopping (spend all)": "Basin-hopping (budget face)",
-    "genetic_algorithm": "Genetic algorithm (capped simplex)",
-    "genetic_algorithm (spend all)": "Genetic algorithm (budget face)",
-    "mdbh": "MDBH (capped simplex)",
-    "mdbh (spend all)": "MDBH (budget face)",
+    "grid": ("Grid", "face"),
+    "grid (capped)": ("Grid", "capped"),
+    "slsqp": ("SLSQP multi-start", "capped"),
+    "slsqp (spend all)": ("SLSQP multi-start", "face"),
+    "basin_hopping": ("Basin-hopping", "capped"),
+    "basin_hopping (spend all)": ("Basin-hopping", "face"),
+    "genetic_algorithm": ("Genetic algorithm", "capped"),
+    "genetic_algorithm (spend all)": ("Genetic algorithm", "face"),
+    "mdbh": ("MDBH", "capped"),
+    "mdbh (spend all)": ("MDBH", "face"),
 }
+MODE_NAMES = {"capped": "capped simplex", "face": "budget face"}
 CASES = ("Beerwiser", "Refugee", "IZZ")
 
 
-def render(frame):
+def header_cell(limit, axis):
     """
-    This function renders the LaTeX table body from the timed-comparison rows.
-    :param frame: the timed-comparison rows
+    This function formats one column header: seconds carry their unit, evaluations are
+    printed with a thousands separator.
+    :param limit: the budget of the column
+    :param axis: "seconds" or "evals"
+    :return: the header text
+    """
+    if axis == "seconds":
+        return f"{limit:g}\\,s"
+    return f"{int(limit):,}"
+
+
+def body_cell(value, dagger):
+    """
+    This function formats one appreciation cell.
+    :param value: the median appreciation, NaN for a cell that has not run yet
+    :param dagger: whether the incumbent rule answered most seeds of the cell
+    :return: the cell text
+    """
+    if pd.isna(value):
+        return "--"
+    return f"{value:.4f}" + ("$^\\dagger$" if dagger else "")
+
+
+def row_name(label, mode):
+    """
+    This function names a table row for the requested budget mode.
+    :param label: the CSV label of the row
+    :param mode: "capped", "face", or None for a table holding both modes
+    :return: the row name, or None when the row belongs to the other mode
+    """
+    method, row_mode = ROW_LABELS[label]
+    if mode is None:
+        return f"{method} ({MODE_NAMES[row_mode]})"
+    return method if mode == row_mode else None
+
+
+def render(frame, axis="seconds", limits=None, mode=None):
+    """
+    This function renders the LaTeX table body from the comparison rows.
+    :param frame: the comparison rows of one axis
+    :param axis: "seconds" or "evals"
+    :param limits: the budgets to show as columns; every budget in the frame when None
+    :param mode: "capped" or "face" to print only that budget mode, without the mode in the row
+        names; both modes, each row suffixed with its mode, when None
     :return: the table as a string
     """
-    limits = sorted(frame["limit_s"].unique())
+    column = AXES[axis]["column"]
+    limits = sorted(frame[column].unique()) if limits is None else [parse_limit(limit) for limit in limits]
     lines = [
         "% Generated by table_time_limited.py - do not edit by hand.",
         "\\begin{tabular}{ll" + "c" * len(limits) + "}",
         "\\toprule",
-        "Case & Method & " + " & ".join(f"{limit}\\,s" for limit in limits) + " \\\\",
+        "Case & Method & " + " & ".join(header_cell(limit, axis) for limit in limits) + " \\\\",
     ]
     for case_name in CASES:
         lines.append("\\midrule")
-        rows = frame[frame["case"] == case_name]
-        median = rows.pivot_table(index="label", columns="limit_s", values="appreciation", aggfunc="median")
+        rows = frame[frame["case"] == case_name].copy()
+        rows["incumbent"] = ~rows["reported_dmo"].astype(str).str.startswith("Timed")
+        # Reindexed on the requested budgets: a cell that has not run yet prints as "--".
+        median = rows.pivot_table(index="label", columns=column, values="appreciation", aggfunc="median")
+        median = median.reindex(columns=[float(limit) for limit in limits])
+        incumbent = rows.pivot_table(index="label", columns=column, values="incumbent", aggfunc="mean")
+        incumbent = incumbent.reindex(columns=median.columns).fillna(0.0)
         first = True
-        for label, pretty in ROW_LABELS.items():
-            if label not in median.index:
+        for label in ROW_LABELS:
+            pretty = row_name(label, mode)
+            if label not in median.index or pretty is None:
                 continue
-            cells = " & ".join(f"{median.loc[label, limit]:.4f}" for limit in limits)
-            lines.append(f"{case_name if first else ''} & {pretty} & {cells} \\\\")
+            cells = [body_cell(median.loc[label, lim], incumbent.loc[label, lim] > 0.5) for lim in median.columns]
+            lines.append(f"{case_name if first else ''} & {pretty} & " + " & ".join(cells) + " \\\\")
             first = False
     lines += ["\\bottomrule", "\\end{tabular}"]
     return "\n".join(lines) + "\n"
@@ -64,9 +121,20 @@ def render(frame):
 
 def main():
     """Write the table next to the CSV."""
-    target = OUT / "tables" / "time_limited.tex"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--axis", choices=list(AXES), default="seconds")
+    parser.add_argument("--limits", nargs="*", type=parse_limit, default=None)
+    parser.add_argument("--mode", choices=list(MODE_NAMES), default=None, help="print one budget mode only")
+    parser.add_argument("--out", default=None, help="the .tex to write; defaults to the axis's table")
+    args = parser.parse_args()
+
+    stem = "time_limited" if args.axis == "seconds" else "eval_limited"
+    if args.mode:
+        stem += f"_{args.mode}"
+    target = Path(args.out) if args.out else OUT / "tables" / f"{stem}.tex"
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(render(pd.read_csv(CSV)), encoding="utf-8")
+    frame = pd.read_csv(AXES[args.axis]["csv"])
+    target.write_text(render(frame, args.axis, args.limits, args.mode), encoding="utf-8")
     print(f"[table] written to {target}")
 
 

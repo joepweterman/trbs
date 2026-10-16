@@ -440,6 +440,54 @@ def test_every_continuous_solver_stops_at_its_time_limit(beerwiser_dicts, solver
 
 
 @suppress_print
+@pytest.mark.parametrize(
+    "solver_class, settings",
+    [
+        (GridSearch, {}),
+        (SLSQPSolver, {"n_starts": 10_000, "seed": 1}),
+        (BasinHoppingSolver, {"n_starts": 1, "n_hops": 1_000_000, "seed": 1}),
+        (GeneticAlgorithmSolver, {"population_size": 12, "n_generations": 1_000_000, "seed": 1}),
+        (MdbhSolver, {"n_starts": 10_000, "n_hops": 10, "n_local_steps": 50, "seed": 1}),
+    ],
+)
+def test_every_solver_stops_at_its_evaluation_limit(beerwiser_dicts, solver_class, settings):
+    """With the unit knob out of reach, the evaluation budget ends the run, within one unit of work.
+
+    The grid checks before every evaluation and lands on the limit exactly; the continuous
+    solvers check between units of work (an SLSQP iteration, a child, a mirror-descent step),
+    so they may overshoot by at most one such unit.
+    """
+    input_dict, output_dict = beerwiser_dicts
+    solver = solver_class(input_dict, output_dict)
+    result = solver.solve("Base case", "Solver DMO", BEERWISER_BUDGET, max_function_evals=200, **settings)
+
+    assert 200 <= result.n_function_evals <= 240, "the solver ran past its evaluation limit"
+    assert result.calculation_time < 3.0
+    assert result.appreciation > 0
+    assert_feasible(result.allocation, BEERWISER_BUDGET)
+
+
+@suppress_print
+def test_genetic_algorithm_stops_when_its_best_stalls(prepared_solver):
+    """With a stall rule the run ends once the best individual stops improving, well before the cap."""
+    solver = GeneticAlgorithmSolver(prepared_solver.input_dict, prepared_solver.output_dict)
+    result = solver.solve(
+        "Base case",
+        "Test DMO",
+        BEERWISER_BUDGET,
+        population_size=16,
+        n_generations=5000,
+        stall_generations=10,
+        seed=42,
+    )
+
+    assert len(result.per_start_results) < 5000
+    best_trace = [row["best"] for row in result.per_start_results]
+    assert best_trace[-1] == pytest.approx(best_trace[-11], abs=1e-9), "the last ten generations did not improve"
+    assert_feasible(result.allocation, BEERWISER_BUDGET)
+
+
+@suppress_print
 @pytest.mark.parametrize("solver_class, settings", SOLVER_SETTINGS[1:])
 def test_spend_all_answers_on_the_budget_face(beerwiser_dicts, solver_class, settings):
     """With ``spend_all`` every continuous solver spends the budget exactly, like grid search."""

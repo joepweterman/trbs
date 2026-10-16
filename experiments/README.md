@@ -23,9 +23,10 @@ which keep their thesis-cited names.
 | File | What it does | Key result |
 | --- | --- | --- |
 | `method_comparison.py` | Every method at its own defaults, per packaged case: appreciation, evaluations, seconds. | Four of the five cases agree within 0.05 points across the continuous methods; Refugee separates them, and basin-hopping wins there. This table motivated basin-hopping as the package default. |
-| `time_limited_comparison.py` | Every method in both budget modes under the same wall-clock limits (15/30/60/120 s), 5 seeds, read at the median. | The continuous methods are done within 15 s on every case; the refining grid climbs with time but never catches them. |
-| `figure_time_limited.py` / `table_time_limited.py` | The figure (median line, min-max band) and the LaTeX table behind the timed comparison. | See `out/time_limited/`. |
+| `time_limited_comparison.py` | Every method in both budget modes under the same budget, on two axes: wall-clock limits (0.25 s to 120 s, `max_calculation_time`) and objective-evaluation budgets (30 to 30,000, `max_function_evals`), 5 seeds, read at the median. | The continuous methods are done within 15 s on every case; the refining grid climbs with time but never catches them. The sub-15 s limits and the evaluations axis are where the methods separate (review round of 8 September 2026). |
+| `figure_time_limited.py` / `table_time_limited.py` | The figure (median line, min-max band) and the LaTeX table behind the budgeted comparison, for either axis (`--axis seconds` or `--axis evals`). | See `out/time_limited/`. |
 | `real_case_study.py` | The thesis's descriptive benchmark on the packaged cases (Chapter 5). | At k=9 (IZZ) the continuous methods beat the grid on quality and cost simultaneously. |
+| `table_benchmark_basecase.py` | Re-renders the two packaged-case tables from the stored benchmark, without rerunning it: the base-case scenario per case with four decimals and the distance to the best value found in any study of the thesis, the same table for every scenario, and the shadow prices with both one-sided prices. | Reading the benchmark on one scenario instead of on the mean of three changes the Refugee ranking; see `docs/thesis/final_version_checklist.md`. |
 
 ## Helpers
 
@@ -44,3 +45,12 @@ Headline results: multi-start SLSQP recovers the certified optimum in 1,260 of 1
 concave-regime runs; SCIP confirms every certificate without ever branching; the grid baseline
 recovers nothing at k=15, where its bounded evaluation budget buys a lattice too coarse to
 contain the optimum.
+
+Two exploratory follow-ups from the review round of 8 September 2026 share
+`sweep_harness.py` (the locked harness with a configuration list and a store of its own) and
+`analyze_sweep.py`: `run_scaling_k.py` takes the certified generator to k in {15, 20, 30, 50,
+75} in `generated/scaling/`, and `run_ga_budget.py` reruns the genetic algorithm on the locked
+cases at 60, 240 and 1,000 generations and with a stall rule (`results_ga_budget.jsonl`). Both
+pin the locked roster settings (capped simplex, no clock), because the case-level defaults
+changed after the locked runs, and both record the method's own answer next to the one the
+incumbent rule reports.

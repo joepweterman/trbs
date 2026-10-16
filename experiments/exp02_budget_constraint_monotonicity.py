@@ -13,16 +13,22 @@ Method, per case x scenario:
 
 Run:
   python experiments/exp02_budget_constraint_monotonicity.py
+
+The results are printed and written to out/exp02_budget_constraint_monotonicity.json.
 """
 
 # pylint: disable=invalid-name,protected-access,too-many-locals
-# (math notation B/X/f; Optimize internals are the documented experiment surface)
+# (math notation B/X/f; solver internals are the documented experiment surface)
 
 import json
+from pathlib import Path
+
 import numpy as np
 from vlinder.trbs import TheResponsibleBusinessSimulator
-from vlinder.optimize import Optimize, score_allocation
+from vlinder.optimize import BaseSolver, score_allocation
 from vlinder.utils import suppress_print
+
+OUT = Path(__file__).resolve().parent / "out" / "exp02_budget_constraint_monotonicity.json"
 
 RNG = np.random.default_rng(12345)
 CASES = ["Beerwiser", "Refugee", "IZZ"]
@@ -44,8 +50,8 @@ def load(name):
 @suppress_print
 def setup_probe(c):
     """Register the Probe DMO and freeze boundaries; return (opt, budget, k)."""
-    opt = Optimize(c.input_dict, c.output_dict)
-    budget = opt._infer_budget()
+    opt = BaseSolver(c.input_dict, c.output_dict)
+    budget = opt.budget
     opt._prepare_input_dict("Probe", c.input_dict["decision_makers_option_value"][0].copy())
     return opt, budget, opt._k
 
@@ -87,6 +93,7 @@ def main():
             }
         results[name] = case_res
     print(json.dumps(results, indent=2))
+    OUT.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

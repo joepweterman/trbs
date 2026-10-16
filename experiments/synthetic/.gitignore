@@ -23,3 +23,13 @@ generated/study/*
 !generated/study/results_equalfooting.jsonl
 !generated/study/meta_equalfooting.json
 !generated/study/analysis_equalfooting/
+# Review round of 8 September 2026: the GA budget study next to the locked stores, and
+# the scaling study in its own root (cases untracked, store and analysis tracked).
+!generated/study/results_ga_budget.jsonl
+!generated/study/meta_ga_budget.json
+!generated/study/analysis_ga_budget/
+!generated/scaling/
+generated/scaling/*
+!generated/scaling/results_scaling.jsonl
+!generated/scaling/meta_scaling.json
+!generated/scaling/analysis_scaling/

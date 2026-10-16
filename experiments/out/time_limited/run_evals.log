@@ -1,0 +1,928 @@
+Beerwiser       30 evals grid                         seed 0  appr  65.701108  used    0.00s  evals        30
+Beerwiser       30 evals grid (capped)                seed 0  appr  65.519846  used    0.00s  evals        30
+Beerwiser       30 evals slsqp                        seed 1  appr  65.701419  used    0.01s  evals        30
+Beerwiser       30 evals slsqp                        seed 2  appr  65.701420  used    0.00s  evals        32
+Beerwiser       30 evals slsqp                        seed 3  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals slsqp                        seed 4  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals slsqp                        seed 5  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals slsqp (spend all)            seed 1  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals slsqp (spend all)            seed 2  appr  65.701420  used    0.00s  evals        32
+Beerwiser       30 evals slsqp (spend all)            seed 3  appr  65.701420  used    0.00s  evals        32
+Beerwiser       30 evals slsqp (spend all)            seed 4  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals slsqp (spend all)            seed 5  appr  65.701419  used    0.00s  evals        30
+Beerwiser       30 evals basin_hopping                seed 1  appr  65.701419  used    0.00s  evals        31
+Beerwiser       30 evals basin_hopping                seed 2  appr  65.701419  used    0.01s  evals        30
+Beerwiser       30 evals basin_hopping                seed 3  appr  65.701420  used    0.00s  evals        31
+Beerwiser       30 evals basin_hopping                seed 4  appr  65.701419  used    0.00s  evals        30
+Beerwiser       30 evals basin_hopping                seed 5  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals basin_hopping (spend all)    seed 1  appr  65.701419  used    0.00s  evals        32
+Beerwiser       30 evals basin_hopping (spend all)    seed 2  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals basin_hopping (spend all)    seed 3  appr  65.701420  used    0.00s  evals        30
+Beerwiser       30 evals basin_hopping (spend all)    seed 4  appr  65.701420  used    0.01s  evals        30
+Beerwiser       30 evals basin_hopping (spend all)    seed 5  appr  65.701420  used    0.01s  evals        32
+Beerwiser       30 evals genetic_algorithm            seed 1  appr  65.519846  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm            seed 2  appr  65.519846  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm            seed 3  appr  65.519846  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm            seed 4  appr  65.519846  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm            seed 5  appr  65.519846  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm (spend all) seed 1  appr  65.701022  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm (spend all) seed 2  appr  65.700802  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm (spend all) seed 3  appr  65.697069  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm (spend all) seed 4  appr  65.700100  used    0.00s  evals        50
+Beerwiser       30 evals genetic_algorithm (spend all) seed 5  appr  65.701294  used    0.00s  evals        50
+Beerwiser       30 evals mdbh                         seed 1  appr  65.519846  used    0.00s  evals        31
+Beerwiser       30 evals mdbh                         seed 2  appr  65.519846  used    0.00s  evals        31
+Beerwiser       30 evals mdbh                         seed 3  appr  65.519846  used    0.00s  evals        31
+Beerwiser       30 evals mdbh                         seed 4  appr  65.519846  used    0.00s  evals        31
+Beerwiser       30 evals mdbh                         seed 5  appr  65.519846  used    0.00s  evals        31
+Beerwiser       30 evals mdbh (spend all)             seed 1  appr  65.611784  used    0.00s  evals        31
+Beerwiser       30 evals mdbh (spend all)             seed 2  appr  65.611784  used    0.00s  evals        31
+Beerwiser       30 evals mdbh (spend all)             seed 3  appr  65.611784  used    0.00s  evals        31
+Beerwiser       30 evals mdbh (spend all)             seed 4  appr  65.611784  used    0.00s  evals        31
+Beerwiser       30 evals mdbh (spend all)             seed 5  appr  65.611784  used    0.00s  evals        31
+Beerwiser      100 evals grid                         seed 0  appr  65.701108  used    0.01s  evals       100
+Beerwiser      100 evals grid (capped)                seed 0  appr  65.673359  used    0.01s  evals       100
+Beerwiser      100 evals slsqp                        seed 1  appr  65.711584  used    0.01s  evals       101
+Beerwiser      100 evals slsqp                        seed 2  appr  65.701420  used    0.03s  evals       102
+Beerwiser      100 evals slsqp                        seed 3  appr  65.706329  used    0.02s  evals       102
+Beerwiser      100 evals slsqp                        seed 4  appr  65.701420  used    0.02s  evals       103
+Beerwiser      100 evals slsqp                        seed 5  appr  65.711584  used    0.01s  evals       102
+Beerwiser      100 evals slsqp (spend all)            seed 1  appr  65.711584  used    0.01s  evals       101
+Beerwiser      100 evals slsqp (spend all)            seed 2  appr  65.701420  used    0.01s  evals       101
+Beerwiser      100 evals slsqp (spend all)            seed 3  appr  65.706329  used    0.01s  evals       100
+Beerwiser      100 evals slsqp (spend all)            seed 4  appr  65.701420  used    0.01s  evals       102
+Beerwiser      100 evals slsqp (spend all)            seed 5  appr  65.711584  used    0.01s  evals       102
+Beerwiser      100 evals basin_hopping                seed 1  appr  65.702110  used    0.01s  evals       100
+Beerwiser      100 evals basin_hopping                seed 2  appr  65.701427  used    0.01s  evals       100
+Beerwiser      100 evals basin_hopping                seed 3  appr  65.701420  used    0.01s  evals       104
+Beerwiser      100 evals basin_hopping                seed 4  appr  65.701420  used    0.01s  evals       104
+Beerwiser      100 evals basin_hopping                seed 5  appr  65.701420  used    0.02s  evals       106
+Beerwiser      100 evals basin_hopping (spend all)    seed 1  appr  65.701420  used    0.01s  evals       100
+Beerwiser      100 evals basin_hopping (spend all)    seed 2  appr  65.701420  used    0.02s  evals       101
+Beerwiser      100 evals basin_hopping (spend all)    seed 3  appr  65.701420  used    0.01s  evals       103
+Beerwiser      100 evals basin_hopping (spend all)    seed 4  appr  65.701420  used    0.02s  evals       101
+Beerwiser      100 evals basin_hopping (spend all)    seed 5  appr  65.701420  used    0.01s  evals       103
+Beerwiser      100 evals genetic_algorithm            seed 1  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm            seed 2  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm            seed 3  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm            seed 4  appr  65.598584  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm            seed 5  appr  65.535118  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm (spend all) seed 1  appr  65.701380  used    0.02s  evals       100
+Beerwiser      100 evals genetic_algorithm (spend all) seed 2  appr  65.701345  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm (spend all) seed 3  appr  65.701135  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm (spend all) seed 4  appr  65.700100  used    0.01s  evals       100
+Beerwiser      100 evals genetic_algorithm (spend all) seed 5  appr  65.704335  used    0.02s  evals       100
+Beerwiser      100 evals mdbh                         seed 1  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals mdbh                         seed 2  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals mdbh                         seed 3  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals mdbh                         seed 4  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals mdbh                         seed 5  appr  65.519846  used    0.01s  evals       100
+Beerwiser      100 evals mdbh (spend all)             seed 1  appr  65.658401  used    0.01s  evals       100
+Beerwiser      100 evals mdbh (spend all)             seed 2  appr  65.658401  used    0.01s  evals       100
+Beerwiser      100 evals mdbh (spend all)             seed 3  appr  65.658401  used    0.01s  evals       100
+Beerwiser      100 evals mdbh (spend all)             seed 4  appr  65.658401  used    0.01s  evals       100
+Beerwiser      100 evals mdbh (spend all)             seed 5  appr  65.658401  used    0.01s  evals       100
+Beerwiser      300 evals grid                         seed 0  appr  65.705062  used    0.02s  evals       300
+Beerwiser      300 evals grid (capped)                seed 0  appr  65.684191  used    0.03s  evals       300
+Beerwiser      300 evals slsqp                        seed 1  appr  65.711584  used    0.04s  evals       301
+Beerwiser      300 evals slsqp                        seed 2  appr  65.711589  used    0.04s  evals       303
+Beerwiser      300 evals slsqp                        seed 3  appr  65.711583  used    0.04s  evals       305
+Beerwiser      300 evals slsqp                        seed 4  appr  65.711585  used    0.04s  evals       303
+Beerwiser      300 evals slsqp                        seed 5  appr  65.711587  used    0.04s  evals       302
+Beerwiser      300 evals slsqp (spend all)            seed 1  appr  65.711584  used    0.04s  evals       303
+Beerwiser      300 evals slsqp (spend all)            seed 2  appr  65.711589  used    0.04s  evals       302
+Beerwiser      300 evals slsqp (spend all)            seed 3  appr  65.711583  used    0.04s  evals       300
+Beerwiser      300 evals slsqp (spend all)            seed 4  appr  65.711585  used    0.04s  evals       300
+Beerwiser      300 evals slsqp (spend all)            seed 5  appr  65.711587  used    0.04s  evals       301
+Beerwiser      300 evals basin_hopping                seed 1  appr  65.702325  used    0.04s  evals       302
+Beerwiser      300 evals basin_hopping                seed 2  appr  65.701427  used    0.04s  evals       300
+Beerwiser      300 evals basin_hopping                seed 3  appr  65.711589  used    0.04s  evals       302
+Beerwiser      300 evals basin_hopping                seed 4  appr  65.711588  used    0.05s  evals       300
+Beerwiser      300 evals basin_hopping                seed 5  appr  65.711590  used    0.07s  evals       306
+Beerwiser      300 evals basin_hopping (spend all)    seed 1  appr  65.701420  used    0.05s  evals       307
+Beerwiser      300 evals basin_hopping (spend all)    seed 2  appr  65.711584  used    0.05s  evals       300
+Beerwiser      300 evals basin_hopping (spend all)    seed 3  appr  65.711586  used    0.04s  evals       303
+Beerwiser      300 evals basin_hopping (spend all)    seed 4  appr  65.701420  used    0.04s  evals       302
+Beerwiser      300 evals basin_hopping (spend all)    seed 5  appr  65.711589  used    0.05s  evals       303
+Beerwiser      300 evals genetic_algorithm            seed 1  appr  65.707918  used    0.03s  evals       300
+Beerwiser      300 evals genetic_algorithm            seed 2  appr  65.565543  used    0.02s  evals       300
+Beerwiser      300 evals genetic_algorithm            seed 3  appr  65.700651  used    0.02s  evals       300
+Beerwiser      300 evals genetic_algorithm            seed 4  appr  65.698132  used    0.03s  evals       300
+Beerwiser      300 evals genetic_algorithm            seed 5  appr  65.695359  used    0.03s  evals       300
+Beerwiser      300 evals genetic_algorithm (spend all) seed 1  appr  65.701635  used    0.03s  evals       300
+Beerwiser      300 evals genetic_algorithm (spend all) seed 2  appr  65.701418  used    0.03s  evals       300
+Beerwiser      300 evals genetic_algorithm (spend all) seed 3  appr  65.704581  used    0.02s  evals       300
+Beerwiser      300 evals genetic_algorithm (spend all) seed 4  appr  65.701419  used    0.03s  evals       300
+Beerwiser      300 evals genetic_algorithm (spend all) seed 5  appr  65.704335  used    0.02s  evals       300
+Beerwiser      300 evals mdbh                         seed 1  appr  65.681699  used    0.02s  evals       302
+Beerwiser      300 evals mdbh                         seed 2  appr  65.519846  used    0.02s  evals       302
+Beerwiser      300 evals mdbh                         seed 3  appr  65.519846  used    0.02s  evals       302
+Beerwiser      300 evals mdbh                         seed 4  appr  65.681517  used    0.02s  evals       302
+Beerwiser      300 evals mdbh                         seed 5  appr  65.519846  used    0.02s  evals       302
+Beerwiser      300 evals mdbh (spend all)             seed 1  appr  65.672184  used    0.02s  evals       302
+Beerwiser      300 evals mdbh (spend all)             seed 2  appr  65.672184  used    0.02s  evals       302
+Beerwiser      300 evals mdbh (spend all)             seed 3  appr  65.672184  used    0.02s  evals       302
+Beerwiser      300 evals mdbh (spend all)             seed 4  appr  65.672184  used    0.02s  evals       302
+Beerwiser      300 evals mdbh (spend all)             seed 5  appr  65.672184  used    0.02s  evals       302
+Beerwiser     1000 evals grid                         seed 0  appr  65.705062  used    0.07s  evals      1000
+Beerwiser     1000 evals grid (capped)                seed 0  appr  65.701108  used    0.07s  evals      1000
+Beerwiser     1000 evals slsqp                        seed 1  appr  65.711590  used    0.15s  evals      1000
+Beerwiser     1000 evals slsqp                        seed 2  appr  65.711589  used    0.13s  evals      1004
+Beerwiser     1000 evals slsqp                        seed 3  appr  65.711590  used    0.12s  evals      1003
+Beerwiser     1000 evals slsqp                        seed 4  appr  65.711588  used    0.13s  evals      1001
+Beerwiser     1000 evals slsqp                        seed 5  appr  65.711588  used    0.13s  evals      1002
+Beerwiser     1000 evals slsqp (spend all)            seed 1  appr  65.711590  used    0.13s  evals      1001
+Beerwiser     1000 evals slsqp (spend all)            seed 2  appr  65.711589  used    0.13s  evals      1003
+Beerwiser     1000 evals slsqp (spend all)            seed 3  appr  65.711590  used    0.14s  evals      1000
+Beerwiser     1000 evals slsqp (spend all)            seed 4  appr  65.711588  used    0.14s  evals      1002
+Beerwiser     1000 evals slsqp (spend all)            seed 5  appr  65.711588  used    0.13s  evals      1003
+Beerwiser     1000 evals basin_hopping                seed 1  appr  65.711590  used    0.13s  evals      1001
+Beerwiser     1000 evals basin_hopping                seed 2  appr  65.711589  used    0.14s  evals      1000
+Beerwiser     1000 evals basin_hopping                seed 3  appr  65.711589  used    0.15s  evals      1002
+Beerwiser     1000 evals basin_hopping                seed 4  appr  65.711589  used    0.13s  evals      1005
+Beerwiser     1000 evals basin_hopping                seed 5  appr  65.711590  used    0.12s  evals      1003
+Beerwiser     1000 evals basin_hopping (spend all)    seed 1  appr  65.711590  used    0.13s  evals      1000
+Beerwiser     1000 evals basin_hopping (spend all)    seed 2  appr  65.711588  used    0.14s  evals      1001
+Beerwiser     1000 evals basin_hopping (spend all)    seed 3  appr  65.711588  used    0.14s  evals      1002
+Beerwiser     1000 evals basin_hopping (spend all)    seed 4  appr  65.711587  used    0.15s  evals      1001
+Beerwiser     1000 evals basin_hopping (spend all)    seed 5  appr  65.711589  used    0.14s  evals      1000
+Beerwiser     1000 evals genetic_algorithm            seed 1  appr  65.710856  used    0.10s  evals      1000
+Beerwiser     1000 evals genetic_algorithm            seed 2  appr  65.711481  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm            seed 3  appr  65.701416  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm            seed 4  appr  65.701417  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm            seed 5  appr  65.701403  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm (spend all) seed 1  appr  65.710067  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm (spend all) seed 2  appr  65.701420  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm (spend all) seed 3  appr  65.704581  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm (spend all) seed 4  appr  65.701420  used    0.09s  evals      1000
+Beerwiser     1000 evals genetic_algorithm (spend all) seed 5  appr  65.706229  used    0.09s  evals      1000
+Beerwiser     1000 evals mdbh                         seed 1  appr  65.710770  used    0.07s  evals      1001
+Beerwiser     1000 evals mdbh                         seed 2  appr  65.700321  used    0.07s  evals      1000
+Beerwiser     1000 evals mdbh                         seed 3  appr  65.701402  used    0.07s  evals      1000
+Beerwiser     1000 evals mdbh                         seed 4  appr  65.681517  used    0.07s  evals      1000
+Beerwiser     1000 evals mdbh                         seed 5  appr  65.709011  used    0.07s  evals      1002
+Beerwiser     1000 evals mdbh (spend all)             seed 1  appr  65.710913  used    0.07s  evals      1001
+Beerwiser     1000 evals mdbh (spend all)             seed 2  appr  65.709932  used    0.07s  evals      1002
+Beerwiser     1000 evals mdbh (spend all)             seed 3  appr  65.709645  used    0.07s  evals      1000
+Beerwiser     1000 evals mdbh (spend all)             seed 4  appr  65.710802  used    0.07s  evals      1002
+Beerwiser     1000 evals mdbh (spend all)             seed 5  appr  65.672184  used    0.07s  evals      1000
+Beerwiser     3000 evals grid                         seed 0  appr  65.709960  used    0.21s  evals      3000
+Beerwiser     3000 evals grid (capped)                seed 0  appr  65.701108  used    0.20s  evals      3000
+Beerwiser     3000 evals slsqp                        seed 1  appr  65.711590  used    0.37s  evals      3004
+Beerwiser     3000 evals slsqp                        seed 2  appr  65.711590  used    0.38s  evals      3000
+Beerwiser     3000 evals slsqp                        seed 3  appr  65.711590  used    0.39s  evals      3002
+Beerwiser     3000 evals slsqp                        seed 4  appr  65.711589  used    0.38s  evals      3003
+Beerwiser     3000 evals slsqp                        seed 5  appr  65.711590  used    0.40s  evals      3003
+Beerwiser     3000 evals slsqp (spend all)            seed 1  appr  65.711590  used    0.38s  evals      3006
+Beerwiser     3000 evals slsqp (spend all)            seed 2  appr  65.711590  used    0.38s  evals      3003
+Beerwiser     3000 evals slsqp (spend all)            seed 3  appr  65.711590  used    0.40s  evals      3000
+Beerwiser     3000 evals slsqp (spend all)            seed 4  appr  65.711589  used    0.37s  evals      3000
+Beerwiser     3000 evals slsqp (spend all)            seed 5  appr  65.711590  used    0.38s  evals      3002
+Beerwiser     3000 evals basin_hopping                seed 1  appr  65.711590  used    0.37s  evals      3000
+Beerwiser     3000 evals basin_hopping                seed 2  appr  65.711590  used    0.38s  evals      3000
+Beerwiser     3000 evals basin_hopping                seed 3  appr  65.711589  used    0.37s  evals      3008
+Beerwiser     3000 evals basin_hopping                seed 4  appr  65.711589  used    0.36s  evals      3000
+Beerwiser     3000 evals basin_hopping                seed 5  appr  65.711590  used    0.36s  evals      3001
+Beerwiser     3000 evals basin_hopping (spend all)    seed 1  appr  65.711590  used    0.43s  evals      3001
+Beerwiser     3000 evals basin_hopping (spend all)    seed 2  appr  65.711588  used    0.40s  evals      3001
+Beerwiser     3000 evals basin_hopping (spend all)    seed 3  appr  65.711590  used    0.41s  evals      3002
+Beerwiser     3000 evals basin_hopping (spend all)    seed 4  appr  65.711589  used    0.65s  evals      3001
+Beerwiser     3000 evals basin_hopping (spend all)    seed 5  appr  65.711589  used    0.42s  evals      3001
+Beerwiser     3000 evals genetic_algorithm            seed 1  appr  65.710856  used    0.28s  evals      3000
+Beerwiser     3000 evals genetic_algorithm            seed 2  appr  65.711481  used    0.28s  evals      3000
+Beerwiser     3000 evals genetic_algorithm            seed 3  appr  65.701420  used    0.26s  evals      3000
+Beerwiser     3000 evals genetic_algorithm            seed 4  appr  65.701419  used    0.26s  evals      3000
+Beerwiser     3000 evals genetic_algorithm            seed 5  appr  65.701420  used    0.26s  evals      3000
+Beerwiser     3000 evals genetic_algorithm (spend all) seed 1  appr  65.710067  used    0.27s  evals      3000
+Beerwiser     3000 evals genetic_algorithm (spend all) seed 2  appr  65.701420  used    0.26s  evals      3000
+Beerwiser     3000 evals genetic_algorithm (spend all) seed 3  appr  65.706820  used    0.25s  evals      3000
+Beerwiser     3000 evals genetic_algorithm (spend all) seed 4  appr  65.701420  used    0.26s  evals      3000
+Beerwiser     3000 evals genetic_algorithm (spend all) seed 5  appr  65.710114  used    0.26s  evals      3000
+Beerwiser     3000 evals mdbh                         seed 1  appr  65.710770  used    0.21s  evals      3001
+Beerwiser     3000 evals mdbh                         seed 2  appr  65.708935  used    0.21s  evals      3000
+Beerwiser     3000 evals mdbh                         seed 3  appr  65.710513  used    0.20s  evals      3001
+Beerwiser     3000 evals mdbh                         seed 4  appr  65.710375  used    0.21s  evals      3001
+Beerwiser     3000 evals mdbh                         seed 5  appr  65.710082  used    0.21s  evals      3002
+Beerwiser     3000 evals mdbh (spend all)             seed 1  appr  65.710913  used    0.21s  evals      3001
+Beerwiser     3000 evals mdbh (spend all)             seed 2  appr  65.710505  used    0.21s  evals      3001
+Beerwiser     3000 evals mdbh (spend all)             seed 3  appr  65.711268  used    0.21s  evals      3000
+Beerwiser     3000 evals mdbh (spend all)             seed 4  appr  65.710802  used    0.21s  evals      3000
+Beerwiser     3000 evals mdbh (spend all)             seed 5  appr  65.710990  used    0.21s  evals      3002
+Beerwiser    10000 evals grid                         seed 0  appr  65.711183  used    0.67s  evals     10000
+Beerwiser    10000 evals grid (capped)                seed 0  appr  65.701108  used    0.67s  evals     10000
+Beerwiser    10000 evals slsqp                        seed 1  appr  65.711590  used    1.24s  evals     10002
+Beerwiser    10000 evals slsqp                        seed 2  appr  65.711590  used    1.22s  evals     10000
+Beerwiser    10000 evals slsqp                        seed 3  appr  65.711590  used    1.27s  evals     10001
+Beerwiser    10000 evals slsqp                        seed 4  appr  65.711590  used    1.24s  evals     10005
+Beerwiser    10000 evals slsqp                        seed 5  appr  65.711590  used    1.21s  evals     10001
+Beerwiser    10000 evals slsqp (spend all)            seed 1  appr  65.711590  used    1.23s  evals     10001
+Beerwiser    10000 evals slsqp (spend all)            seed 2  appr  65.711590  used    1.22s  evals     10002
+Beerwiser    10000 evals slsqp (spend all)            seed 3  appr  65.711590  used    1.26s  evals     10001
+Beerwiser    10000 evals slsqp (spend all)            seed 4  appr  65.711590  used    1.25s  evals     10003
+Beerwiser    10000 evals slsqp (spend all)            seed 5  appr  65.711590  used    1.20s  evals     10002
+Beerwiser    10000 evals basin_hopping                seed 1  appr  65.711591  used    1.19s  evals     10005
+Beerwiser    10000 evals basin_hopping                seed 2  appr  65.711590  used    1.20s  evals     10002
+Beerwiser    10000 evals basin_hopping                seed 3  appr  65.711590  used    1.23s  evals     10000
+Beerwiser    10000 evals basin_hopping                seed 4  appr  65.711590  used    1.31s  evals     10000
+Beerwiser    10000 evals basin_hopping                seed 5  appr  65.711590  used    1.22s  evals     10006
+Beerwiser    10000 evals basin_hopping (spend all)    seed 1  appr  65.711590  used    1.28s  evals     10000
+Beerwiser    10000 evals basin_hopping (spend all)    seed 2  appr  65.711590  used    1.30s  evals     10002
+Beerwiser    10000 evals basin_hopping (spend all)    seed 3  appr  65.711590  used    1.33s  evals     10000
+Beerwiser    10000 evals basin_hopping (spend all)    seed 4  appr  65.711590  used    1.31s  evals     10001
+Beerwiser    10000 evals basin_hopping (spend all)    seed 5  appr  65.711589  used    1.30s  evals     10001
+Beerwiser    10000 evals genetic_algorithm            seed 1  appr  65.711316  used    0.87s  evals     10000
+Beerwiser    10000 evals genetic_algorithm            seed 2  appr  65.711481  used    0.86s  evals     10000
+Beerwiser    10000 evals genetic_algorithm            seed 3  appr  65.701420  used    0.86s  evals     10000
+Beerwiser    10000 evals genetic_algorithm            seed 4  appr  65.701420  used    0.86s  evals     10000
+Beerwiser    10000 evals genetic_algorithm            seed 5  appr  65.701420  used    0.85s  evals     10000
+Beerwiser    10000 evals genetic_algorithm (spend all) seed 1  appr  65.711386  used    0.86s  evals     10000
+Beerwiser    10000 evals genetic_algorithm (spend all) seed 2  appr  65.701420  used    0.86s  evals     10000
+Beerwiser    10000 evals genetic_algorithm (spend all) seed 3  appr  65.711162  used    0.88s  evals     10000
+Beerwiser    10000 evals genetic_algorithm (spend all) seed 4  appr  65.701420  used    0.87s  evals     10000
+Beerwiser    10000 evals genetic_algorithm (spend all) seed 5  appr  65.711434  used    0.86s  evals     10000
+Beerwiser    10000 evals mdbh                         seed 1  appr  65.711131  used    0.70s  evals     10001
+Beerwiser    10000 evals mdbh                         seed 2  appr  65.711489  used    0.72s  evals     10000
+Beerwiser    10000 evals mdbh                         seed 3  appr  65.711248  used    0.70s  evals     10000
+Beerwiser    10000 evals mdbh                         seed 4  appr  65.710942  used    0.69s  evals     10001
+Beerwiser    10000 evals mdbh                         seed 5  appr  65.711389  used    0.69s  evals     10002
+Beerwiser    10000 evals mdbh (spend all)             seed 1  appr  65.710913  used    0.69s  evals     10000
+Beerwiser    10000 evals mdbh (spend all)             seed 2  appr  65.711418  used    0.70s  evals     10000
+Beerwiser    10000 evals mdbh (spend all)             seed 3  appr  65.711477  used    0.73s  evals     10002
+Beerwiser    10000 evals mdbh (spend all)             seed 4  appr  65.711501  used    0.72s  evals     10002
+Beerwiser    10000 evals mdbh (spend all)             seed 5  appr  65.710990  used    0.71s  evals     10002
+Beerwiser    30000 evals grid                         seed 0  appr  65.711488  used    2.00s  evals     30000
+Beerwiser    30000 evals grid (capped)                seed 0  appr  65.701419  used    2.01s  evals     30000
+Beerwiser    30000 evals slsqp                        seed 1  appr  65.711590  used    3.75s  evals     30000
+Beerwiser    30000 evals slsqp                        seed 2  appr  65.711590  used    3.71s  evals     30000
+Beerwiser    30000 evals slsqp                        seed 3  appr  65.711590  used    3.71s  evals     30002
+Beerwiser    30000 evals slsqp                        seed 4  appr  65.711590  used    3.70s  evals     30000
+Beerwiser    30000 evals slsqp                        seed 5  appr  65.711590  used    3.70s  evals     30001
+Beerwiser    30000 evals slsqp (spend all)            seed 1  appr  65.711590  used    3.71s  evals     30003
+Beerwiser    30000 evals slsqp (spend all)            seed 2  appr  65.711590  used    3.67s  evals     30003
+Beerwiser    30000 evals slsqp (spend all)            seed 3  appr  65.711590  used    4.01s  evals     30003
+Beerwiser    30000 evals slsqp (spend all)            seed 4  appr  65.711590  used    3.74s  evals     30003
+Beerwiser    30000 evals slsqp (spend all)            seed 5  appr  65.711590  used    3.73s  evals     30004
+Beerwiser    30000 evals basin_hopping                seed 1  appr  65.711591  used    3.87s  evals     30001
+Beerwiser    30000 evals basin_hopping                seed 2  appr  65.711602  used    3.80s  evals     30003
+Beerwiser    30000 evals basin_hopping                seed 3  appr  65.711590  used    3.71s  evals     30000
+Beerwiser    30000 evals basin_hopping                seed 4  appr  65.711590  used    3.60s  evals     30002
+Beerwiser    30000 evals basin_hopping                seed 5  appr  65.711590  used    3.66s  evals     30000
+Beerwiser    30000 evals basin_hopping (spend all)    seed 1  appr  65.711590  used    3.80s  evals     30003
+Beerwiser    30000 evals basin_hopping (spend all)    seed 2  appr  65.711590  used    3.94s  evals     30003
+Beerwiser    30000 evals basin_hopping (spend all)    seed 3  appr  65.711590  used    4.28s  evals     30003
+Beerwiser    30000 evals basin_hopping (spend all)    seed 4  appr  65.711590  used    4.10s  evals     30000
+Beerwiser    30000 evals basin_hopping (spend all)    seed 5  appr  65.711590  used    4.10s  evals     30001
+Beerwiser    30000 evals genetic_algorithm            seed 1  appr  65.711365  used    2.68s  evals     30000
+Beerwiser    30000 evals genetic_algorithm            seed 2  appr  65.711481  used    2.67s  evals     30000
+Beerwiser    30000 evals genetic_algorithm            seed 3  appr  65.701420  used    2.69s  evals     30000
+Beerwiser    30000 evals genetic_algorithm            seed 4  appr  65.701420  used    2.69s  evals     30000
+Beerwiser    30000 evals genetic_algorithm            seed 5  appr  65.701420  used    2.64s  evals     30000
+Beerwiser    30000 evals genetic_algorithm (spend all) seed 1  appr  65.711446  used    2.66s  evals     30000
+Beerwiser    30000 evals genetic_algorithm (spend all) seed 2  appr  65.701420  used    2.69s  evals     30000
+Beerwiser    30000 evals genetic_algorithm (spend all) seed 3  appr  65.711248  used    2.69s  evals     30000
+Beerwiser    30000 evals genetic_algorithm (spend all) seed 4  appr  65.701420  used    2.64s  evals     30000
+Beerwiser    30000 evals genetic_algorithm (spend all) seed 5  appr  65.711482  used    2.68s  evals     30000
+Beerwiser    30000 evals mdbh                         seed 1  appr  65.711353  used    2.48s  evals     30000
+Beerwiser    30000 evals mdbh                         seed 2  appr  65.711504  used    2.38s  evals     30000
+Beerwiser    30000 evals mdbh                         seed 3  appr  65.711392  used    2.14s  evals     30000
+Beerwiser    30000 evals mdbh                         seed 4  appr  65.711529  used    2.15s  evals     30002
+Beerwiser    30000 evals mdbh                         seed 5  appr  65.711525  used    2.14s  evals     30001
+Beerwiser    30000 evals mdbh (spend all)             seed 1  appr  65.711353  used    2.17s  evals     30002
+Beerwiser    30000 evals mdbh (spend all)             seed 2  appr  65.711418  used    2.17s  evals     30001
+Beerwiser    30000 evals mdbh (spend all)             seed 3  appr  65.711517  used    2.15s  evals     30001
+Beerwiser    30000 evals mdbh (spend all)             seed 4  appr  65.711573  used    2.16s  evals     30002
+Beerwiser    30000 evals mdbh (spend all)             seed 5  appr  65.711253  used    2.15s  evals     30001
+Refugee         30 evals grid                         seed 0  appr  95.326136  used    0.01s  evals        30
+Refugee         30 evals grid (capped)                seed 0  appr  85.226297  used    0.01s  evals        30
+Refugee         30 evals slsqp                        seed 1  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp                        seed 2  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp                        seed 3  appr  96.729024  used    0.01s  evals        31
+Refugee         30 evals slsqp                        seed 4  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp                        seed 5  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp (spend all)            seed 1  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp (spend all)            seed 2  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp (spend all)            seed 3  appr  96.729024  used    0.01s  evals        31
+Refugee         30 evals slsqp (spend all)            seed 4  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals slsqp (spend all)            seed 5  appr  85.226297  used    0.01s  evals        33
+Refugee         30 evals basin_hopping                seed 1  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping                seed 2  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping                seed 3  appr  96.729024  used    0.01s  evals        38
+Refugee         30 evals basin_hopping                seed 4  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping                seed 5  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping (spend all)    seed 1  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping (spend all)    seed 2  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping (spend all)    seed 3  appr  96.729024  used    0.01s  evals        38
+Refugee         30 evals basin_hopping (spend all)    seed 4  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals basin_hopping (spend all)    seed 5  appr  85.226297  used    0.01s  evals        40
+Refugee         30 evals genetic_algorithm            seed 1  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm            seed 2  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm            seed 3  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm            seed 4  appr  86.859065  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm            seed 5  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm (spend all) seed 1  appr  85.226297  used    0.02s  evals        50
+Refugee         30 evals genetic_algorithm (spend all) seed 2  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm (spend all) seed 3  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm (spend all) seed 4  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals genetic_algorithm (spend all) seed 5  appr  85.226297  used    0.01s  evals        50
+Refugee         30 evals mdbh                         seed 1  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh                         seed 2  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh                         seed 3  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh                         seed 4  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh                         seed 5  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh (spend all)             seed 1  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh (spend all)             seed 2  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh (spend all)             seed 3  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh (spend all)             seed 4  appr  85.226297  used    0.01s  evals        31
+Refugee         30 evals mdbh (spend all)             seed 5  appr  85.226297  used    0.01s  evals        31
+Refugee        100 evals grid                         seed 0  appr  95.326136  used    0.03s  evals       100
+Refugee        100 evals grid (capped)                seed 0  appr  95.326136  used    0.03s  evals       100
+Refugee        100 evals slsqp                        seed 1  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals slsqp                        seed 2  appr  85.226297  used    0.03s  evals       108
+Refugee        100 evals slsqp                        seed 3  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals slsqp                        seed 4  appr  85.226297  used    0.03s  evals       108
+Refugee        100 evals slsqp                        seed 5  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals slsqp (spend all)            seed 1  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals slsqp (spend all)            seed 2  appr  85.226297  used    0.03s  evals       108
+Refugee        100 evals slsqp (spend all)            seed 3  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals slsqp (spend all)            seed 4  appr  85.226297  used    0.03s  evals       108
+Refugee        100 evals slsqp (spend all)            seed 5  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals basin_hopping                seed 1  appr  85.226297  used    0.03s  evals       107
+Refugee        100 evals basin_hopping                seed 2  appr  85.226297  used    0.04s  evals       115
+Refugee        100 evals basin_hopping                seed 3  appr  85.226297  used    0.03s  evals       107
+Refugee        100 evals basin_hopping                seed 4  appr  85.226297  used    0.04s  evals       115
+Refugee        100 evals basin_hopping                seed 5  appr  85.226297  used    0.03s  evals       107
+Refugee        100 evals basin_hopping (spend all)    seed 1  appr  85.226297  used    0.03s  evals       107
+Refugee        100 evals basin_hopping (spend all)    seed 2  appr  85.226297  used    0.04s  evals       115
+Refugee        100 evals basin_hopping (spend all)    seed 3  appr  85.226297  used    0.03s  evals       107
+Refugee        100 evals basin_hopping (spend all)    seed 4  appr  85.226297  used    0.04s  evals       115
+Refugee        100 evals basin_hopping (spend all)    seed 5  appr  85.226297  used    0.03s  evals       107
+Refugee        100 evals genetic_algorithm            seed 1  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm            seed 2  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm            seed 3  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm            seed 4  appr  86.859065  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm            seed 5  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm (spend all) seed 1  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm (spend all) seed 2  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm (spend all) seed 3  appr  93.402213  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm (spend all) seed 4  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals genetic_algorithm (spend all) seed 5  appr  85.226297  used    0.03s  evals       100
+Refugee        100 evals mdbh                         seed 1  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh                         seed 2  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh                         seed 3  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh                         seed 4  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh                         seed 5  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh (spend all)             seed 1  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh (spend all)             seed 2  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh (spend all)             seed 3  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh (spend all)             seed 4  appr  85.226297  used    0.03s  evals       103
+Refugee        100 evals mdbh (spend all)             seed 5  appr  85.226297  used    0.03s  evals       103
+Refugee        300 evals grid                         seed 0  appr  95.326136  used    0.08s  evals       300
+Refugee        300 evals grid (capped)                seed 0  appr  95.326136  used    0.08s  evals       300
+Refugee        300 evals slsqp                        seed 1  appr  85.226297  used    0.09s  evals       300
+Refugee        300 evals slsqp                        seed 2  appr  85.226297  used    0.11s  evals       302
+Refugee        300 evals slsqp                        seed 3  appr  96.870709  used    0.11s  evals       301
+Refugee        300 evals slsqp                        seed 4  appr  85.226297  used    0.12s  evals       300
+Refugee        300 evals slsqp                        seed 5  appr  85.226297  used    0.12s  evals       306
+Refugee        300 evals slsqp (spend all)            seed 1  appr  85.226297  used    0.11s  evals       301
+Refugee        300 evals slsqp (spend all)            seed 2  appr  85.226297  used    0.11s  evals       302
+Refugee        300 evals slsqp (spend all)            seed 3  appr  96.870709  used    0.12s  evals       301
+Refugee        300 evals slsqp (spend all)            seed 4  appr  85.226297  used    0.11s  evals       300
+Refugee        300 evals slsqp (spend all)            seed 5  appr  85.226297  used    0.10s  evals       306
+Refugee        300 evals basin_hopping                seed 1  appr  85.226297  used    0.12s  evals       303
+Refugee        300 evals basin_hopping                seed 2  appr  85.226297  used    0.12s  evals       302
+Refugee        300 evals basin_hopping                seed 3  appr  96.870709  used    0.12s  evals       304
+Refugee        300 evals basin_hopping                seed 4  appr  85.226297  used    0.12s  evals       300
+Refugee        300 evals basin_hopping                seed 5  appr  85.226297  used    0.10s  evals       303
+Refugee        300 evals basin_hopping (spend all)    seed 1  appr  85.226297  used    0.12s  evals       304
+Refugee        300 evals basin_hopping (spend all)    seed 2  appr  85.226297  used    0.11s  evals       302
+Refugee        300 evals basin_hopping (spend all)    seed 3  appr  96.870709  used    0.11s  evals       304
+Refugee        300 evals basin_hopping (spend all)    seed 4  appr  85.226297  used    0.11s  evals       300
+Refugee        300 evals basin_hopping (spend all)    seed 5  appr  85.226297  used    0.12s  evals       303
+Refugee        300 evals genetic_algorithm            seed 1  appr  87.481382  used    0.10s  evals       300
+Refugee        300 evals genetic_algorithm            seed 2  appr  85.226297  used    0.09s  evals       300
+Refugee        300 evals genetic_algorithm            seed 3  appr  85.226297  used    0.11s  evals       300
+Refugee        300 evals genetic_algorithm            seed 4  appr  92.461375  used    0.10s  evals       300
+Refugee        300 evals genetic_algorithm            seed 5  appr  85.226297  used    0.09s  evals       300
+Refugee        300 evals genetic_algorithm (spend all) seed 1  appr  85.226297  used    0.11s  evals       300
+Refugee        300 evals genetic_algorithm (spend all) seed 2  appr  86.929123  used    0.10s  evals       300
+Refugee        300 evals genetic_algorithm (spend all) seed 3  appr  95.525049  used    0.11s  evals       300
+Refugee        300 evals genetic_algorithm (spend all) seed 4  appr  91.853884  used    0.10s  evals       300
+Refugee        300 evals genetic_algorithm (spend all) seed 5  appr  92.324787  used    0.11s  evals       300
+Refugee        300 evals mdbh                         seed 1  appr  85.226297  used    0.10s  evals       301
+Refugee        300 evals mdbh                         seed 2  appr  85.226297  used    0.10s  evals       301
+Refugee        300 evals mdbh                         seed 3  appr  85.226297  used    0.10s  evals       301
+Refugee        300 evals mdbh                         seed 4  appr  85.226297  used    0.11s  evals       301
+Refugee        300 evals mdbh                         seed 5  appr  85.226297  used    0.10s  evals       301
+Refugee        300 evals mdbh (spend all)             seed 1  appr  85.226297  used    0.09s  evals       301
+Refugee        300 evals mdbh (spend all)             seed 2  appr  85.226297  used    0.10s  evals       301
+Refugee        300 evals mdbh (spend all)             seed 3  appr  85.226297  used    0.09s  evals       301
+Refugee        300 evals mdbh (spend all)             seed 4  appr  85.226297  used    0.10s  evals       301
+Refugee        300 evals mdbh (spend all)             seed 5  appr  85.226297  used    0.09s  evals       301
+Refugee       1000 evals grid                         seed 0  appr  96.590788  used    0.33s  evals      1000
+Refugee       1000 evals grid (capped)                seed 0  appr  95.326136  used    0.33s  evals      1000
+Refugee       1000 evals slsqp                        seed 1  appr  85.226297  used    0.42s  evals      1001
+Refugee       1000 evals slsqp                        seed 2  appr  85.226297  used    0.38s  evals      1003
+Refugee       1000 evals slsqp                        seed 3  appr  96.870709  used    0.39s  evals      1000
+Refugee       1000 evals slsqp                        seed 4  appr  85.226297  used    0.39s  evals      1006
+Refugee       1000 evals slsqp                        seed 5  appr  85.226297  used    0.38s  evals      1005
+Refugee       1000 evals slsqp (spend all)            seed 1  appr  85.226297  used    0.38s  evals      1002
+Refugee       1000 evals slsqp (spend all)            seed 2  appr  85.226297  used    0.39s  evals      1001
+Refugee       1000 evals slsqp (spend all)            seed 3  appr  96.870709  used    0.40s  evals      1007
+Refugee       1000 evals slsqp (spend all)            seed 4  appr  85.226297  used    0.35s  evals      1006
+Refugee       1000 evals slsqp (spend all)            seed 5  appr  85.226297  used    0.39s  evals      1005
+Refugee       1000 evals basin_hopping                seed 1  appr  85.226297  used    0.37s  evals      1005
+Refugee       1000 evals basin_hopping                seed 2  appr  85.226297  used    0.34s  evals      1007
+Refugee       1000 evals basin_hopping                seed 3  appr  96.870709  used    0.36s  evals      1004
+Refugee       1000 evals basin_hopping                seed 4  appr  85.226297  used    0.33s  evals      1007
+Refugee       1000 evals basin_hopping                seed 5  appr  85.226297  used    0.37s  evals      1004
+Refugee       1000 evals basin_hopping (spend all)    seed 1  appr  85.226297  used    0.33s  evals      1003
+Refugee       1000 evals basin_hopping (spend all)    seed 2  appr  85.226297  used    0.32s  evals      1006
+Refugee       1000 evals basin_hopping (spend all)    seed 3  appr  96.870709  used    0.35s  evals      1010
+Refugee       1000 evals basin_hopping (spend all)    seed 4  appr  85.226297  used    0.37s  evals      1000
+Refugee       1000 evals basin_hopping (spend all)    seed 5  appr  85.226297  used    0.36s  evals      1004
+Refugee       1000 evals genetic_algorithm            seed 1  appr  95.819446  used    0.36s  evals      1000
+Refugee       1000 evals genetic_algorithm            seed 2  appr  96.658195  used    0.35s  evals      1000
+Refugee       1000 evals genetic_algorithm            seed 3  appr  95.180914  used    0.36s  evals      1000
+Refugee       1000 evals genetic_algorithm            seed 4  appr  96.311853  used    0.33s  evals      1000
+Refugee       1000 evals genetic_algorithm            seed 5  appr  96.548729  used    0.34s  evals      1000
+Refugee       1000 evals genetic_algorithm (spend all) seed 1  appr  96.710904  used    0.35s  evals      1000
+Refugee       1000 evals genetic_algorithm (spend all) seed 2  appr  96.793353  used    0.35s  evals      1000
+Refugee       1000 evals genetic_algorithm (spend all) seed 3  appr  96.822981  used    0.33s  evals      1000
+Refugee       1000 evals genetic_algorithm (spend all) seed 4  appr  96.824167  used    0.35s  evals      1000
+Refugee       1000 evals genetic_algorithm (spend all) seed 5  appr  96.388583  used    0.34s  evals      1000
+Refugee       1000 evals mdbh                         seed 1  appr  85.226297  used    0.33s  evals      1002
+Refugee       1000 evals mdbh                         seed 2  appr  85.226297  used    0.32s  evals      1002
+Refugee       1000 evals mdbh                         seed 3  appr  96.811638  used    0.30s  evals      1002
+Refugee       1000 evals mdbh                         seed 4  appr  85.226297  used    0.34s  evals      1001
+Refugee       1000 evals mdbh                         seed 5  appr  95.081496  used    0.34s  evals      1001
+Refugee       1000 evals mdbh (spend all)             seed 1  appr  85.226297  used    0.33s  evals      1002
+Refugee       1000 evals mdbh (spend all)             seed 2  appr  85.226297  used    0.34s  evals      1002
+Refugee       1000 evals mdbh (spend all)             seed 3  appr  85.226297  used    0.36s  evals      1002
+Refugee       1000 evals mdbh (spend all)             seed 4  appr  85.226297  used    0.33s  evals      1002
+Refugee       1000 evals mdbh (spend all)             seed 5  appr  96.854362  used    0.31s  evals      1000
+Refugee       3000 evals grid                         seed 0  appr  96.590788  used    1.00s  evals      3000
+Refugee       3000 evals grid (capped)                seed 0  appr  96.590788  used    0.98s  evals      3000
+Refugee       3000 evals slsqp                        seed 1  appr  85.226297  used    1.17s  evals      3000
+Refugee       3000 evals slsqp                        seed 2  appr  96.800974  used    1.16s  evals      3003
+Refugee       3000 evals slsqp                        seed 3  appr  96.870709  used    1.12s  evals      3001
+Refugee       3000 evals slsqp                        seed 4  appr  85.226297  used    1.12s  evals      3000
+Refugee       3000 evals slsqp                        seed 5  appr  85.226297  used    1.15s  evals      3000
+Refugee       3000 evals slsqp (spend all)            seed 1  appr  85.226297  used    1.08s  evals      3010
+Refugee       3000 evals slsqp (spend all)            seed 2  appr  96.800974  used    1.22s  evals      3008
+Refugee       3000 evals slsqp (spend all)            seed 3  appr  96.870709  used    1.15s  evals      3006
+Refugee       3000 evals slsqp (spend all)            seed 4  appr  85.226297  used    1.13s  evals      3001
+Refugee       3000 evals slsqp (spend all)            seed 5  appr  85.226297  used    1.12s  evals      3001
+Refugee       3000 evals basin_hopping                seed 1  appr  96.468491  used    1.08s  evals      3001
+Refugee       3000 evals basin_hopping                seed 2  appr  85.226297  used    1.07s  evals      3006
+Refugee       3000 evals basin_hopping                seed 3  appr  96.870821  used    1.03s  evals      3003
+Refugee       3000 evals basin_hopping                seed 4  appr  96.854526  used    1.11s  evals      3011
+Refugee       3000 evals basin_hopping                seed 5  appr  85.226297  used    1.15s  evals      3003
+Refugee       3000 evals basin_hopping (spend all)    seed 1  appr  96.468491  used    1.08s  evals      3004
+Refugee       3000 evals basin_hopping (spend all)    seed 2  appr  85.226297  used    1.03s  evals      3000
+Refugee       3000 evals basin_hopping (spend all)    seed 3  appr  96.871581  used    1.08s  evals      3000
+Refugee       3000 evals basin_hopping (spend all)    seed 4  appr  96.860247  used    1.10s  evals      3002
+Refugee       3000 evals basin_hopping (spend all)    seed 5  appr  85.226297  used    1.05s  evals      3007
+Refugee       3000 evals genetic_algorithm            seed 1  appr  96.840275  used    1.09s  evals      3000
+Refugee       3000 evals genetic_algorithm            seed 2  appr  96.871892  used    1.00s  evals      3000
+Refugee       3000 evals genetic_algorithm            seed 3  appr  96.871965  used    0.98s  evals      3000
+Refugee       3000 evals genetic_algorithm            seed 4  appr  96.871563  used    1.01s  evals      3000
+Refugee       3000 evals genetic_algorithm            seed 5  appr  96.844091  used    0.97s  evals      3000
+Refugee       3000 evals genetic_algorithm (spend all) seed 1  appr  96.870954  used    1.02s  evals      3000
+Refugee       3000 evals genetic_algorithm (spend all) seed 2  appr  96.871054  used    0.98s  evals      3000
+Refugee       3000 evals genetic_algorithm (spend all) seed 3  appr  96.871554  used    1.02s  evals      3000
+Refugee       3000 evals genetic_algorithm (spend all) seed 4  appr  96.864329  used    0.96s  evals      3000
+Refugee       3000 evals genetic_algorithm (spend all) seed 5  appr  96.871710  used    0.98s  evals      3000
+Refugee       3000 evals mdbh                         seed 1  appr  96.847458  used    1.00s  evals      3000
+Refugee       3000 evals mdbh                         seed 2  appr  85.226297  used    1.01s  evals      3000
+Refugee       3000 evals mdbh                         seed 3  appr  96.811638  used    1.00s  evals      3003
+Refugee       3000 evals mdbh                         seed 4  appr  96.747758  used    1.01s  evals      3004
+Refugee       3000 evals mdbh                         seed 5  appr  96.850661  used    1.00s  evals      3000
+Refugee       3000 evals mdbh (spend all)             seed 1  appr  85.226297  used    1.01s  evals      3004
+Refugee       3000 evals mdbh (spend all)             seed 2  appr  96.856446  used    0.95s  evals      3001
+Refugee       3000 evals mdbh (spend all)             seed 3  appr  85.226297  used    1.14s  evals      3000
+Refugee       3000 evals mdbh (spend all)             seed 4  appr  96.798159  used    1.23s  evals      3003
+Refugee       3000 evals mdbh (spend all)             seed 5  appr  96.857866  used    1.17s  evals      3004
+Refugee      10000 evals grid                         seed 0  appr  96.808432  used    3.93s  evals     10000
+Refugee      10000 evals grid (capped)                seed 0  appr  96.590788  used    4.14s  evals     10000
+Refugee      10000 evals slsqp                        seed 1  appr  85.883650  used    4.57s  evals     10004
+Refugee      10000 evals slsqp                        seed 2  appr  96.800974  used    4.51s  evals     10000
+Refugee      10000 evals slsqp                        seed 3  appr  96.870709  used    4.54s  evals     10006
+Refugee      10000 evals slsqp                        seed 4  appr  96.838284  used   14.48s  evals     10004
+Refugee      10000 evals slsqp                        seed 5  appr  96.601387  used   22.34s  evals     10003
+Refugee      10000 evals slsqp (spend all)            seed 1  appr  85.883650  used   21.37s  evals     10006
+Refugee      10000 evals slsqp (spend all)            seed 2  appr  96.800974  used    8.68s  evals     10004
+Refugee      10000 evals slsqp (spend all)            seed 3  appr  96.870709  used   19.89s  evals     10004
+Refugee      10000 evals slsqp (spend all)            seed 4  appr  96.837700  used    4.33s  evals     10000
+Refugee      10000 evals slsqp (spend all)            seed 5  appr  96.601387  used    4.31s  evals     10001
+Refugee      10000 evals basin_hopping                seed 1  appr  96.871555  used    4.60s  evals     10001
+Refugee      10000 evals basin_hopping                seed 2  appr  85.226297  used    4.86s  evals     10001
+Refugee      10000 evals basin_hopping                seed 3  appr  96.870821  used    4.86s  evals     10001
+Refugee      10000 evals basin_hopping                seed 4  appr  96.869279  used    5.02s  evals     10005
+Refugee      10000 evals basin_hopping                seed 5  appr  85.226297  used    4.86s  evals     10001
+Refugee      10000 evals basin_hopping (spend all)    seed 1  appr  96.872175  used    4.75s  evals     10006
+Refugee      10000 evals basin_hopping (spend all)    seed 2  appr  85.226297  used    4.91s  evals     10007
+Refugee      10000 evals basin_hopping (spend all)    seed 3  appr  96.871581  used    4.86s  evals     10000
+Refugee      10000 evals basin_hopping (spend all)    seed 4  appr  96.870445  used    4.70s  evals     10004
+Refugee      10000 evals basin_hopping (spend all)    seed 5  appr  85.226297  used    5.08s  evals     10000
+Refugee      10000 evals genetic_algorithm            seed 1  appr  96.871897  used    4.64s  evals     10000
+Refugee      10000 evals genetic_algorithm            seed 2  appr  96.872007  used    4.62s  evals     10000
+Refugee      10000 evals genetic_algorithm            seed 3  appr  96.871965  used    4.81s  evals     10000
+Refugee      10000 evals genetic_algorithm            seed 4  appr  96.871707  used    4.64s  evals     10000
+Refugee      10000 evals genetic_algorithm            seed 5  appr  96.871510  used    4.72s  evals     10000
+Refugee      10000 evals genetic_algorithm (spend all) seed 1  appr  96.872188  used    4.84s  evals     10000
+Refugee      10000 evals genetic_algorithm (spend all) seed 2  appr  96.872174  used    4.65s  evals     10000
+Refugee      10000 evals genetic_algorithm (spend all) seed 3  appr  96.872147  used    4.88s  evals     10000
+Refugee      10000 evals genetic_algorithm (spend all) seed 4  appr  96.870946  used    4.80s  evals     10000
+Refugee      10000 evals genetic_algorithm (spend all) seed 5  appr  96.871921  used    4.47s  evals     10000
+Refugee      10000 evals mdbh                         seed 1  appr  96.847458  used    4.22s  evals     10001
+Refugee      10000 evals mdbh                         seed 2  appr  96.854506  used    4.35s  evals     10000
+Refugee      10000 evals mdbh                         seed 3  appr  96.865464  used    4.17s  evals     10000
+Refugee      10000 evals mdbh                         seed 4  appr  96.747758  used    4.28s  evals     10005
+Refugee      10000 evals mdbh                         seed 5  appr  96.856216  used    4.26s  evals     10004
+Refugee      10000 evals mdbh (spend all)             seed 1  appr  85.226297  used    4.29s  evals     10001
+Refugee      10000 evals mdbh (spend all)             seed 2  appr  96.856446  used    4.26s  evals     10005
+Refugee      10000 evals mdbh (spend all)             seed 3  appr  96.770264  used    4.21s  evals     10005
+Refugee      10000 evals mdbh (spend all)             seed 4  appr  96.860691  used    4.26s  evals     10000
+Refugee      10000 evals mdbh (spend all)             seed 5  appr  96.861155  used    4.17s  evals     10003
+Refugee      30000 evals grid                         seed 0  appr  96.808432  used   12.92s  evals     30000
+Refugee      30000 evals grid (capped)                seed 0  appr  96.808432  used   12.49s  evals     30000
+Refugee      30000 evals slsqp                        seed 1  appr  96.869417  used   14.81s  evals     30010
+Refugee      30000 evals slsqp                        seed 2  appr  96.871926  used   14.93s  evals     30006
+Refugee      30000 evals slsqp                        seed 3  appr  96.871730  used   14.57s  evals     30000
+Refugee      30000 evals slsqp                        seed 4  appr  96.871812  used   15.00s  evals     30005
+Refugee      30000 evals slsqp                        seed 5  appr  96.871082  used   14.81s  evals     30006
+Refugee      30000 evals slsqp (spend all)            seed 1  appr  96.869417  used   15.23s  evals     30008
+Refugee      30000 evals slsqp (spend all)            seed 2  appr  96.871926  used   15.52s  evals     30006
+Refugee      30000 evals slsqp (spend all)            seed 3  appr  96.871738  used   15.58s  evals     30006
+Refugee      30000 evals slsqp (spend all)            seed 4  appr  96.871691  used   19.00s  evals     30002
+Refugee      30000 evals slsqp (spend all)            seed 5  appr  96.871082  used   15.50s  evals     30004
+Refugee      30000 evals basin_hopping                seed 1  appr  96.871555  used   15.00s  evals     30005
+Refugee      30000 evals basin_hopping                seed 2  appr  96.867674  used   15.00s  evals     30001
+Refugee      30000 evals basin_hopping                seed 3  appr  96.870821  used   14.91s  evals     30000
+Refugee      30000 evals basin_hopping                seed 4  appr  96.872159  used   14.86s  evals     30000
+Refugee      30000 evals basin_hopping                seed 5  appr  96.872153  used   15.00s  evals     30001
+Refugee      30000 evals basin_hopping (spend all)    seed 1  appr  96.872175  used   14.88s  evals     30000
+Refugee      30000 evals basin_hopping (spend all)    seed 2  appr  96.872088  used   14.98s  evals     30004
+Refugee      30000 evals basin_hopping (spend all)    seed 3  appr  96.871581  used   14.84s  evals     30006
+Refugee      30000 evals basin_hopping (spend all)    seed 4  appr  96.871872  used   14.91s  evals     30002
+Refugee      30000 evals basin_hopping (spend all)    seed 5  appr  96.872147  used   14.83s  evals     30004
+Refugee      30000 evals genetic_algorithm            seed 1  appr  96.872061  used   13.88s  evals     30000
+Refugee      30000 evals genetic_algorithm            seed 2  appr  96.872007  used   15.00s  evals     30000
+Refugee      30000 evals genetic_algorithm            seed 3  appr  96.872104  used   14.29s  evals     30000
+Refugee      30000 evals genetic_algorithm            seed 4  appr  96.872138  used   14.02s  evals     30000
+Refugee      30000 evals genetic_algorithm            seed 5  appr  96.872020  used   14.06s  evals     30000
+Refugee      30000 evals genetic_algorithm (spend all) seed 1  appr  96.872189  used   14.06s  evals     30000
+Refugee      30000 evals genetic_algorithm (spend all) seed 2  appr  96.872189  used   14.24s  evals     30000
+Refugee      30000 evals genetic_algorithm (spend all) seed 3  appr  96.872158  used   14.18s  evals     30000
+Refugee      30000 evals genetic_algorithm (spend all) seed 4  appr  96.872093  used   13.95s  evals     30000
+Refugee      30000 evals genetic_algorithm (spend all) seed 5  appr  96.872120  used   14.11s  evals     30000
+Refugee      30000 evals mdbh                         seed 1  appr  96.855217  used   48.02s  evals     30002
+Refugee      30000 evals mdbh                         seed 2  appr  96.854506  used   39.88s  evals     30002
+Refugee      30000 evals mdbh                         seed 3  appr  96.865464  used   41.85s  evals     30000
+Refugee      30000 evals mdbh                         seed 4  appr  96.849873  used   34.54s  evals     30002
+Refugee      30000 evals mdbh                         seed 5  appr  96.859732  used   23.25s  evals     30001
+Refugee      30000 evals mdbh (spend all)             seed 1  appr  96.848537  used   23.19s  evals     30002
+Refugee      30000 evals mdbh (spend all)             seed 2  appr  96.856446  used   25.86s  evals     30002
+Refugee      30000 evals mdbh (spend all)             seed 3  appr  96.846337  used   29.87s  evals     30003
+Refugee      30000 evals mdbh (spend all)             seed 4  appr  96.860691  used   29.21s  evals     30002
+Refugee      30000 evals mdbh (spend all)             seed 5  appr  96.861155  used   27.35s  evals     30003
+IZZ             30 evals grid                         seed 0  appr  60.491060  used    0.03s  evals        30
+IZZ             30 evals grid (capped)                seed 0  appr  60.491060  used    0.03s  evals        30
+IZZ             30 evals slsqp                        seed 1  appr  66.222942  used    0.05s  evals        32
+IZZ             30 evals slsqp                        seed 2  appr  61.349422  used    0.05s  evals        31
+IZZ             30 evals slsqp                        seed 3  appr  60.305219  used    0.04s  evals        34
+IZZ             30 evals slsqp                        seed 4  appr  60.878520  used    0.07s  evals        32
+IZZ             30 evals slsqp                        seed 5  appr  60.868527  used    0.04s  evals        32
+IZZ             30 evals slsqp (spend all)            seed 1  appr  66.222942  used    0.03s  evals        32
+IZZ             30 evals slsqp (spend all)            seed 2  appr  61.349432  used    0.02s  evals        31
+IZZ             30 evals slsqp (spend all)            seed 3  appr  60.305227  used    0.02s  evals        34
+IZZ             30 evals slsqp (spend all)            seed 4  appr  60.881864  used    0.03s  evals        32
+IZZ             30 evals slsqp (spend all)            seed 5  appr  60.863368  used    0.03s  evals        32
+IZZ             30 evals basin_hopping                seed 1  appr  66.222942  used    0.06s  evals        43
+IZZ             30 evals basin_hopping                seed 2  appr  61.349422  used    0.05s  evals        42
+IZZ             30 evals basin_hopping                seed 3  appr  60.305219  used    0.05s  evals        45
+IZZ             30 evals basin_hopping                seed 4  appr  60.878520  used    0.05s  evals        43
+IZZ             30 evals basin_hopping                seed 5  appr  60.868527  used    0.04s  evals        43
+IZZ             30 evals basin_hopping (spend all)    seed 1  appr  66.222942  used    0.05s  evals        43
+IZZ             30 evals basin_hopping (spend all)    seed 2  appr  61.349432  used    0.05s  evals        42
+IZZ             30 evals basin_hopping (spend all)    seed 3  appr  60.305227  used    0.12s  evals        45
+IZZ             30 evals basin_hopping (spend all)    seed 4  appr  60.881864  used    0.04s  evals        43
+IZZ             30 evals basin_hopping (spend all)    seed 5  appr  60.863368  used    0.05s  evals        43
+IZZ             30 evals genetic_algorithm            seed 1  appr  65.645084  used    0.05s  evals        50
+IZZ             30 evals genetic_algorithm            seed 2  appr  61.829830  used    0.05s  evals        50
+IZZ             30 evals genetic_algorithm            seed 3  appr  62.158735  used    0.04s  evals        50
+IZZ             30 evals genetic_algorithm            seed 4  appr  62.851447  used    0.04s  evals        50
+IZZ             30 evals genetic_algorithm            seed 5  appr  64.709217  used    0.05s  evals        50
+IZZ             30 evals genetic_algorithm (spend all) seed 1  appr  67.573593  used    0.05s  evals        50
+IZZ             30 evals genetic_algorithm (spend all) seed 2  appr  67.007065  used    0.04s  evals        50
+IZZ             30 evals genetic_algorithm (spend all) seed 3  appr  60.483866  used    0.06s  evals        50
+IZZ             30 evals genetic_algorithm (spend all) seed 4  appr  64.486609  used    0.04s  evals        50
+IZZ             30 evals genetic_algorithm (spend all) seed 5  appr  65.069982  used    0.02s  evals        50
+IZZ             30 evals mdbh                         seed 1  appr  65.003947  used    0.03s  evals        31
+IZZ             30 evals mdbh                         seed 2  appr  65.003947  used    0.03s  evals        31
+IZZ             30 evals mdbh                         seed 3  appr  65.003947  used    0.03s  evals        31
+IZZ             30 evals mdbh                         seed 4  appr  65.003947  used    0.02s  evals        31
+IZZ             30 evals mdbh                         seed 5  appr  65.003947  used    0.04s  evals        31
+IZZ             30 evals mdbh (spend all)             seed 1  appr  67.435945  used    0.03s  evals        31
+IZZ             30 evals mdbh (spend all)             seed 2  appr  67.435945  used    0.07s  evals        31
+IZZ             30 evals mdbh (spend all)             seed 3  appr  67.435945  used    0.02s  evals        31
+IZZ             30 evals mdbh (spend all)             seed 4  appr  67.435945  used    0.02s  evals        31
+IZZ             30 evals mdbh (spend all)             seed 5  appr  67.435945  used    0.02s  evals        31
+IZZ            100 evals grid                         seed 0  appr  68.037570  used    0.07s  evals       100
+IZZ            100 evals grid (capped)                seed 0  appr  63.762269  used    0.08s  evals       100
+IZZ            100 evals slsqp                        seed 1  appr  60.655987  used    0.10s  evals       109
+IZZ            100 evals slsqp                        seed 2  appr  59.209009  used    0.07s  evals       101
+IZZ            100 evals slsqp                        seed 3  appr  60.650946  used    0.07s  evals       102
+IZZ            100 evals slsqp                        seed 4  appr  60.623724  used    0.08s  evals       103
+IZZ            100 evals slsqp                        seed 5  appr  60.620798  used    0.10s  evals       103
+IZZ            100 evals slsqp (spend all)            seed 1  appr  60.655988  used    0.08s  evals       109
+IZZ            100 evals slsqp (spend all)            seed 2  appr  59.891533  used    0.13s  evals       101
+IZZ            100 evals slsqp (spend all)            seed 3  appr  60.650946  used    0.10s  evals       102
+IZZ            100 evals slsqp (spend all)            seed 4  appr  69.176478  used    0.13s  evals       103
+IZZ            100 evals slsqp (spend all)            seed 5  appr  69.185206  used    0.10s  evals       102
+IZZ            100 evals basin_hopping                seed 1  appr  60.655987  used    0.12s  evals       120
+IZZ            100 evals basin_hopping                seed 2  appr  59.209009  used    0.11s  evals       112
+IZZ            100 evals basin_hopping                seed 3  appr  60.650946  used    0.11s  evals       113
+IZZ            100 evals basin_hopping                seed 4  appr  60.623724  used    0.10s  evals       114
+IZZ            100 evals basin_hopping                seed 5  appr  60.620798  used    0.08s  evals       114
+IZZ            100 evals basin_hopping (spend all)    seed 1  appr  60.655988  used    0.10s  evals       120
+IZZ            100 evals basin_hopping (spend all)    seed 2  appr  59.891533  used    0.08s  evals       112
+IZZ            100 evals basin_hopping (spend all)    seed 3  appr  60.650946  used    0.09s  evals       113
+IZZ            100 evals basin_hopping (spend all)    seed 4  appr  69.176478  used    0.07s  evals       114
+IZZ            100 evals basin_hopping (spend all)    seed 5  appr  69.185206  used    0.09s  evals       113
+IZZ            100 evals genetic_algorithm            seed 1  appr  65.645084  used    0.04s  evals       100
+IZZ            100 evals genetic_algorithm            seed 2  appr  61.829830  used    0.06s  evals       100
+IZZ            100 evals genetic_algorithm            seed 3  appr  62.719350  used    0.06s  evals       100
+IZZ            100 evals genetic_algorithm            seed 4  appr  62.851447  used    0.07s  evals       100
+IZZ            100 evals genetic_algorithm            seed 5  appr  64.709217  used    0.09s  evals       100
+IZZ            100 evals genetic_algorithm (spend all) seed 1  appr  68.391388  used    0.07s  evals       100
+IZZ            100 evals genetic_algorithm (spend all) seed 2  appr  67.430712  used    0.07s  evals       100
+IZZ            100 evals genetic_algorithm (spend all) seed 3  appr  60.549901  used    0.03s  evals       100
+IZZ            100 evals genetic_algorithm (spend all) seed 4  appr  65.953528  used    0.07s  evals       100
+IZZ            100 evals genetic_algorithm (spend all) seed 5  appr  67.882184  used    0.10s  evals       100
+IZZ            100 evals mdbh                         seed 1  appr  68.255374  used    0.09s  evals       101
+IZZ            100 evals mdbh                         seed 2  appr  68.255374  used    0.08s  evals       101
+IZZ            100 evals mdbh                         seed 3  appr  68.255374  used    0.09s  evals       101
+IZZ            100 evals mdbh                         seed 4  appr  68.255374  used    0.11s  evals       101
+IZZ            100 evals mdbh                         seed 5  appr  68.255374  used    0.10s  evals       101
+IZZ            100 evals mdbh (spend all)             seed 1  appr  68.550123  used    0.13s  evals       101
+IZZ            100 evals mdbh (spend all)             seed 2  appr  68.550123  used    0.08s  evals       101
+IZZ            100 evals mdbh (spend all)             seed 3  appr  68.550123  used    0.10s  evals       101
+IZZ            100 evals mdbh (spend all)             seed 4  appr  68.550123  used    0.08s  evals       101
+IZZ            100 evals mdbh (spend all)             seed 5  appr  68.550123  used    0.13s  evals       101
+IZZ            300 evals grid                         seed 0  appr  68.312451  used    0.35s  evals       300
+IZZ            300 evals grid (capped)                seed 0  appr  68.312451  used    0.31s  evals       300
+IZZ            300 evals slsqp                        seed 1  appr  69.190151  used    0.40s  evals       309
+IZZ            300 evals slsqp                        seed 2  appr  69.189371  used    0.42s  evals       308
+IZZ            300 evals slsqp                        seed 3  appr  69.190149  used    0.50s  evals       307
+IZZ            300 evals slsqp                        seed 4  appr  69.190530  used    0.35s  evals       303
+IZZ            300 evals slsqp                        seed 5  appr  69.186426  used    0.38s  evals       310
+IZZ            300 evals slsqp (spend all)            seed 1  appr  69.190151  used    0.20s  evals       309
+IZZ            300 evals slsqp (spend all)            seed 2  appr  69.190220  used    0.17s  evals       310
+IZZ            300 evals slsqp (spend all)            seed 3  appr  69.190150  used    0.29s  evals       307
+IZZ            300 evals slsqp (spend all)            seed 4  appr  69.190543  used    0.32s  evals       300
+IZZ            300 evals slsqp (spend all)            seed 5  appr  69.190521  used    0.30s  evals       310
+IZZ            300 evals basin_hopping                seed 1  appr  69.190151  used    0.16s  evals       306
+IZZ            300 evals basin_hopping                seed 2  appr  69.189371  used    0.16s  evals       319
+IZZ            300 evals basin_hopping                seed 3  appr  69.190149  used    0.31s  evals       306
+IZZ            300 evals basin_hopping                seed 4  appr  69.190530  used    0.32s  evals       314
+IZZ            300 evals basin_hopping                seed 5  appr  69.186426  used    0.31s  evals       310
+IZZ            300 evals basin_hopping (spend all)    seed 1  appr  69.190151  used    0.33s  evals       306
+IZZ            300 evals basin_hopping (spend all)    seed 2  appr  69.190220  used    0.31s  evals       307
+IZZ            300 evals basin_hopping (spend all)    seed 3  appr  69.190150  used    0.35s  evals       306
+IZZ            300 evals basin_hopping (spend all)    seed 4  appr  69.190543  used    0.29s  evals       302
+IZZ            300 evals basin_hopping (spend all)    seed 5  appr  69.190521  used    0.29s  evals       307
+IZZ            300 evals genetic_algorithm            seed 1  appr  67.289524  used    0.25s  evals       300
+IZZ            300 evals genetic_algorithm            seed 2  appr  65.672830  used    0.24s  evals       300
+IZZ            300 evals genetic_algorithm            seed 3  appr  68.089749  used    0.24s  evals       300
+IZZ            300 evals genetic_algorithm            seed 4  appr  64.950480  used    0.23s  evals       300
+IZZ            300 evals genetic_algorithm            seed 5  appr  67.053056  used    0.25s  evals       300
+IZZ            300 evals genetic_algorithm (spend all) seed 1  appr  68.843027  used    0.26s  evals       300
+IZZ            300 evals genetic_algorithm (spend all) seed 2  appr  67.996620  used    0.31s  evals       300
+IZZ            300 evals genetic_algorithm (spend all) seed 3  appr  65.683531  used    0.26s  evals       300
+IZZ            300 evals genetic_algorithm (spend all) seed 4  appr  67.383280  used    0.25s  evals       300
+IZZ            300 evals genetic_algorithm (spend all) seed 5  appr  68.761769  used    0.25s  evals       300
+IZZ            300 evals mdbh                         seed 1  appr  68.865076  used    0.23s  evals       301
+IZZ            300 evals mdbh                         seed 2  appr  68.865076  used    0.24s  evals       301
+IZZ            300 evals mdbh                         seed 3  appr  68.865076  used    0.23s  evals       301
+IZZ            300 evals mdbh                         seed 4  appr  68.865076  used    0.22s  evals       301
+IZZ            300 evals mdbh                         seed 5  appr  68.865076  used    0.24s  evals       301
+IZZ            300 evals mdbh (spend all)             seed 1  appr  69.000652  used    0.24s  evals       301
+IZZ            300 evals mdbh (spend all)             seed 2  appr  69.000652  used    0.24s  evals       301
+IZZ            300 evals mdbh (spend all)             seed 3  appr  69.000652  used    0.27s  evals       301
+IZZ            300 evals mdbh (spend all)             seed 4  appr  69.000652  used    0.31s  evals       301
+IZZ            300 evals mdbh (spend all)             seed 5  appr  69.000652  used    0.30s  evals       301
+IZZ           1000 evals grid                         seed 0  appr  68.312451  used    0.82s  evals      1000
+IZZ           1000 evals grid (capped)                seed 0  appr  68.312451  used    0.96s  evals      1000
+IZZ           1000 evals slsqp                        seed 1  appr  69.190406  used    1.01s  evals      1005
+IZZ           1000 evals slsqp                        seed 2  appr  69.190222  used    0.83s  evals      1009
+IZZ           1000 evals slsqp                        seed 3  appr  69.190226  used    0.93s  evals      1006
+IZZ           1000 evals slsqp                        seed 4  appr  69.190531  used    0.94s  evals      1004
+IZZ           1000 evals slsqp                        seed 5  appr  69.190221  used    0.96s  evals      1007
+IZZ           1000 evals slsqp (spend all)            seed 1  appr  69.190254  used    1.00s  evals      1007
+IZZ           1000 evals slsqp (spend all)            seed 2  appr  69.190221  used    0.91s  evals      1002
+IZZ           1000 evals slsqp (spend all)            seed 3  appr  69.190218  used    0.94s  evals      1012
+IZZ           1000 evals slsqp (spend all)            seed 4  appr  69.190543  used    0.95s  evals      1009
+IZZ           1000 evals slsqp (spend all)            seed 5  appr  69.190521  used    0.90s  evals      1007
+IZZ           1000 evals basin_hopping                seed 1  appr  69.190268  used    0.96s  evals      1006
+IZZ           1000 evals basin_hopping                seed 2  appr  69.190230  used    1.04s  evals      1010
+IZZ           1000 evals basin_hopping                seed 3  appr  69.190238  used    0.91s  evals      1002
+IZZ           1000 evals basin_hopping                seed 4  appr  69.190531  used    0.95s  evals      1007
+IZZ           1000 evals basin_hopping                seed 5  appr  69.190241  used    0.92s  evals      1003
+IZZ           1000 evals basin_hopping (spend all)    seed 1  appr  69.190494  used    0.85s  evals      1005
+IZZ           1000 evals basin_hopping (spend all)    seed 2  appr  69.190395  used    0.87s  evals      1017
+IZZ           1000 evals basin_hopping (spend all)    seed 3  appr  69.190237  used    0.81s  evals      1009
+IZZ           1000 evals basin_hopping (spend all)    seed 4  appr  69.190543  used    0.89s  evals      1012
+IZZ           1000 evals basin_hopping (spend all)    seed 5  appr  69.190521  used    0.87s  evals      1009
+IZZ           1000 evals genetic_algorithm            seed 1  appr  69.015029  used    0.83s  evals      1000
+IZZ           1000 evals genetic_algorithm            seed 2  appr  68.306193  used    0.88s  evals      1000
+IZZ           1000 evals genetic_algorithm            seed 3  appr  68.930859  used    0.85s  evals      1000
+IZZ           1000 evals genetic_algorithm            seed 4  appr  68.454999  used    0.85s  evals      1000
+IZZ           1000 evals genetic_algorithm            seed 5  appr  69.181680  used    0.95s  evals      1000
+IZZ           1000 evals genetic_algorithm (spend all) seed 1  appr  69.181383  used    0.82s  evals      1000
+IZZ           1000 evals genetic_algorithm (spend all) seed 2  appr  69.050564  used    0.83s  evals      1000
+IZZ           1000 evals genetic_algorithm (spend all) seed 3  appr  68.942814  used    0.87s  evals      1000
+IZZ           1000 evals genetic_algorithm (spend all) seed 4  appr  69.013156  used    0.80s  evals      1000
+IZZ           1000 evals genetic_algorithm (spend all) seed 5  appr  69.099835  used    0.83s  evals      1000
+IZZ           1000 evals mdbh                         seed 1  appr  68.980156  used    0.74s  evals      1003
+IZZ           1000 evals mdbh                         seed 2  appr  68.980156  used    0.75s  evals      1003
+IZZ           1000 evals mdbh                         seed 3  appr  68.980156  used    1.04s  evals      1004
+IZZ           1000 evals mdbh                         seed 4  appr  69.189793  used    0.77s  evals      1003
+IZZ           1000 evals mdbh                         seed 5  appr  69.162984  used    0.78s  evals      1003
+IZZ           1000 evals mdbh (spend all)             seed 1  appr  69.000652  used    0.78s  evals      1004
+IZZ           1000 evals mdbh (spend all)             seed 2  appr  69.000652  used    1.02s  evals      1003
+IZZ           1000 evals mdbh (spend all)             seed 3  appr  69.000652  used    0.81s  evals      1004
+IZZ           1000 evals mdbh (spend all)             seed 4  appr  69.188860  used    0.75s  evals      1003
+IZZ           1000 evals mdbh (spend all)             seed 5  appr  69.190153  used    0.80s  evals      1004
+IZZ           3000 evals grid                         seed 0  appr  68.732218  used    2.37s  evals      3000
+IZZ           3000 evals grid (capped)                seed 0  appr  68.312451  used    2.26s  evals      3000
+IZZ           3000 evals slsqp                        seed 1  appr  69.190524  used    3.00s  evals      3007
+IZZ           3000 evals slsqp                        seed 2  appr  69.190259  used    2.70s  evals      3001
+IZZ           3000 evals slsqp                        seed 3  appr  69.190471  used    3.21s  evals      3002
+IZZ           3000 evals slsqp                        seed 4  appr  69.190531  used    3.30s  evals      3011
+IZZ           3000 evals slsqp                        seed 5  appr  69.190400  used    3.19s  evals      3001
+IZZ           3000 evals slsqp (spend all)            seed 1  appr  69.190509  used    3.31s  evals      3008
+IZZ           3000 evals slsqp (spend all)            seed 2  appr  69.190397  used    2.89s  evals      3000
+IZZ           3000 evals slsqp (spend all)            seed 3  appr  69.190471  used    2.90s  evals      3004
+IZZ           3000 evals slsqp (spend all)            seed 4  appr  69.190543  used    2.48s  evals      3006
+IZZ           3000 evals slsqp (spend all)            seed 5  appr  69.190521  used    3.58s  evals      3012
+IZZ           3000 evals basin_hopping                seed 1  appr  69.190362  used    2.85s  evals      3002
+IZZ           3000 evals basin_hopping                seed 2  appr  69.190325  used    2.98s  evals      3005
+IZZ           3000 evals basin_hopping                seed 3  appr  69.190238  used    2.68s  evals      3007
+IZZ           3000 evals basin_hopping                seed 4  appr  69.190531  used    2.91s  evals      3000
+IZZ           3000 evals basin_hopping                seed 5  appr  69.190270  used    2.56s  evals      3010
+IZZ           3000 evals basin_hopping (spend all)    seed 1  appr  69.190494  used    2.86s  evals      3004
+IZZ           3000 evals basin_hopping (spend all)    seed 2  appr  69.190395  used    2.80s  evals      3004
+IZZ           3000 evals basin_hopping (spend all)    seed 3  appr  69.190468  used    2.84s  evals      3004
+IZZ           3000 evals basin_hopping (spend all)    seed 4  appr  69.190543  used    3.14s  evals      3009
+IZZ           3000 evals basin_hopping (spend all)    seed 5  appr  69.190521  used    2.71s  evals      3009
+IZZ           3000 evals genetic_algorithm            seed 1  appr  69.176826  used    3.88s  evals      3000
+IZZ           3000 evals genetic_algorithm            seed 2  appr  69.077853  used    2.89s  evals      3000
+IZZ           3000 evals genetic_algorithm            seed 3  appr  69.174915  used    2.61s  evals      3000
+IZZ           3000 evals genetic_algorithm            seed 4  appr  69.184238  used    3.16s  evals      3000
+IZZ           3000 evals genetic_algorithm            seed 5  appr  69.189809  used    3.07s  evals      3000
+IZZ           3000 evals genetic_algorithm (spend all) seed 1  appr  69.190334  used    3.33s  evals      3000
+IZZ           3000 evals genetic_algorithm (spend all) seed 2  appr  69.184467  used    4.31s  evals      3000
+IZZ           3000 evals genetic_algorithm (spend all) seed 3  appr  69.143266  used    2.65s  evals      3000
+IZZ           3000 evals genetic_algorithm (spend all) seed 4  appr  69.190110  used    2.69s  evals      3000
+IZZ           3000 evals genetic_algorithm (spend all) seed 5  appr  69.190027  used    2.98s  evals      3000
+IZZ           3000 evals mdbh                         seed 1  appr  69.173733  used    2.70s  evals      3005
+IZZ           3000 evals mdbh                         seed 2  appr  69.115848  used    2.34s  evals      3002
+IZZ           3000 evals mdbh                         seed 3  appr  69.188067  used    2.85s  evals      3002
+IZZ           3000 evals mdbh                         seed 4  appr  69.189793  used    3.65s  evals      3000
+IZZ           3000 evals mdbh                         seed 5  appr  69.162984  used    2.45s  evals      3002
+IZZ           3000 evals mdbh (spend all)             seed 1  appr  69.189836  used    2.45s  evals      3001
+IZZ           3000 evals mdbh (spend all)             seed 2  appr  69.165803  used    2.54s  evals      3003
+IZZ           3000 evals mdbh (spend all)             seed 3  appr  69.188294  used    2.33s  evals      3009
+IZZ           3000 evals mdbh (spend all)             seed 4  appr  69.188975  used    2.68s  evals      3001
+IZZ           3000 evals mdbh (spend all)             seed 5  appr  69.190153  used    2.45s  evals      3009
+IZZ          10000 evals grid                         seed 0  appr  68.732218  used    9.00s  evals     10000
+IZZ          10000 evals grid (capped)                seed 0  appr  68.732218  used    8.08s  evals     10000
+IZZ          10000 evals slsqp                        seed 1  appr  69.190524  used    8.86s  evals     10011
+IZZ          10000 evals slsqp                        seed 2  appr  69.190419  used    8.77s  evals     10004
+IZZ          10000 evals slsqp                        seed 3  appr  69.190471  used    8.97s  evals     10002
+IZZ          10000 evals slsqp                        seed 4  appr  69.190531  used    8.71s  evals     10004
+IZZ          10000 evals slsqp                        seed 5  appr  69.190534  used    8.79s  evals     10013
+IZZ          10000 evals slsqp (spend all)            seed 1  appr  69.190509  used    8.92s  evals     10010
+IZZ          10000 evals slsqp (spend all)            seed 2  appr  69.190397  used    9.02s  evals     10004
+IZZ          10000 evals slsqp (spend all)            seed 3  appr  69.190471  used    8.97s  evals     10001
+IZZ          10000 evals slsqp (spend all)            seed 4  appr  69.190543  used    9.18s  evals     10011
+IZZ          10000 evals slsqp (spend all)            seed 5  appr  69.190529  used    9.27s  evals     10003
+IZZ          10000 evals basin_hopping                seed 1  appr  69.190362  used    8.93s  evals     10010
+IZZ          10000 evals basin_hopping                seed 2  appr  69.190402  used    8.84s  evals     10002
+IZZ          10000 evals basin_hopping                seed 3  appr  69.190276  used    8.98s  evals     10011
+IZZ          10000 evals basin_hopping                seed 4  appr  69.190531  used    9.05s  evals     10002
+IZZ          10000 evals basin_hopping                seed 5  appr  69.190373  used    9.02s  evals     10005
+IZZ          10000 evals basin_hopping (spend all)    seed 1  appr  69.190494  used    9.10s  evals     10013
+IZZ          10000 evals basin_hopping (spend all)    seed 2  appr  69.190431  used    9.38s  evals     10007
+IZZ          10000 evals basin_hopping (spend all)    seed 3  appr  69.190527  used    9.03s  evals     10011
+IZZ          10000 evals basin_hopping (spend all)    seed 4  appr  69.190543  used    8.92s  evals     10006
+IZZ          10000 evals basin_hopping (spend all)    seed 5  appr  69.190521  used    8.89s  evals     10004
+IZZ          10000 evals genetic_algorithm            seed 1  appr  69.187546  used    8.55s  evals     10000
+IZZ          10000 evals genetic_algorithm            seed 2  appr  69.189328  used    8.61s  evals     10000
+IZZ          10000 evals genetic_algorithm            seed 3  appr  69.190274  used    8.63s  evals     10000
+IZZ          10000 evals genetic_algorithm            seed 4  appr  69.190288  used    8.60s  evals     10000
+IZZ          10000 evals genetic_algorithm            seed 5  appr  69.190148  used    8.88s  evals     10000
+IZZ          10000 evals genetic_algorithm (spend all) seed 1  appr  69.190341  used    9.09s  evals     10000
+IZZ          10000 evals genetic_algorithm (spend all) seed 2  appr  69.188963  used    8.53s  evals     10000
+IZZ          10000 evals genetic_algorithm (spend all) seed 3  appr  69.189859  used    8.79s  evals     10000
+IZZ          10000 evals genetic_algorithm (spend all) seed 4  appr  69.190183  used    8.44s  evals     10000
+IZZ          10000 evals genetic_algorithm (spend all) seed 5  appr  69.190194  used    8.69s  evals     10000
+IZZ          10000 evals mdbh                         seed 1  appr  69.189674  used    7.85s  evals     10000
+IZZ          10000 evals mdbh                         seed 2  appr  69.190191  used    8.06s  evals     10001
+IZZ          10000 evals mdbh                         seed 3  appr  69.190099  used    8.04s  evals     10005
+IZZ          10000 evals mdbh                         seed 4  appr  69.190192  used    8.13s  evals     10001
+IZZ          10000 evals mdbh                         seed 5  appr  69.189992  used    9.34s  evals     10004
+IZZ          10000 evals mdbh (spend all)             seed 1  appr  69.189836  used    8.06s  evals     10008
+IZZ          10000 evals mdbh (spend all)             seed 2  appr  69.189734  used    7.84s  evals     10004
+IZZ          10000 evals mdbh (spend all)             seed 3  appr  69.188294  used    7.70s  evals     10002
+IZZ          10000 evals mdbh (spend all)             seed 4  appr  69.189443  used    7.88s  evals     10006
+IZZ          10000 evals mdbh (spend all)             seed 5  appr  69.190153  used    7.71s  evals     10002
+IZZ          30000 evals grid                         seed 0  appr  68.732218  used   23.65s  evals     30000
+IZZ          30000 evals grid (capped)                seed 0  appr  68.732218  used   23.73s  evals     30000
+IZZ          30000 evals slsqp                        seed 1  appr  69.190529  used   28.72s  evals     30006
+IZZ          30000 evals slsqp                        seed 2  appr  69.190530  used   27.16s  evals     30004
+IZZ          30000 evals slsqp                        seed 3  appr  69.190545  used   29.35s  evals     30002
+IZZ          30000 evals slsqp                        seed 4  appr  69.190531  used   27.37s  evals     30011
+IZZ          30000 evals slsqp                        seed 5  appr  69.190534  used   26.49s  evals     30005
+IZZ          30000 evals slsqp (spend all)            seed 1  appr  69.190518  used   26.74s  evals     30006
+IZZ          30000 evals slsqp (spend all)            seed 2  appr  69.190534  used   26.75s  evals     30009
+IZZ          30000 evals slsqp (spend all)            seed 3  appr  69.190478  used   27.77s  evals     30004
+IZZ          30000 evals slsqp (spend all)            seed 4  appr  69.190543  used   16.95s  evals     30007
+IZZ          30000 evals slsqp (spend all)            seed 5  appr  69.190529  used   16.09s  evals     30007
+IZZ          30000 evals basin_hopping                seed 1  appr  69.190431  used   16.93s  evals     30004
+IZZ          30000 evals basin_hopping                seed 2  appr  69.190551  used   16.08s  evals     30008
+IZZ          30000 evals basin_hopping                seed 3  appr  69.190532  used   17.15s  evals     30012
+IZZ          30000 evals basin_hopping                seed 4  appr  69.190531  used   16.14s  evals     30004
+IZZ          30000 evals basin_hopping                seed 5  appr  69.190477  used   16.93s  evals     30008
+IZZ          30000 evals basin_hopping (spend all)    seed 1  appr  69.190494  used   16.38s  evals     30010
+IZZ          30000 evals basin_hopping (spend all)    seed 2  appr  69.190513  used   15.73s  evals     30008
+IZZ          30000 evals basin_hopping (spend all)    seed 3  appr  69.190542  used   16.35s  evals     30006
+IZZ          30000 evals basin_hopping (spend all)    seed 4  appr  69.190543  used   17.11s  evals     30008
+IZZ          30000 evals basin_hopping (spend all)    seed 5  appr  69.190521  used   29.76s  evals     30010
+IZZ          30000 evals genetic_algorithm            seed 1  appr  69.190179  used   26.70s  evals     30000
+IZZ          30000 evals genetic_algorithm            seed 2  appr  69.189532  used   26.57s  evals     30000
+IZZ          30000 evals genetic_algorithm            seed 3  appr  69.190330  used   25.91s  evals     30000
+IZZ          30000 evals genetic_algorithm            seed 4  appr  69.190323  used   25.61s  evals     30000
+IZZ          30000 evals genetic_algorithm            seed 5  appr  69.190173  used   26.15s  evals     30000
+IZZ          30000 evals genetic_algorithm (spend all) seed 1  appr  69.190341  used   25.39s  evals     30000
+IZZ          30000 evals genetic_algorithm (spend all) seed 2  appr  69.189614  used   26.25s  evals     30000
+IZZ          30000 evals genetic_algorithm (spend all) seed 3  appr  69.190142  used   25.67s  evals     30000
+IZZ          30000 evals genetic_algorithm (spend all) seed 4  appr  69.190201  used   24.10s  evals     30000
+IZZ          30000 evals genetic_algorithm (spend all) seed 5  appr  69.190211  used   24.84s  evals     30000
+IZZ          30000 evals mdbh                         seed 1  appr  69.190254  used   23.58s  evals     30006
+IZZ          30000 evals mdbh                         seed 2  appr  69.190191  used   25.20s  evals     30005
+IZZ          30000 evals mdbh                         seed 3  appr  69.190101  used   25.23s  evals     30001
+IZZ          30000 evals mdbh                         seed 4  appr  69.190192  used   28.42s  evals     30001
+IZZ          30000 evals mdbh                         seed 5  appr  69.189992  used   24.50s  evals     30006
+IZZ          30000 evals mdbh (spend all)             seed 1  appr  69.190282  used   25.33s  evals     30004
+IZZ          30000 evals mdbh (spend all)             seed 2  appr  69.190142  used   27.70s  evals     30000
+IZZ          30000 evals mdbh (spend all)             seed 3  appr  69.190141  used   25.20s  evals     30000
+IZZ          30000 evals mdbh (spend all)             seed 4  appr  69.190190  used   25.31s  evals     30004
+IZZ          30000 evals mdbh (spend all)             seed 5  appr  69.190304  used   25.35s  evals     30001
+
+Median appreciation per case and limit:
+
+Beerwiser
+limit_evals                        30         100        300        1000       3000       10000      30000
+label                                                                                                     
+basin_hopping                  65.701419  65.701420  65.711588  65.711589  65.711590  65.711590  65.711590
+basin_hopping (spend all)      65.701420  65.701420  65.711584  65.711588  65.711589  65.711590  65.711590
+genetic_algorithm              65.519846  65.519846  65.698132  65.701417  65.701420  65.701420  65.701420
+genetic_algorithm (spend all)  65.700802  65.701345  65.701635  65.704581  65.706820  65.711162  65.711248
+grid                           65.701108  65.701108  65.705062  65.705062  65.709960  65.711183  65.711488
+grid (capped)                  65.519846  65.673359  65.684191  65.701108  65.701108  65.701108  65.701419
+mdbh                           65.519846  65.519846  65.519846  65.701402  65.710375  65.711248  65.711504
+mdbh (spend all)               65.611784  65.658401  65.672184  65.709932  65.710913  65.711418  65.711418
+slsqp                          65.701420  65.706329  65.711585  65.711589  65.711590  65.711590  65.711590
+slsqp (spend all)              65.701420  65.706329  65.711585  65.711589  65.711590  65.711590  65.711590
+
+IZZ
+limit_evals                        30         100        300        1000       3000       10000      30000
+label                                                                                                     
+basin_hopping                  60.878520  60.623724  69.190149  69.190241  69.190325  69.190373  69.190531
+basin_hopping (spend all)      60.881864  60.655988  69.190220  69.190494  69.190494  69.190521  69.190521
+genetic_algorithm              62.851447  62.851447  67.053056  68.930859  69.176826  69.190148  69.190179
+genetic_algorithm (spend all)  65.069982  67.430712  67.996620  69.050564  69.190027  69.190183  69.190201
+grid                           60.491060  68.037570  68.312451  68.312451  68.732218  68.732218  68.732218
+grid (capped)                  60.491060  63.762269  68.312451  68.312451  68.312451  68.732218  68.732218
+mdbh                           65.003947  68.255374  68.865076  68.980156  69.173733  69.190099  69.190191
+mdbh (spend all)               67.435945  68.550123  69.000652  69.000652  69.188975  69.189734  69.190190
+slsqp                          60.878520  60.623724  69.190149  69.190226  69.190471  69.190524  69.190531
+slsqp (spend all)              60.881864  60.655988  69.190220  69.190254  69.190509  69.190509  69.190529
+
+Refugee
+limit_evals                        30         100        300        1000       3000       10000      30000
+label                                                                                                     
+basin_hopping                  85.226297  85.226297  85.226297  85.226297  96.468491  96.869279  96.871555
+basin_hopping (spend all)      85.226297  85.226297  85.226297  85.226297  96.468491  96.870445  96.872088
+genetic_algorithm              85.226297  85.226297  85.226297  96.311853  96.871563  96.871897  96.872061
+genetic_algorithm (spend all)  85.226297  85.226297  91.853884  96.793353  96.871054  96.872147  96.872158
+grid                           95.326136  95.326136  95.326136  96.590788  96.590788  96.808432  96.808432
+grid (capped)                  85.226297  95.326136  95.326136  95.326136  96.590788  96.590788  96.808432
+mdbh                           85.226297  85.226297  85.226297  85.226297  96.811638  96.854506  96.855217
+mdbh (spend all)               85.226297  85.226297  85.226297  85.226297  96.798159  96.856446  96.856446
+slsqp                          85.226297  85.226297  85.226297  85.226297  85.226297  96.800974  96.871730
+slsqp (spend all)              85.226297  85.226297  85.226297  85.226297  85.226297  96.800974  96.871691
+
+[timed] written to C:\Users\joepw\tRBS\experiments\out\time_limited\eval_limited_comparison.csv

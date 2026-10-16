@@ -1,0 +1,106 @@
+config_label,k,eps,n,recovery
+"basin_hopping@n_hops=25,n_starts=1",15,0.1,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",15,0.01,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",15,0.001,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",20,0.1,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",20,0.01,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",20,0.001,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",30,0.1,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",30,0.01,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",30,0.001,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",50,0.1,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",50,0.01,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",50,0.001,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",75,0.1,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",75,0.01,30,1.0
+"basin_hopping@n_hops=25,n_starts=1",75,0.001,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",15,0.1,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",15,0.01,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",15,0.001,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",20,0.1,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",20,0.01,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",20,0.001,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",30,0.1,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",30,0.01,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",30,0.001,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",50,0.1,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",50,0.01,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",50,0.001,30,0.9666666666666667
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",75,0.1,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",75,0.01,30,1.0
+"genetic_algorithm@n_generations=4000,population_size=50,stall_generations=100",75,0.001,30,0.9
+"genetic_algorithm@n_generations=60,population_size=50",15,0.1,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",15,0.01,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",15,0.001,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",20,0.1,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",20,0.01,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",20,0.001,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",30,0.1,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",30,0.01,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",30,0.001,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",50,0.1,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",50,0.01,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",50,0.001,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",75,0.1,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",75,0.01,30,0.0
+"genetic_algorithm@n_generations=60,population_size=50",75,0.001,30,0.0
+"grid (face, refining)",15,0.1,30,1.0
+"grid (face, refining)",15,0.01,30,0.5666666666666667
+"grid (face, refining)",15,0.001,30,0.5
+"grid (face, refining)",20,0.1,30,1.0
+"grid (face, refining)",20,0.01,30,0.6
+"grid (face, refining)",20,0.001,30,0.5333333333333333
+"grid (face, refining)",30,0.1,30,1.0
+"grid (face, refining)",30,0.01,30,0.5666666666666667
+"grid (face, refining)",30,0.001,30,0.5
+"grid (face, refining)",50,0.1,30,0.8333333333333334
+"grid (face, refining)",50,0.01,30,0.6
+"grid (face, refining)",50,0.001,30,0.5
+"grid (face, refining)",75,0.1,30,0.8
+"grid (face, refining)",75,0.01,30,0.7
+"grid (face, refining)",75,0.001,30,0.7
+grid_capped@max_combinations=60000,15,0.1,30,1.0
+grid_capped@max_combinations=60000,15,0.01,30,0.5666666666666667
+grid_capped@max_combinations=60000,15,0.001,30,0.5
+grid_capped@max_combinations=60000,20,0.1,30,1.0
+grid_capped@max_combinations=60000,20,0.01,30,0.6333333333333333
+grid_capped@max_combinations=60000,20,0.001,30,0.5
+grid_capped@max_combinations=60000,30,0.1,30,0.9666666666666667
+grid_capped@max_combinations=60000,30,0.01,30,0.5
+grid_capped@max_combinations=60000,30,0.001,30,0.5
+grid_capped@max_combinations=60000,50,0.1,30,0.6
+grid_capped@max_combinations=60000,50,0.01,30,0.6
+grid_capped@max_combinations=60000,50,0.001,30,0.5
+grid_capped@max_combinations=60000,75,0.1,30,0.8
+grid_capped@max_combinations=60000,75,0.01,30,0.7
+grid_capped@max_combinations=60000,75,0.001,30,0.7
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",15,0.1,30,1.0
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",15,0.01,30,0.5
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",15,0.001,30,0.4
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",20,0.1,30,0.9333333333333333
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",20,0.01,30,0.5
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",20,0.001,30,0.3
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",30,0.1,30,0.9
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",30,0.01,30,0.7333333333333333
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",30,0.001,30,0.4666666666666667
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",50,0.1,30,1.0
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",50,0.01,30,0.5
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",50,0.001,30,0.3
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",75,0.1,30,0.9
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",75,0.01,30,0.7
+"mdbh@eta=1.0,n_hops=10,n_local_steps=50,n_starts=5,sigma=1.5,temperature=1.0",75,0.001,30,0.36666666666666664
+slsqp@n_starts=100,15,0.1,30,1.0
+slsqp@n_starts=100,15,0.01,30,1.0
+slsqp@n_starts=100,15,0.001,30,1.0
+slsqp@n_starts=100,20,0.1,30,1.0
+slsqp@n_starts=100,20,0.01,30,1.0
+slsqp@n_starts=100,20,0.001,30,1.0
+slsqp@n_starts=100,30,0.1,30,1.0
+slsqp@n_starts=100,30,0.01,30,1.0
+slsqp@n_starts=100,30,0.001,30,1.0
+slsqp@n_starts=100,50,0.1,30,1.0
+slsqp@n_starts=100,50,0.01,30,1.0
+slsqp@n_starts=100,50,0.001,30,1.0
+slsqp@n_starts=100,75,0.1,30,1.0
+slsqp@n_starts=100,75,0.01,30,1.0
+slsqp@n_starts=100,75,0.001,30,1.0

@@ -1,0 +1,110 @@
+{
+  "Beerwiser": {
+    "k": 2,
+    "B": 300000.0,
+    "scenarios": {
+      "Base case": {
+        "best_face": 65.70663,
+        "best_capped": 65.574445,
+        "capped_minus_face": -0.132185,
+        "best_capped_spend_fraction": 0.9991,
+        "n_radial_underspend_strictly_better": 0,
+        "max_radial_gain": -0.000793,
+        "median_radial_gain": -44.534714,
+        "n_cap": 4000
+      },
+      "Optimistic": {
+        "best_face": 65.95431,
+        "best_capped": 65.605153,
+        "capped_minus_face": -0.349157,
+        "best_capped_spend_fraction": 0.9926,
+        "n_radial_underspend_strictly_better": 0,
+        "max_radial_gain": 0.0,
+        "median_radial_gain": -29.234298,
+        "n_cap": 4000
+      },
+      "Pessimistic": {
+        "best_face": 83.333333,
+        "best_capped": 83.333333,
+        "capped_minus_face": 0.0,
+        "best_capped_spend_fraction": 0.9866,
+        "n_radial_underspend_strictly_better": 0,
+        "max_radial_gain": 0.0,
+        "median_radial_gain": -50.952405,
+        "n_cap": 4000
+      }
+    }
+  },
+  "Refugee": {
+    "k": 5,
+    "B": 6469004.0,
+    "scenarios": {
+      "Base case": {
+        "best_face": 95.693504,
+        "best_capped": 91.175214,
+        "capped_minus_face": -4.51829,
+        "best_capped_spend_fraction": 0.9796,
+        "n_radial_underspend_strictly_better": 0,
+        "max_radial_gain": -0.001545,
+        "median_radial_gain": -7.502501,
+        "n_cap": 4000
+      },
+      "Labour optimistic": {
+        "best_face": 99.193663,
+        "best_capped": 98.333996,
+        "capped_minus_face": -0.859666,
+        "best_capped_spend_fraction": 0.9933,
+        "n_radial_underspend_strictly_better": 0,
+        "max_radial_gain": -0.001592,
+        "median_radial_gain": -10.093789,
+        "n_cap": 4000
+      },
+      "Labour pessimistic": {
+        "best_face": 71.976722,
+        "best_capped": 68.447967,
+        "capped_minus_face": -3.528755,
+        "best_capped_spend_fraction": 0.9816,
+        "n_radial_underspend_strictly_better": 0,
+        "max_radial_gain": -0.001029,
+        "median_radial_gain": -4.583663,
+        "n_cap": 4000
+      }
+    }
+  },
+  "IZZ": {
+    "k": 9,
+    "B": 100.0,
+    "scenarios": {
+      "Base case": {
+        "best_face": 68.506327,
+        "best_capped": 68.564002,
+        "capped_minus_face": 0.057675,
+        "best_capped_spend_fraction": 0.9858,
+        "n_radial_underspend_strictly_better": 278,
+        "max_radial_gain": 4.960473,
+        "median_radial_gain": -1.837235,
+        "n_cap": 4000
+      },
+      "Optimistic": {
+        "best_face": 69.110452,
+        "best_capped": 69.018532,
+        "capped_minus_face": -0.091919,
+        "best_capped_spend_fraction": 0.978,
+        "n_radial_underspend_strictly_better": 262,
+        "max_radial_gain": 5.543521,
+        "median_radial_gain": -1.895357,
+        "n_cap": 4000
+      },
+      "Pessimistic": {
+        "best_face": 56.349141,
+        "best_capped": 56.525333,
+        "capped_minus_face": 0.176192,
+        "best_capped_spend_fraction": 0.9716,
+        "n_radial_underspend_strictly_better": 524,
+        "max_radial_gain": 8.89282,
+        "median_radial_gain": -1.395925,
+        "n_cap": 4000
+      }
+    }
+  }
+}

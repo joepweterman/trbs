@@ -257,6 +257,19 @@ class BaseSolver:
         eval_counter[0] += 1
         return -score_allocation(self.input_dict, x, scenario, dmo_name, self._frozen_boundaries)
 
+    @staticmethod
+    def _budget_spent(deadline, eval_counter, max_function_evals):
+        """Whether the run's clock or its evaluation budget is spent.
+
+        Every solver accepts the same two limits: ``max_calculation_time`` (seconds, checked
+        against ``deadline``, a ``time.perf_counter()`` value) and ``max_function_evals``
+        (objective evaluations, checked against ``eval_counter``). Either may be ``None``,
+        meaning no limit of that kind; the run stops at the first one it reaches.
+        """
+        if deadline is not None and time.perf_counter() >= deadline:
+            return True
+        return max_function_evals is not None and eval_counter[0] >= max_function_evals
+
     def find_dict_values(self, scenario):
         """
         This function retrieves values based on the input and output dictionaries.
@@ -345,9 +358,10 @@ class GridSearch(BaseSolver):
     The solver has two modes. Under ``max_combinations`` the step size is coarsened until the
     number of combinations stays under that ceiling and the whole lattice is evaluated once; on
     the budget face the true cost is higher than the ceiling, because every combination is
-    expanded into all its distinct permutations. Under ``max_calculation_time`` the ceiling is
-    ignored: the solver evaluates ever finer lattices, halving the step each round and skipping
-    points it already evaluated, until the time runs out.
+    expanded into all its distinct permutations. Under ``max_calculation_time`` or
+    ``max_function_evals`` the ceiling is ignored: the solver evaluates ever finer lattices,
+    halving the step each round and skipping points it already evaluated, until the time or
+    the evaluations run out.
     """
 
     default_dmo_name = "Optimized (grid)"
@@ -362,6 +376,7 @@ class GridSearch(BaseSolver):
         *,
         max_combinations=60000,
         max_calculation_time=None,
+        max_function_evals=None,
         spend_all=True,
         **_ignored,
     ):
@@ -372,10 +387,12 @@ class GridSearch(BaseSolver):
         :param budget: accepted for a uniform solver signature but unused. Grid search derives
             its own total from the best-performing decision-maker option.
         :param max_combinations: upper bound on the number of combinations to build. Only used
-            when no ``max_calculation_time`` is given.
+            when neither ``max_calculation_time`` nor ``max_function_evals`` is given.
         :param max_calculation_time: seconds the run may take. When given, ``max_combinations``
             is ignored: the solver evaluates ever finer lattices, halving the step each round,
-            until the time runs out. See :meth:`_refine_within_time`.
+            until the time runs out. See :meth:`_refine_within_budget`.
+        :param max_function_evals: objective evaluations the run may spend. Same refining
+            mode as ``max_calculation_time``; the run stops at whichever limit comes first.
         :param spend_all: when True (the default), the lattice covers the budget face
             ``sum(x) = B``; when False, the capped simplex ``sum(x) <= B``.
         :return: an :class:`OptimizationResult`.
@@ -399,9 +416,15 @@ class GridSearch(BaseSolver):
                 n_function_evals=0,
             )
 
-        if max_calculation_time is not None:
-            best_allocation, best_appreciation, n_evals, levels = self._refine_within_time(
-                scenario, dmo_name, max_investment, started_at, max_calculation_time, spend_all=spend_all
+        if max_calculation_time is not None or max_function_evals is not None:
+            best_allocation, best_appreciation, n_evals, levels = self._refine_within_budget(
+                scenario,
+                dmo_name,
+                max_investment,
+                started_at,
+                max_calculation_time,
+                max_function_evals,
+                spend_all=spend_all,
             )
         else:
             scaled_max_investment = self.scale_max_investment(max_investment)
@@ -443,42 +466,51 @@ class GridSearch(BaseSolver):
             per_start_results=levels,
         )
 
-    def _refine_within_time(
-        self, scenario, dmo_name, max_investment, started_at, max_calculation_time, spend_all=True
+    def _refine_within_budget(
+        self,
+        scenario,
+        dmo_name,
+        max_investment,
+        started_at,
+        max_calculation_time,
+        max_function_evals=None,
+        spend_all=True,
     ):
         """
-        This function evaluates ever finer lattices until the time budget runs out.
+        This function evaluates ever finer lattices until the time or evaluation budget runs out.
 
         The first round uses a step of half the budget, and every next round halves the
         step again, so the answer is available at any moment and only sharpens with time.
         Halving nests the lattices: every point of a round is also a point of the next,
         finer round, and :meth:`refinement_points` skips those so no allocation is ever
-        evaluated twice. The clock is checked before every evaluation, and the incumbent
+        evaluated twice. The budget is checked before every evaluation, and the incumbent
         so far is the answer when it runs out.
         :param scenario: the scenario being solved
         :param dmo_name: the solver's own decision-maker option name
         :param max_investment: the budget being allocated
         :param started_at: the ``time.perf_counter()`` the run started at
-        :param max_calculation_time: the seconds available to the run
+        :param max_calculation_time: the seconds available to the run, or None
+        :param max_function_evals: the objective evaluations available to the run, or None
         :return: the best allocation, its appreciation, the evaluation count and a
             per-round trace of step size, new points and incumbent
         """
-        deadline = started_at + float(max_calculation_time)
+        deadline = None if max_calculation_time is None else started_at + float(max_calculation_time)
+        eval_counter = [0]
         best_allocation, best_appreciation = None, -np.inf
-        n_evals, levels, units = 0, [], 2
+        levels, units = [], 2
 
-        while time.perf_counter() < deadline:
+        while not self._budget_spent(deadline, eval_counter, max_function_evals):
             step_size = max_investment / units
             new_points = 0
             first_round = units == 2
             for point in self.refinement_points(units, self._k, include_all=first_round, spend_all=spend_all):
-                if time.perf_counter() >= deadline:
+                if self._budget_spent(deadline, eval_counter, max_function_evals):
                     break
                 allocation = np.array(point, dtype=float) * step_size
                 appreciation = score_allocation(
                     self.input_dict, allocation, scenario, dmo_name, self._frozen_boundaries
                 )
-                n_evals += 1
+                eval_counter[0] += 1
                 new_points += 1
                 if appreciation > best_appreciation:
                     best_appreciation = appreciation
@@ -486,7 +518,7 @@ class GridSearch(BaseSolver):
             levels.append({"step_size": step_size, "new_points": new_points, "best": float(best_appreciation)})
             units *= 2
 
-        return best_allocation, best_appreciation, n_evals, levels
+        return best_allocation, best_appreciation, eval_counter[0], levels
 
     @staticmethod
     def refinement_points(units, parts, include_all, spend_all=True):
@@ -650,6 +682,7 @@ class SLSQPSolver(BaseSolver):
         seed=None,
         spend_all=False,
         max_calculation_time=None,
+        max_function_evals=None,
         **_ignored,
     ):
         """Run ``n_starts`` local solves and write back the best allocation.
@@ -665,6 +698,9 @@ class SLSQPSolver(BaseSolver):
             of being an upper bound.
         :param max_calculation_time: seconds the run may take: no new start begins once the
             time is spent, and the best answer so far stands (None = no limit).
+        :param max_function_evals: objective evaluations the run may spend, enforced the
+            same way as the time limit; the run stops at whichever comes first (None = no
+            limit).
         :return: an :class:`OptimizationResult` with per-start diagnostics.
         """
         self._prepare_input_dict(dmo_name, reference_allocation)
@@ -678,10 +714,17 @@ class SLSQPSolver(BaseSolver):
         best_neg_f = np.inf
 
         for i, x0 in enumerate(starts):
-            if deadline is not None and time.perf_counter() >= deadline:
+            if self._budget_spent(deadline, eval_counter, max_function_evals):
                 break
             res = self._slsqp_from_start(
-                x0, scenario, dmo_name, budget, eval_counter, spend_all=spend_all, deadline=deadline
+                x0,
+                scenario,
+                dmo_name,
+                budget,
+                eval_counter,
+                spend_all=spend_all,
+                deadline=deadline,
+                max_function_evals=max_function_evals,
             )
             per_start.append(
                 {
@@ -731,7 +774,9 @@ class SLSQPSolver(BaseSolver):
         """:meth:`BaseSolver._objective` in budget-normalised coordinates, ``x = budget * z``."""
         return self._objective(np.asarray(z, dtype=float) * budget, scenario, dmo_name, eval_counter)
 
-    def _slsqp_minimizer_kwargs(self, scenario, dmo_name, eval_counter, budget, spend_all=False, deadline=None):
+    def _slsqp_minimizer_kwargs(
+        self, scenario, dmo_name, eval_counter, budget, spend_all=False, deadline=None, max_function_evals=None
+    ):
         """The SLSQP configuration shared by a single solve and by every hop of a hopping run.
 
         The solve runs in normalised coordinates, ``x = B * z``, on the unit capped simplex.
@@ -743,10 +788,10 @@ class SLSQPSolver(BaseSolver):
         scipy reads ``ineq`` constraints as ``fun(z) >= 0``, hence ``1 - sum(z) >= 0``, and
         ``eq`` constraints as ``fun(z) == 0``, so the same function serves both modes.
 
-        A ``deadline`` (a ``time.perf_counter()`` value) is enforced through scipy's
-        callback: it runs after every iteration and raises ``StopIteration`` once the time
-        is spent, so a running solve stops within one iteration of its deadline instead of
-        finishing first.
+        A ``deadline`` (a ``time.perf_counter()`` value) or a ``max_function_evals`` budget
+        is enforced through scipy's callback: it runs after every iteration and raises
+        ``StopIteration`` once the budget is spent, so a running solve stops within one
+        iteration of its limit instead of finishing first.
         """
         kwargs = {
             "method": "SLSQP",
@@ -755,19 +800,27 @@ class SLSQPSolver(BaseSolver):
             "args": (scenario, dmo_name, eval_counter, float(budget)),
             "options": {"ftol": 1e-6, "maxiter": 100, "disp": False, "eps": 1e-6},
         }
-        if deadline is not None:
+        if deadline is not None or max_function_evals is not None:
 
-            def _stop_at_deadline(*_args, **_kwargs):
-                if time.perf_counter() >= deadline:
+            def _stop_when_spent(*_args, **_kwargs):
+                if self._budget_spent(deadline, eval_counter, max_function_evals):
                     raise StopIteration
 
-            kwargs["callback"] = _stop_at_deadline
+            kwargs["callback"] = _stop_when_spent
         return kwargs
 
-    def _slsqp_from_start(self, x0, scenario, dmo_name, budget, eval_counter, spend_all=False, deadline=None):
+    def _slsqp_from_start(
+        self, x0, scenario, dmo_name, budget, eval_counter, spend_all=False, deadline=None, max_function_evals=None
+    ):
         """Single SLSQP solve from ``x0``; ``res.x`` is mapped back to allocation units."""
         minimizer_kwargs = self._slsqp_minimizer_kwargs(
-            scenario, dmo_name, eval_counter, budget, spend_all=spend_all, deadline=deadline
+            scenario,
+            dmo_name,
+            eval_counter,
+            budget,
+            spend_all=spend_all,
+            deadline=deadline,
+            max_function_evals=max_function_evals,
         )
         res = minimize(
             self._objective_z,
@@ -838,6 +891,7 @@ class BasinHoppingSolver(SLSQPSolver):
         seed=None,
         spend_all=False,
         max_calculation_time=None,
+        max_function_evals=None,
         **_ignored,
     ):
         """Run ``n_starts`` hopping chains of ``n_hops`` hops and write back the best allocation.
@@ -856,6 +910,9 @@ class BasinHoppingSolver(SLSQPSolver):
         :param max_calculation_time: seconds the run may take: the chain stops hopping and no
             new chain starts once the time is spent, and the best answer so far stands
             (None = no limit).
+        :param max_function_evals: objective evaluations the run may spend, enforced the
+            same way as the time limit; the run stops at whichever comes first (None = no
+            limit).
         :return: an :class:`OptimizationResult` with per-chain diagnostics.
         """
         self._prepare_input_dict(dmo_name, reference_allocation)
@@ -867,23 +924,29 @@ class BasinHoppingSolver(SLSQPSolver):
         # Hopping runs in the same normalised coordinates as the local solve, which also makes
         # step_frac independent of the case's budget scale.
         minimizer_kwargs = self._slsqp_minimizer_kwargs(
-            scenario, dmo_name, eval_counter, budget, spend_all=spend_all, deadline=deadline
+            scenario,
+            dmo_name,
+            eval_counter,
+            budget,
+            spend_all=spend_all,
+            deadline=deadline,
+            max_function_evals=max_function_evals,
         )
         project = self._project_budget_face if spend_all else self._project_capped_simplex
 
-        # scipy stops hopping when the callback returns True, which turns the deadline into a
+        # scipy stops hopping when the callback returns True, which turns the budget into a
         # stop between two hops rather than an estimate of how many hops would have fitted.
-        def _deadline_reached(_x, _f, _accept):
-            return time.perf_counter() >= deadline
+        def _budget_reached(_x, _f, _accept):
+            return self._budget_spent(deadline, eval_counter, max_function_evals)
 
-        callback = _deadline_reached if deadline is not None else None
+        callback = _budget_reached if deadline is not None or max_function_evals is not None else None
 
         per_start = []
         best_x = None
         best_neg_f = np.inf
 
         for i, x0 in enumerate(starts):
-            if deadline is not None and time.perf_counter() >= deadline:
+            if self._budget_spent(deadline, eval_counter, max_function_evals):
                 break
             if seed is None:
                 step_rng, hop_rng = np.random.default_rng(), np.random.default_rng()
@@ -969,6 +1032,9 @@ class GeneticAlgorithmSolver(BaseSolver):
         seed=None,
         spend_all=False,
         max_calculation_time=None,
+        max_function_evals=None,
+        stall_generations=None,
+        stall_tol=1e-9,
         **_ignored,
     ):
         """Evolve ``population_size`` allocations over ``n_generations`` generations.
@@ -987,6 +1053,13 @@ class GeneticAlgorithmSolver(BaseSolver):
             of being an upper bound; the population lives on the face and repair returns to it.
         :param max_calculation_time: seconds the run may take: no new generation begins once
             the time is spent, and the best individual so far stands (None = no limit).
+        :param max_function_evals: objective evaluations the run may spend, enforced the
+            same way as the time limit; the run stops at whichever comes first (None = no
+            limit).
+        :param stall_generations: stop once the best fitness has not improved by more than
+            ``stall_tol`` for this many consecutive generations, so that a run whose budget
+            is generous ends when the population has converged (None = run every generation).
+        :param stall_tol: the improvement that resets the stall count.
         :return: an :class:`OptimizationResult`; ``per_start_results`` holds the per-generation
             best and mean fitness.
         """
@@ -1009,9 +1082,12 @@ class GeneticAlgorithmSolver(BaseSolver):
             population = rng.dirichlet(np.ones(self._k + 1), size=population_size)[:, : self._k]
         scores = np.array([fitness(z) for z in population])
         trace = []
+        stale = 0
 
         for generation in range(n_generations):
-            if deadline is not None and time.perf_counter() >= deadline:
+            if self._budget_spent(deadline, eval_counter, max_function_evals):
+                break
+            if stall_generations is not None and stale >= stall_generations:
                 break
             children = []
             while len(children) < population_size:
@@ -1024,15 +1100,15 @@ class GeneticAlgorithmSolver(BaseSolver):
                     child = self._polynomial_mutation(child, eta_mutation, rng)
                     children.append(project(child, 1.0))
             children = np.array(children[:population_size])
-            # The deadline is also checked per child: the evaluations are the expensive part,
+            # The budget is also checked per child: the evaluations are the expensive part,
             # so stopping between children caps the overshoot at a single evaluation.
             child_scores = []
             for child in children:
-                if deadline is not None and time.perf_counter() >= deadline:
+                if self._budget_spent(deadline, eval_counter, max_function_evals):
                     break
                 child_scores.append(fitness(child))
             if len(child_scores) < population_size:
-                break  # time ran out mid-generation: the previous population's best stands
+                break  # the budget ran out mid-generation: the previous population's best stands
             child_scores = np.array(child_scores)
 
             # The incumbent best survives unless a child beats it.
@@ -1041,6 +1117,7 @@ class GeneticAlgorithmSolver(BaseSolver):
             if scores[elite_idx] > child_scores.max():
                 children[worst_child] = population[elite_idx]
                 child_scores[worst_child] = scores[elite_idx]
+            stale = 0 if child_scores.max() > scores.max() + stall_tol else stale + 1
             population, scores = children, child_scores
             trace.append({"generation": generation, "best": float(scores.max()), "mean": float(scores.mean())})
 
@@ -1119,6 +1196,7 @@ class MdbhSolver(BaseSolver):
         seed=None,
         spend_all=False,
         max_calculation_time=None,
+        max_function_evals=None,
         **_ignored,
     ):
         """Run ``n_starts`` chains of mirror-descent solves separated by multiplicative jumps.
@@ -1140,6 +1218,9 @@ class MdbhSolver(BaseSolver):
         :param max_calculation_time: seconds the run may take: the chain stops hopping and no
             new chain starts once the time is spent, and the best answer so far stands
             (None = no limit).
+        :param max_function_evals: objective evaluations the run may spend, enforced the
+            same way as the time limit; the run stops at whichever comes first (None = no
+            limit).
         :return: an :class:`OptimizationResult` with per-chain diagnostics.
         """
         self._prepare_input_dict(dmo_name, reference_allocation)
@@ -1148,27 +1229,26 @@ class MdbhSolver(BaseSolver):
         started_at = time.perf_counter()
         deadline = None if max_calculation_time is None else started_at + float(max_calculation_time)
         dim = self._k if spend_all else self._k + 1
+        limits = {"deadline": deadline, "max_function_evals": max_function_evals}
 
         per_start = []
         best_w, best_f = None, -np.inf
         for start in range(n_starts):
-            if deadline is not None and time.perf_counter() >= deadline:
+            if self._budget_spent(deadline, eval_counter, max_function_evals):
                 break
             w = np.full(dim, 1.0 / dim) if start == 0 else rng.dirichlet(np.ones(dim))
-            w, f_w = self._mirror_descent(
-                w, scenario, dmo_name, eval_counter, budget, n_local_steps, eta, deadline=deadline
-            )
+            w, f_w = self._mirror_descent(w, scenario, dmo_name, eval_counter, budget, n_local_steps, eta, **limits)
             chain_best_w, chain_best_f = w.copy(), f_w
             accepted = 0
             for _ in range(n_hops):
-                if deadline is not None and time.perf_counter() >= deadline:
+                if self._budget_spent(deadline, eval_counter, max_function_evals):
                     break
                 kick = rng.normal(size=dim)
                 kick -= kick.mean()  # a direction along the simplex: the shifts cancel out
                 w_kicked = np.maximum(w * np.exp(sigma * kick), 1e-12)
                 w_kicked = w_kicked / w_kicked.sum()
                 w_new, f_new = self._mirror_descent(
-                    w_kicked, scenario, dmo_name, eval_counter, budget, n_local_steps, eta, deadline=deadline
+                    w_kicked, scenario, dmo_name, eval_counter, budget, n_local_steps, eta, **limits
                 )
                 if f_new > f_w or rng.random() < math.exp(min(0.0, f_new - f_w) / temperature):
                     w, f_w = w_new, f_new
@@ -1215,7 +1295,19 @@ class MdbhSolver(BaseSolver):
             grad[i] = (self._appreciation_w(w_step, scenario, dmo_name, eval_counter, budget) - f_w) / h
         return grad
 
-    def _mirror_descent(self, w, scenario, dmo_name, eval_counter, budget, n_steps, eta, patience=8, deadline=None):
+    def _mirror_descent(
+        self,
+        w,
+        scenario,
+        dmo_name,
+        eval_counter,
+        budget,
+        n_steps,
+        eta,
+        patience=8,
+        deadline=None,
+        max_function_evals=None,
+    ):
         """Entropic mirror descent on the slack-extended simplex (maximisation).
 
         Each coordinate is multiplied by the exponential of its gradient, with the gradient
@@ -1224,13 +1316,14 @@ class MdbhSolver(BaseSolver):
         the update can drive a coordinate towards zero, which is what a sparse optimum wants, but
         it must never reach zero or it could never recover. The method is not monotone, so the
         best iterate seen is returned and the loop stops after ``patience`` steps without
-        improvement, or when the ``deadline`` (a ``time.perf_counter()`` value) passes.
+        improvement, or when the ``deadline`` (a ``time.perf_counter()`` value) passes or the
+        ``max_function_evals`` budget is spent.
         """
         best_w = np.asarray(w, dtype=float).copy()
         best_f = self._appreciation_w(best_w, scenario, dmo_name, eval_counter, budget)
         current_w, current_f, stale = best_w.copy(), best_f, 0
         for step in range(1, n_steps + 1):
-            if deadline is not None and time.perf_counter() >= deadline:
+            if self._budget_spent(deadline, eval_counter, max_function_evals):
                 break
             grad = self._fd_gradient_w(current_w, current_f, scenario, dmo_name, eval_counter, budget)
             grad_scale = float(np.max(np.abs(grad)))
